@@ -677,8 +677,28 @@ window.doLogin = async function() {
   document.getElementById('loginPassword').value = '';
 }
 // 엔터 로그인
-document.getElementById('loginId').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('loginPassword').focus(); });
-document.getElementById('loginPassword').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('loginId').addEventListener('keydown', function(e) { if(e.key==='Enter') document.getElementById('loginPassword').focus(); });
+document.getElementById('loginPassword').addEventListener('keydown', function(e) { if(e.key==='Enter') doLogin(); });
+
+// 뒤로가기 막기
+history.pushState(null, '', location.href);
+window.addEventListener('popstate', function() {
+  history.pushState(null, '', location.href);
+});
+
+// 세션 복원 (새로고침/재접속 시 자동 로그인)
+(function() {
+  var session = localStorage.getItem('envitec_session');
+  if (session) {
+    try {
+      window.currentUser = JSON.parse(session);
+      // Firebase 로드 후 startApp 실행
+      setTimeout(function() { startApp(); }, 500);
+    } catch(e) {
+      localStorage.removeItem('envitec_session');
+    }
+  }
+})();
 
 async function startApp() {
   document.getElementById('loginScreen').style.display = 'none';
@@ -701,6 +721,11 @@ async function startApp() {
   buildCollectInputForm();
   buildLoadingInputForm();
   if (u.type === 'admin') loadAdminData();
+
+  // 세션 저장 (로그인 유지)
+  localStorage.setItem('envitec_session', JSON.stringify(window.currentUser));
+  // 뒤로가기 막기
+  history.pushState(null, '', location.href);
 
   // 날짜 기본값
   document.getElementById('ci-date').value = today();
@@ -1517,10 +1542,12 @@ window.changePassword = async function() {
 window.doLogout = function() {
   if (!confirm('로그아웃 하시겠습니까?')) return;
   window.currentUser = null;
+  localStorage.removeItem('envitec_session');
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('loginPassword').value = '';
   document.getElementById('loginErr').style.display = 'none';
+  history.replaceState(null, '', location.href);
 };
 
 // ── 탭 전환 ──
