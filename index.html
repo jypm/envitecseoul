@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>엔비텍코리아 서울지점</title>
-<link rel="icon" type="image/png" href="icon.png">
 <style>
   :root {
     --bg: #121216;
@@ -960,38 +959,58 @@ function renderCollectResults(docs) {
   }
 
   let totalCollect = 0, totalWeight = 0;
-  CONTAINER_SIZES.forEach(sz => {
-    docs.forEach(d => {
-      const c = parseInt(d[`collect${sz}`]||0);
-      const w = parseFloat(d[`collect${sz}weight`]||0);
+  CONTAINER_SIZES.forEach(function(sz) {
+    docs.forEach(function(d) {
+      const c = parseInt(d['collect'+sz]||0);
+      const w = parseFloat(d['collect'+sz+'weight']||0);
       if (c > 0) { totalCollect += c; totalWeight += w; }
     });
   });
 
   const stat = document.getElementById('q-stat');
-  stat.textContent = `총 ${docs.length}건 · 총 수거 ${totalCollect}개 · 무게 ${totalWeight.toFixed(1)}kg`;
+  stat.textContent = '총 ' + docs.length + '건 · 총 수거 ' + totalCollect + '개 · 무게 ' + totalWeight.toFixed(1) + 'kg';
   stat.style.display = '';
 
-  const html = docs.map(d => {
-    const tags = CONTAINER_SIZES.map(sz => {
-      const c = parseInt(d[`collect${sz}`]||0);
-      const dv = parseInt(d[`deliver${sz}`]||0);
-      const parts = [];
-      if (c > 0) parts.push(`<span class="tag collect">수거 ${sz} ${c}개</span>`);
-      if (dv > 0) parts.push(`<span class="tag deliver">납품 ${sz} ${dv}개</span>`);
-      return parts.join('');
-    }).join('');
-    const memo = d.memo ? `<div class="result-memo">📝 ${d.memo}</div>` : '';
-    return `
-      <div class="result-item" onclick="showCollectDetail('${d.id}', collectResultsCache)">
-        <div class="result-item-header">
-          <div class="result-date">${d.date}</div>
-          <div class="result-car">${d.carNumber}</div>
-        </div>
-        <div class="result-client">${d.clientName}</div>
-        <div class="result-tags">${tags || '<span class="tag">수량 없음</span>'}</div>
-        ${memo}
-      </div>`;
+  const LABEL = {'4L':'4L박스','12L':'12L박스','30L':'30L박스','50L':'50L박스','63L':'63L박스','1L':'1L합성','2L':'2L합성','5L':'5L합성','10L':'10L합성','20L':'20L합성'};
+
+  const html = docs.map(function(d) {
+    // 수거 목록
+    let collectRows = '';
+    CONTAINER_SIZES.forEach(function(sz) {
+      const c = parseInt(d['collect'+sz]||0);
+      const w = parseFloat(d['collect'+sz+'weight']||0);
+      if (c > 0) collectRows += '<div style="font-size:14px;color:#ddd;margin:2px 0">' + (LABEL[sz]||sz) + ' : ' + c + ' (' + w.toFixed(1) + ')</div>';
+    });
+    if (!collectRows) collectRows = '<div style="font-size:13px;color:#555">내역 없음</div>';
+
+    // 납품 목록
+    let deliverRows = '';
+    CONTAINER_SIZES.forEach(function(sz) {
+      const dv = parseInt(d['deliver'+sz]||0);
+      if (dv > 0) deliverRows += '<div style="font-size:14px;color:#ddd;margin:2px 0">' + (LABEL[sz]||sz) + ' : ' + dv + '</div>';
+    });
+    if (!deliverRows) deliverRows = '<div style="font-size:13px;color:#555">내역 없음</div>';
+
+    const memo = d.memo ? '<div style="font-size:13px;color:#FFCA28;margin-top:8px;padding-top:8px;border-top:1px solid #2a2a2a">메모: ' + d.memo + '</div>' : '';
+
+    return '<div class="result-item" onclick="showCollectDetail(\'' + d.id + '\', collectResultsCache)" style="padding:14px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+      + '<div style="font-size:17px;font-weight:700;color:#60A5FA">' + d.clientName + '</div>'
+      + '<div style="font-size:13px;color:#888">' + d.carNumber + '</div>'
+      + '</div>'
+      + '<div style="height:1px;background:#2a2a2a;margin-bottom:10px"></div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+      + '<div>'
+      + '<div style="font-size:13px;font-weight:700;color:#34D399;margin-bottom:6px">🚚 수 거</div>'
+      + collectRows
+      + '</div>'
+      + '<div>'
+      + '<div style="font-size:13px;font-weight:700;color:#FF6B6B;margin-bottom:6px">🚚 납 품</div>'
+      + deliverRows
+      + '</div>'
+      + '</div>'
+      + memo
+      + '</div>';
   }).join('');
 
   document.getElementById('q-results').innerHTML = html;
