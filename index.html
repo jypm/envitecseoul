@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>엔비텍코리아 서울지점</title>
+<style>
+  :root {
+    --bg: #121216;
+    --surface: #1E1E24;
+    --surface2: #2A2A32;
+    --border: #2e2e38;
+    --accent: #3D82F6;
+    --accent2: #60A5FA;
+    --accent3: #34D399;
+    --danger: #FF5555;
+    --text: #ffffff;
+    --text2: #888888;
+    --text3: #555555;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Segoe UI', -apple-system, sans-serif; font-size: 15px; overscroll-behavior: none; }
+
+  /* ── 로그인 ── */
+  #loginScreen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 20px; background: var(--bg);
+  }
+  .login-logo { font-size: 28px; font-weight: 700; color: var(--accent); margin-bottom: 6px; letter-spacing: -0.5px; }
+  .login-sub { color: var(--text2); font-size: 13px; margin-bottom: 40px; }
+  .login-box { width: 100%; max-width: 360px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; }
+  .login-box h2 { font-size: 16px; font-weight: 600; margin-bottom: 20px; color: var(--text2); text-align: center; }
+  .login-input { width: 100%; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 16px; text-align: left; outline: none; transition: border-color .2s; }
+  .login-input:focus { border-color: var(--accent); }
+  .login-label { font-size: 12px; color: var(--text2); margin-bottom: 5px; margin-top: 12px; display: block; }
+  .login-save-id { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 13px; color: var(--text2); cursor: pointer; }
+  .login-save-id input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent); }
+  .login-btn { width: 100%; padding: 14px; margin-top: 14px; background: var(--accent); border: none; border-radius: var(--radius); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+  .login-btn:hover { opacity: .9; }
+  .login-ver { color: var(--text3); font-size: 12px; margin-top: 16px; text-align: center; }
+  .car-select-box { display: none; margin-top: 16px; }
+  .car-select-box select { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 15px; outline: none; }
+  .car-select-box.show { display: block; }
+  .login-err { color: var(--danger); font-size: 13px; text-align: center; margin-top: 10px; display: none; }
+
+  /* ── 앱 레이아웃 ── */
+  #app { display: none; height: 100vh; flex-direction: column; }
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100; flex-shrink: 0;
+  }
+  .header-title { font-size: 15px; font-weight: 700; color: #3D82F6; }
+  .header-user { font-size: 12px; color: var(--text2); }
+  .header-logout { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text2); font-size: 12px; padding: 5px 10px; cursor: pointer; }
+
+  /* ── 탭 바 ── */
+  .tab-bar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; overflow-x: auto; flex-shrink: 0;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-item { flex: 0 0 auto; padding: 12px 18px; font-size: 13px; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all .2s; }
+  .tab-item.active { color: #3D82F6; border-bottom-color: #3D82F6; font-weight: 600; }
+
+  /* ── 콘텐츠 ── */
+  .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .page { display: none; padding: 16px; max-width: 800px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* ── 공통 카드 ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* ── 폼 요소 ── */
+  .form-row { margin-bottom: 12px; }
+  .form-label { font-size: 12px; color: var(--text2); margin-bottom: 5px; display: block; }
+  .form-input, .form-select {
+    width: 100%; padding: 11px 13px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text); font-size: 15px; outline: none;
+    transition: border-color .2s;
+    -webkit-appearance: none; appearance: none;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--accent); }
+  .form-input[readonly] { opacity: .5; cursor: not-allowed; pointer-events: none; }
+  .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+
+  /* ── 버튼 ── */
+  .btn { padding: 12px 18px; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .2s; width: 100%; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-sm { padding: 8px 14px; font-size: 13px; width: auto; }
+  .btn:hover { opacity: .85; }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .btn-row { display: flex; gap: 8px; margin-top: 14px; }
+
+  .collect-section-title { font-size: 15px; font-weight: 700; color: #FFCA28; margin-bottom: 10px; }
+  .collect-header { display: grid; grid-template-columns: 1fr 70px 70px 70px; gap: 6px; padding: 4px 0 8px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+  .collect-col-label { font-size: 12px; color: var(--text2); }
+  .collect-col-num { font-size: 12px; font-weight: 600; text-align: center; }
+  .collect-row { display: grid; grid-template-columns: 1fr 70px 70px 70px; gap: 6px; align-items: center; padding: 5px 0; border-bottom: 1px solid #1e1e2a; }
+  .collect-row-label { font-size: 14px; font-weight: 600; color: var(--text); }
+  .collect-num-input { width: 100%; padding: 7px 4px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 14px; font-weight: 600; text-align: center; outline: none; }
+  .collect-num-input:focus { border-color: var(--accent); }
+  .collect-section { }
+
+  /* ── 조회 결과 ── */
+  .result-stat { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 12px; font-size: 13px; color: var(--accent); font-weight: 600; }
+  .result-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 8px; cursor: pointer; transition: border-color .2s; }
+  .result-item:hover { border-color: var(--accent); }
+  .result-item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .result-date { font-size: 14px; font-weight: 600; color: var(--text); }
+  .result-car { font-size: 13px; color: var(--accent2); }
+  .result-client { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .result-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 3px 7px; font-size: 12px; color: var(--text2); }
+  .tag.collect { border-color: #3D82F640; color: #60A5FA; }
+  .tag.deliver { border-color: #34D39940; color: #34D399; }
+  .result-memo { font-size: 12px; color: var(--text3); margin-top: 6px; }
+  .result-actions { display: flex; gap: 6px; margin-top: 10px; }
+
+  /* ── 상차 품목 ── */
+  .loading-section { margin-bottom: 16px; }
+  .loading-section-title { font-size: 12px; font-weight: 700; color: #34D399; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .loading-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+  .loading-item { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; display: flex; align-items: center; gap: 8px; }
+  .loading-item-label { font-size: 13px; color: var(--text); flex: 1; }
+  .loading-item input { width: 56px; padding: 6px 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 14px; outline: none; text-align: center; }
+  .loading-item input:focus { border-color: var(--accent); }
+
+  /* ── 관리자 ── */
+  .admin-section { margin-bottom: 20px; }
+  .admin-section h3 { font-size: 14px; font-weight: 600; color: var(--text2); margin-bottom: 12px; }
+  .vehicle-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+  .vehicle-info { display: flex; flex-direction: column; gap: 2px; }
+  .vehicle-car { font-size: 15px; font-weight: 600; color: var(--text); }
+  .vehicle-meta { font-size: 12px; color: var(--text2); }
+  .vehicle-actions { display: flex; gap: 6px; }
+
+  /* ── 모달 ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+  .modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 18px; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 18px; }
+
+  /* ── 토스트 ── */
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #222; color: #fff; padding: 12px 20px; border-radius: 24px; font-size: 14px; z-index: 999; transition: transform .3s; pointer-events: none; white-space: nowrap; max-width: 90vw; text-align: center; }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.success { background: #3D82F620; color: #60A5FA; border: 1px solid #3D82F640; }
+  #toast.error { background: #ff444420; color: var(--danger); border: 1px solid #ff444440; }
+
+  /* ── 검색 서브탭 ── */
+  .sub-tabs { display: flex; gap: 0; margin-bottom: 14px; background: var(--bg); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+  .sub-tab { flex: 1; padding: 10px; text-align: center; font-size: 13px; cursor: pointer; color: var(--text2); transition: all .2s; }
+  .sub-tab.active { background: #3D82F6; color: #fff; font-weight: 600; }
+
+  /* ── 로딩 스피너 ── */
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--text2); font-size: 13px; text-align: center; padding: 20px; }
+
+  /* ── 반응형 PC ── */
+  @media (min-width: 600px) {
+    .page { padding: 20px; }
+    .container-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+    .loading-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .btn-row { flex-direction: row; }
+    .result-actions { flex-direction: row; }
+  }
+
+  /* ── 자동완성 드롭다운 ── */
+  .autocomplete-wrap { position: relative; }
+  .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); z-index: 50; max-height: 200px; overflow-y: auto; display: none; }
+  .autocomplete-list.show { display: block; }
+  .autocomplete-item { padding: 10px 13px; cursor: pointer; font-size: 14px; border-bottom: 1px solid var(--border); }
+  .autocomplete-item:last-child { border-bottom: none; }
+  .autocomplete-item:hover, .autocomplete-item.focused { background: var(--border); color: var(--accent); }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 로그인 화면 ==================== -->
+<div id="loginScreen">
+  <div class="login-logo">🚛 엔비텍코리아</div>
+  <div class="login-sub">서울지점 업무 시스템</div>
+  <div class="login-box">
+    <h2>로그인</h2>
+    <label class="login-label">아이디 (차량번호 또는 admin)</label>
+    <input id="loginId" class="login-input" type="text" placeholder="차량번호 또는 admin" autocomplete="off" autocapitalize="none">
+    <label class="login-label">비밀번호</label>
+    <input id="loginPassword" class="login-input" type="password" placeholder="비밀번호" autocomplete="off">
+    <label class="login-save-id">
+      <input type="checkbox" id="saveIdCheck"> 아이디 저장
+    </label>
+    <div class="login-err" id="loginErr">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+    <button class="login-btn" onclick="doLogin()">로그인</button>
+    <div class="login-ver" id="loginVer">ver 1.0.0</div>
+  </div>
+</div>
+
+<!-- ==================== 앱 화면 ==================== -->
+<div id="app">
+  <header>
+    <div>
+      <div class="header-title">🚛 엔비텍코리아 서울지점</div>
+      <div class="header-user" id="headerUser"></div>
+    </div>
+    <button class="header-logout" onclick="doLogout()">로그아웃</button>
+  </header>
+
+  <div class="tab-bar" id="tabBar">
+    <div class="tab-item active" onclick="switchTab('수거입력')">수거입력</div>
+    <div class="tab-item" onclick="switchTab('수거조회')">수거조회</div>
+    <div class="tab-item" onclick="switchTab('상차입력')">상차입력</div>
+    <div class="tab-item" onclick="switchTab('상차조회')">상차조회</div>
+    <div class="tab-item admin-only" onclick="switchTab('관리자')" style="display:none">⚙️ 관리자</div>
+  </div>
+
+  <div class="content">
+
+    <!-- ====== 수거 입력 ====== -->
+    <div class="page active" id="page-수거입력">
+      <div class="card">
+        <div class="card-title" id="collectInputTitle">수거일지 입력</div>
+
+        <div class="form-row-2">
+          <div class="form-row" style="margin-bottom:0">
+            <label class="form-label">날짜</label>
+            <input id="ci-date" class="form-input" type="date">
+          </div>
+          <div class="form-row" style="margin-bottom:0">
+            <label class="form-label">차량번호</label>
+<select id="ci-car" class="form-select"><option value="">-- 차량 선택 --</option></select>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top:10px">
+          <label class="form-label">거래처명</label>
+          <div class="autocomplete-wrap">
+            <input id="ci-client" class="form-input" type="text" placeholder="거래처명 검색 (초성 가능)" autocomplete="off" oninput="acFilter('ci-client','ci-client-list','clientList')">
+            <div class="autocomplete-list" id="ci-client-list"></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">메모</label>
+          <input id="ci-memo" class="form-input" type="text" placeholder="메모 (선택)">
+        </div>
+      </div>
+
+      <!-- 컨테이너별 입력 -->
+      <div class="card">
+        <div class="collect-section">
+          <div class="collect-section-title">📦 골판지 박스류</div>
+          <div class="collect-header">
+            <span class="collect-col-label">규격</span>
+            <span class="collect-col-num" style="color:#64B5F6">수거(개)</span>
+            <span class="collect-col-num" style="color:#4DB6AC">무게(kg)</span>
+            <span class="collect-col-num" style="color:#E57373">납품(개)</span>
+          </div>
+          <div id="ci-group-box"></div>
+        </div>
+        <div class="collect-section" style="margin-top:18px">
+          <div class="collect-section-title">🧪 합성수지 용기류</div>
+          <div class="collect-header">
+            <span class="collect-col-label">규격</span>
+            <span class="collect-col-num" style="color:#64B5F6">수거(개)</span>
+            <span class="collect-col-num" style="color:#4DB6AC">무게(kg)</span>
+            <span class="collect-col-num" style="color:#E57373">납품(개)</span>
+          </div>
+          <div id="ci-group-resin"></div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="collectCancelBtn" style="display:none" onclick="cancelCollectEdit()">취소</button>
+        <button class="btn btn-primary" id="collectSubmitBtn" onclick="submitCollect()">저장</button>
+      </div>
+    </div>
+
+    <!-- ====== 수거 조회 ====== -->
+    <div class="page" id="page-수거조회">
+      <div class="sub-tabs">
+        <div class="sub-tab active" onclick="switchSubTab('date')">날짜별</div>
+        <div class="sub-tab" onclick="switchSubTab('client')">거래처별</div>
+      </div>
+
+      <!-- 날짜별 -->
+      <div id="subpanel-date">
+        <div class="card">
+          <div class="form-row-2">
+            <div>
+              <label class="form-label">날짜</label>
+              <input id="qd-date" class="form-input" type="date">
+            </div>
+            <div>
+              <label class="form-label">차량번호 (전체)</label>
+              <select id="qd-car" class="form-select"><option value="">전체</option></select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="searchByDate()">조회</button>
+        </div>
+      </div>
+
+      <!-- 거래처별 -->
+      <div id="subpanel-client" style="display:none">
+        <div class="card">
+          <div class="form-row">
+            <label class="form-label">거래처명</label>
+            <div class="autocomplete-wrap">
+              <input id="qc-client" class="form-input" type="text" placeholder="거래처명" autocomplete="off" oninput="acFilter('qc-client','qc-client-list','clientList')">
+              <div class="autocomplete-list" id="qc-client-list"></div>
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div>
+              <label class="form-label">시작일</label>
+              <input id="qc-start" class="form-input" type="date">
+            </div>
+            <div>
+              <label class="form-label">종료일</label>
+              <input id="qc-end" class="form-input" type="date">
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">차량번호 (전체)</label>
+            <select id="qc-car" class="form-select"><option value="">전체</option></select>
+          </div>
+          <button class="btn btn-primary" onclick="searchByClient()">조회</button>
+        </div>
+      </div>
+
+      <div id="q-stat" class="result-stat" style="display:none"></div>
+      <div id="q-results"></div>
+    </div>
+
+    <!-- ====== 상차 입력 ====== -->
+    <div class="page" id="page-상차입력">
+      <div class="card">
+        <div class="card-title" id="loadingInputTitle">상차일지 입력</div>
+        <div class="form-row-2">
+          <div>
+            <label class="form-label">날짜</label>
+            <input id="li-date" class="form-input" type="date">
+          </div>
+          <div>
+            <label class="form-label">담당자</label>
+            <select id="li-worker" class="form-select">
+              <option value="">-- 담당자 선택 --</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="loading-section">
+          <div class="loading-section-title" style="color:#64B5F6">📦 박스</div>
+          <div class="loading-grid" id="li-box"></div>
+        </div>
+        <div class="loading-section">
+          <div class="loading-section-title" style="color:#81C784">🧴 합성수지</div>
+          <div class="loading-grid" id="li-resin"></div>
+        </div>
+        <div class="loading-section">
+          <div class="loading-section-title" style="color:#FFB74D">🛍 비닐</div>
+          <div class="loading-grid" id="li-vinyl"></div>
+        </div>
+        <div class="loading-section">
+          <div class="loading-section-title" style="color:#BA68C8">🏷 기타</div>
+          <div class="loading-grid" id="li-etc"></div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="loadingCancelBtn" style="display:none" onclick="cancelLoadingEdit()">취소</button>
+        <button class="btn btn-primary" id="loadingSubmitBtn" onclick="submitLoading()">저장</button>
+      </div>
+    </div>
+
+    <!-- ====== 상차 조회 ====== -->
+    <div class="page" id="page-상차조회">
+      <div class="card">
+        <div class="form-row-2">
+          <div>
+            <label class="form-label">시작일</label>
+            <input id="lq-start" class="form-input" type="date">
+          </div>
+          <div>
+            <label class="form-label">종료일</label>
+            <input id="lq-end" class="form-input" type="date">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">담당자</label>
+          <select id="lq-worker" class="form-select">
+            <option value="">전체</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="searchLoading()">조회</button>
+      </div>
+      <div id="lq-results"></div>
+    </div>
+
+    <!-- ====== 관리자 ====== -->
+    <div class="page" id="page-관리자">
+      <div class="admin-section">
+        <h3>🚗 차량 관리</h3>
+        <button class="btn btn-secondary btn-sm" style="margin-bottom:12px" onclick="openCarModal()">+ 차량 추가</button>
+        <div id="carList"></div>
+      </div>
+      <div class="admin-section">
+        <h3>👤 계정 관리</h3>
+        <button class="btn btn-secondary btn-sm" style="margin-bottom:12px" onclick="openUserModal()">+ 계정 추가</button>
+        <div id="userList"></div>
+      </div>
+      <div class="admin-section">
+        <h3>👷 담당자 관리</h3>
+        <button class="btn btn-secondary btn-sm" style="margin-bottom:12px" onclick="openWorkerModal()">+ 담당자 추가</button>
+        <div id="workerList"></div>
+      </div>
+      <div class="admin-section">
+        <h3>🔐 관리자 비밀번호</h3>
+        <button class="btn btn-secondary btn-sm" onclick="openChangePasswordModal('admin')">비밀번호 변경</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<!-- ==================== 모달: 차량 추가 ==================== -->
+<div class="modal-overlay" id="carModal">
+  <div class="modal">
+    <h3 id="carModalTitle">차량 추가</h3>
+    <div class="form-row">
+      <label class="form-label">차량번호</label>
+      <input id="cm-car" class="form-input" type="text" placeholder="예: 12가3456">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('carModal')">취소</button>
+      <button class="btn btn-primary" onclick="saveCar()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 모달: 계정 추가/수정 ==================== -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal">
+    <h3 id="userModalTitle">계정 추가</h3>
+    <div class="form-row">
+      <label class="form-label">아이디</label>
+      <input id="um-id" class="form-input" type="text" placeholder="로그인 아이디">
+    </div>
+    <div class="form-row">
+      <label class="form-label">이름</label>
+      <input id="um-name" class="form-input" type="text" placeholder="홍길동">
+    </div>
+    <div class="form-row">
+      <label class="form-label">비밀번호</label>
+      <input id="um-pw" class="form-input" type="password" placeholder="비밀번호 설정">
+    </div>
+    <div class="form-row">
+      <label class="form-label">담당 차량 (복수 선택 가능)</label>
+      <div id="um-cars" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px;max-height:160px;overflow-y:auto"></div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">잠금 설정</label>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px;margin-top:4px">✅ 체크 = 담당 차량만 / 미체크 = 전체 선택 가능</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer"><input type="checkbox" id="um-p-ci" style="width:16px;height:16px;accent-color:#64B5F6"> 수거입력 잠금</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer"><input type="checkbox" id="um-p-cq" style="width:16px;height:16px;accent-color:#81C784"> 수거조회 잠금</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer"><input type="checkbox" id="um-p-li" style="width:16px;height:16px;accent-color:#FFB74D"> 상차입력 잠금</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer"><input type="checkbox" id="um-p-lq" style="width:16px;height:16px;accent-color:#BA68C8"> 상차조회 잠금</label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('userModal')">취소</button>
+      <button class="btn btn-primary" onclick="saveUser()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 모달: 담당자 추가 -->
+<div class="modal-overlay" id="workerModal">
+  <div class="modal">
+    <h3>담당자 추가</h3>
+    <div class="form-row">
+      <label class="form-label">이름</label>
+      <input id="wm-name" class="form-input" type="text" placeholder="이름">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('workerModal')">취소</button>
+      <button class="btn btn-primary" onclick="saveWorker()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 모달: 비밀번호 변경 -->
+<div class="modal-overlay" id="changePwModal">
+  <div class="modal">
+    <h3>비밀번호 변경</h3>
+    <div class="form-row">
+      <label class="form-label">현재 비밀번호</label>
+      <input id="cp-cur" class="form-input" type="password">
+    </div>
+    <div class="form-row">
+      <label class="form-label">새 비밀번호</label>
+      <input id="cp-new" class="form-input" type="password">
+    </div>
+    <div class="form-row">
+      <label class="form-label">새 비밀번호 확인</label>
+      <input id="cp-con" class="form-input" type="password">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('changePwModal')">취소</button>
+      <button class="btn btn-primary" onclick="changePassword()">변경</button>
+    </div>
+  </div>
+</div>
+
+<!-- 수거 상세 모달 -->
+<div class="modal-overlay" id="collectDetailModal">
+  <div class="modal">
+    <h3 id="cdm-title">수거 내역 상세</h3>
+    <div id="cdm-body"></div>
+    <div class="modal-actions" id="cdm-actions"></div>
+  </div>
+</div>
+
+<!-- 상차 상세 모달 -->
+<div class="modal-overlay" id="loadingDetailModal">
+  <div class="modal">
+    <h3 id="ldm-title">상차 내역 상세</h3>
+    <div id="ldm-body"></div>
+    <div class="modal-actions" id="ldm-actions"></div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div id="toast"></div>
+
+<!-- ==================== Firebase SDK ==================== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, getDocs, query, where, orderBy, getDoc, setDoc, Timestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ── Firebase 설정 ──
+const firebaseConfig = {
+  apiKey: "AIzaSyCwnrF2wNzB4egLPZ-YuYrK6eLCe-Z23XI",
+  authDomain: "jypenvitec.firebaseapp.com",
+  projectId: "jypenvitec",
+  storageBucket: "jypenvitec.appspot.com",
+  messagingSenderId: "639154034236",
+  appId: "1:639154034236:android:61532b997caa2716885539"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ── 전역 상태 ──
+window.DB = db;
+window.FS = { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, query, where, orderBy, getDoc, setDoc, Timestamp };
+window.currentUser = null; // { type:'admin' } or { type:'vehicle', carNumber, name, docId }
+window.carList = [];
+window.clientList = [];
+window.workerList = [];
+window.editCollectId = null;
+window.editLoadingId = null;
+window.changePwTarget = null;
+window.vehicleEditId = null;
+
+// ── 초기화 ──
+const CONTAINER_SIZES = ['4L','12L','30L','50L','63L','1L','2L','5L','10L','20L'];
+const LOADING_ITEMS = {
+  '박스':   ['박스_4L','박스_12L','박스_30L','박스_50L','박스_63L','박스_74L'],
+  '합성수지': ['합성수지_1L','합성수지_2L','합성수지_5L','합성수지_10L','합성수지_20L','합성수지_10격','합성수지_20격'],
+  '비닐':   ['비닐_4L','비닐_5L','비닐_12L','비닐_12묶','비닐_30L','비닐_50L','비닐_63L','비닐_84L'],
+  '기타':   ['태그','테이프']
+};
+const LOADING_LABELS = {
+  '박스_4L':'골판지박스 4L','박스_12L':'골판지박스 12L','박스_30L':'골판지박스 30L',
+  '박스_50L':'골판지박스 50L','박스_63L':'골판지박스 63L','박스_74L':'골판지박스 74L',
+  '합성수지_1L':'합성수지 1L','합성수지_2L':'합성수지 2L','합성수지_5L':'합성수지 5L',
+  '합성수지_10L':'합성수지 10L','합성수지_20L':'합성수지 20L',
+  '합성수지_10격':'합성수지 10격','합성수지_20격':'합성수지 20격',
+  '비닐_4L':'비닐 4L','비닐_5L':'비닐 5L','비닐_12L':'비닐 12L','비닐_12묶':'비닐 12묶',
+  '비닐_30L':'비닐 30L','비닐_50L':'비닐 50L','비닐_63L':'비닐 63L','비닐_84L':'비닐 84L',
+  '태그':'태그','테이프':'테이프'
+};
+window.LOADING_LABELS = LOADING_LABELS;
+window.CONTAINER_SIZES = CONTAINER_SIZES;
+window.LOADING_ITEMS = LOADING_ITEMS;
+
+// 오늘 날짜
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+function monthAgo() {
+  const d = new Date(); d.setMonth(d.getMonth()-1);
+  return d.toISOString().split('T')[0];
+}
+function monthStart() {
+  const d = new Date(); d.setDate(1);
+  return d.toISOString().split('T')[0];
+}
+window.todayDate = today;
+
+// ── 로그인 ──
+// 저장된 아이디 불러오기
+(function() {
+  const saved = localStorage.getItem('envitec_saved_id');
+  if (saved) {
+    document.getElementById('loginId').value = saved;
+    document.getElementById('saveIdCheck').checked = true;
+    document.getElementById('loginPassword').focus();
+  }
+})();
+
+window.doLogin = async function() {
+  const inputId = document.getElementById('loginId').value.trim();
+  const pw = document.getElementById('loginPassword').value.trim();
+  if (!inputId || !pw) { document.getElementById('loginErr').style.display = 'block'; return; }
+
+  if (document.getElementById('saveIdCheck').checked) {
+    localStorage.setItem('envitec_saved_id', inputId);
+  } else {
+    localStorage.removeItem('envitec_saved_id');
+  }
+
+  // 관리자 체크
+  if (inputId.toLowerCase() === 'admin') {
+    try {
+      const adminDoc = await getDoc(doc(db, 'adminConfig', 'auth'));
+      if (adminDoc.exists() && adminDoc.data().password === pw) {
+        window.currentUser = { type: 'admin' };
+        startApp();
+        return;
+      }
+    } catch(e) {}
+    document.getElementById('loginErr').style.display = 'block';
+    document.getElementById('loginPassword').value = '';
+    return;
+  }
+
+  // 사용자 계정 체크 (users 컬렉션)
+  try {
+    const uSnap = await getDocs(query(collection(db,'users'), where('userId','==',inputId)));
+    if (!uSnap.empty) {
+      const ud = uSnap.docs[0];
+      if (ud.data().password === pw) {
+        const up = ud.data().permissions || { lockCollectInput:true, lockCollectQuery:true, lockLoadingInput:true, lockLoadingQuery:true };
+        window.currentUser = {
+          type: 'vehicle',
+          userId: ud.data().userId,
+          name: ud.data().name||'',
+          docId: ud.id,
+          cars: ud.data().cars || [],
+          permissions: up
+        };
+        startApp();
+        return;
+      }
+    }
+  } catch(e) {}
+
+  document.getElementById('loginErr').style.display = 'block';
+  document.getElementById('loginPassword').value = '';
+}
+// 엔터 로그인
+document.getElementById('loginId').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('loginPassword').focus(); });
+document.getElementById('loginPassword').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+async function startApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+
+  const u = window.currentUser;
+  // 모든 탭 숨기기
+  if (u.type === 'admin') {
+    document.getElementById('headerUser').textContent = '관리자';
+    document.querySelectorAll('.admin-only').forEach(function(el){ el.style.display = ''; });
+  } else {
+    document.getElementById('headerUser').textContent = u.userId + (u.name ? ' · ' + u.name : '');
+    document.querySelector('.admin-only').style.display = 'none';
+    // 잠금 권한 적용
+    const p = u.permissions || { lockCollectInput:true, lockCollectQuery:true, lockLoadingInput:true, lockLoadingQuery:true };
+    window._userLock = p;
+  }
+
+  await loadMasterData();
+  buildCollectInputForm();
+  buildLoadingInputForm();
+  if (u.type === 'admin') loadAdminData();
+
+  // 날짜 기본값
+  document.getElementById('ci-date').value = today();
+  document.getElementById('li-date').value = today();
+  document.getElementById('qd-date').value = today();
+  document.getElementById('qc-start').value = monthAgo();
+  document.getElementById('qc-end').value = today();
+  document.getElementById('lq-start').value = monthStart();
+  document.getElementById('lq-end').value = today();
+
+  // 차량 자동 입력 + 잠금 권한 적용
+  if (u.type === 'vehicle') {
+    const lk = u.permissions || { lockCollectInput:true, lockCollectQuery:true, lockLoadingInput:true, lockLoadingQuery:true };
+
+    // 수거입력 차량번호
+    document.getElementById('ci-car').value = u.carNumber;
+    if (lk.lockCollectInput) {
+      document.getElementById('ci-car').disabled = true;
+      document.getElementById('ci-car').style.opacity = '0.5';
+      document.getElementById('ci-car').style.cursor = 'not-allowed';
+    }
+
+    // 수거조회 차량번호
+    document.getElementById('qd-car').value = u.carNumber;
+    document.getElementById('qc-car').value = u.carNumber;
+    if (lk.lockCollectQuery) {
+      document.getElementById('qd-car').disabled = true;
+      document.getElementById('qd-car').style.opacity = '0.5';
+      document.getElementById('qd-car').style.cursor = 'not-allowed';
+      document.getElementById('qc-car').disabled = true;
+      document.getElementById('qc-car').style.opacity = '0.5';
+      document.getElementById('qc-car').style.cursor = 'not-allowed';
+    }
+
+    // 상차입력 담당자 - 잠금 시 본인 자동선택+비활성화
+    if (u.name) {
+      const sel = document.getElementById('li-worker');
+      sel.value = u.name;
+      if (lk.lockLoadingInput) {
+        sel.disabled = true;
+        sel.style.opacity = '0.5';
+        sel.style.cursor = 'not-allowed';
+      } else {
+        sel.disabled = false;
+        sel.style.opacity = '';
+        sel.style.cursor = '';
+      }
+    }
+
+    // 상차조회 담당자 - 잠금 시 본인 자동선택+비활성화
+    if (u.name) {
+      const lqSel = document.getElementById('lq-worker');
+      if (lk.lockLoadingQuery) {
+        lqSel.value = u.name;
+        lqSel.disabled = true;
+        lqSel.style.opacity = '0.5';
+        lqSel.style.cursor = 'not-allowed';
+      } else {
+        lqSel.disabled = false;
+        lqSel.style.opacity = '';
+        lqSel.style.cursor = '';
+      }
+    }
+  }
+}
+
+// 마스터 데이터 로드
+async function loadMasterData() {
+  // ── 거래처 목록: clients 컬렉션에서 읽기 (일지db 전체 스캔 제거) ──
+  try {
+    const cSnap = await getDocs(collection(db,'clients'));
+    window.clientList = cSnap.docs.map(d => d.data().name).filter(Boolean).sort();
+  } catch(e) { window.clientList = []; }
+
+  // ── 차량 목록: vehicles 컬렉션에서 읽기 (활성 차량만 입력용, 전체 조회용) ──
+  try {
+    const vSnap = await getDocs(collection(db,'vehicles'));
+    window.carList = vSnap.docs.map(d => d.data().carNumber).filter(Boolean).sort();
+    window.activeCarList = vSnap.docs.filter(d => d.data().active !== false).map(d => d.data().carNumber).filter(Boolean).sort();
+  } catch(e) { window.carList = []; window.activeCarList = []; }
+  // 차량번호 드롭다운 채우기 (입력=활성차량, 조회=전체)
+  const ciCarEl = document.getElementById('ci-car');
+  if (ciCarEl) {
+    ciCarEl.innerHTML = '<option value="">-- 차량 선택 --</option>';
+    (window.activeCarList||[]).forEach(function(car) { ciCarEl.innerHTML += '<option value="' + car + '">' + car + '</option>'; });
+  }
+  ['qd-car','qc-car'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '<option value="">전체</option>';
+    (window.carList||[]).forEach(function(car) { el.innerHTML += '<option value="' + car + '">' + car + '</option>'; });
+  });
+
+  // ── 담당자 목록: workers 컬렉션 ──
+  try {
+    const wSnap = await getDocs(collection(db,'workers'));
+    window.workerList = [];
+    wSnap.forEach(d => { if(d.data().name) window.workerList.push({id:d.id, name:d.data().name}); });
+    window.workerList.sort((a,b) => a.name.localeCompare(b.name));
+    // 상차입력 담당자 스피너
+    const sel = document.getElementById('li-worker');
+    sel.innerHTML = '<option value="">-- 담당자 선택 --</option>';
+    window.workerList.forEach(function(w) { sel.innerHTML += '<option value="' + w.name + '">' + w.name + '</option>'; });
+
+    // 상차조회 담당자 드롭다운
+    const lqSel = document.getElementById('lq-worker');
+    lqSel.innerHTML = '<option value="">전체</option>';
+    window.workerList.forEach(function(w) { lqSel.innerHTML += '<option value="' + w.name + '">' + w.name + '</option>'; });
+  } catch(e) {}
+}
+
+// ── 수거 입력 폼 빌드 ──
+const COLLECT_GROUPS = [
+  { id: 'ci-group-box', label: '골판지 박스류', sizes: ['4L','12L','30L','50L','63L'], labels: {'4L':'4L 박스','12L':'12L 박스','30L':'30L 박스','50L':'50L 박스','63L':'63L 박스'} },
+  { id: 'ci-group-resin', label: '합성수지 용기류', sizes: ['1L','2L','5L','10L','20L'], labels: {'1L':'1L 합성','2L':'2L 합성','5L':'5L 합성','10L':'10L 합성','20L':'20L 합성'} },
+];
+window.COLLECT_GROUPS = COLLECT_GROUPS;
+
+function buildCollectInputForm() {
+  COLLECT_GROUPS.forEach(group => {
+    const el = document.getElementById(group.id);
+    el.innerHTML = group.sizes.map(sz => `
+      <div class="collect-row">
+        <span class="collect-row-label">${group.labels[sz]||sz}</span>
+        <input class="collect-num-input" type="number" min="0" placeholder="0" id="ci-c${sz}" inputmode="numeric" style="color:#64B5F6">
+        <input class="collect-num-input" type="number" min="0" step="0.1" placeholder="0.0" id="ci-w${sz}" inputmode="decimal" style="color:#4DB6AC">
+        <input class="collect-num-input" type="number" min="0" placeholder="0" id="ci-d${sz}" inputmode="numeric" style="color:#E57373">
+      </div>`).join('');
+  });
+}
+
+// ── 수거 저장 ──
+window.submitCollect = async function() {
+  const date = document.getElementById('ci-date').value;
+  const carNumber = document.getElementById('ci-car').value.trim();
+  const clientName = document.getElementById('ci-client').value.trim();
+  const memo = document.getElementById('ci-memo').value.trim();
+
+  if (!date || !carNumber || !clientName) {
+    toast('날짜, 차량번호, 거래처명은 필수입니다.', 'error'); return;
+  }
+
+  const data = { date, carNumber, clientName, memo, timestamp: Timestamp.now() };
+  CONTAINER_SIZES.forEach(sz => {
+    data[`collect${sz}`] = document.getElementById(`ci-c${sz}`).value || '0';
+    data[`deliver${sz}`] = document.getElementById(`ci-d${sz}`).value || '0';
+    data[`collect${sz}weight`] = document.getElementById(`ci-w${sz}`).value || '0';
+  });
+
+  const btn = document.getElementById('collectSubmitBtn');
+  btn.disabled = true; btn.textContent = '저장 중...';
+
+  try {
+    if (window.editCollectId) {
+      await updateDoc(doc(db,'일지db',window.editCollectId), data);
+      toast('수정 완료!', 'success');
+      cancelCollectEdit();
+    } else {
+      await addDoc(collection(db,'일지db'), data);
+      toast('저장 완료!', 'success');
+      clearCollectForm();
+    }
+    // 클라이언트 목록 업데이트
+    // 새 거래처면 clients 컬렉션에 추가
+    if (!window.clientList.includes(clientName)) {
+      window.clientList.push(clientName); window.clientList.sort();
+      try { await addDoc(collection(db,'clients'), { name: clientName }); } catch(e) {}
+    }
+    // 새 차량이면 carList 갱신 (vehicles 컬렉션은 관리자가 관리)
+    if (!window.carList.includes(carNumber)) { window.carList.push(carNumber); window.carList.sort(); }
+  } catch(e) { toast('저장 실패: '+e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = window.editCollectId ? '수정 저장' : '저장'; }
+};
+
+function clearCollectForm() {
+  document.getElementById('ci-client').value = '';
+  document.getElementById('ci-memo').value = '';
+  CONTAINER_SIZES.forEach(sz => {
+    document.getElementById(`ci-c${sz}`).value = '';
+    document.getElementById(`ci-d${sz}`).value = '';
+    document.getElementById(`ci-w${sz}`).value = '';
+  });
+}
+
+window.cancelCollectEdit = function() {
+  window.editCollectId = null;
+  document.getElementById('collectInputTitle').textContent = '수거일지 입력';
+  document.getElementById('collectSubmitBtn').textContent = '저장';
+  document.getElementById('collectCancelBtn').style.display = 'none';
+  clearCollectForm();
+  if (window.currentUser && window.currentUser.type === 'vehicle') {
+    applyPermissions();
+  } else {
+    document.getElementById('ci-car').value = '';
+  }
+};
+
+// ── 수거 조회 ──
+let currentSubTab = 'date';
+window.switchSubTab = function(tab) {
+  currentSubTab = tab;
+  document.querySelectorAll('.sub-tab').forEach((el,i) => el.classList.toggle('active', (i===0&&tab==='date')||(i===1&&tab==='client')));
+  document.getElementById('subpanel-date').style.display = tab==='date' ? '' : 'none';
+  document.getElementById('subpanel-client').style.display = tab==='client' ? '' : 'none';
+  document.getElementById('q-stat').style.display = 'none';
+  document.getElementById('q-results').innerHTML = '';
+};
+
+window.searchByDate = async function() {
+  const date = document.getElementById('qd-date').value;
+  const car = document.getElementById('qd-car').value.trim();
+  if (!date) { toast('날짜를 선택하세요.', 'error'); return; }
+
+  document.getElementById('q-results').innerHTML = '<div class="loading-text"><span class="spinner"></span>조회 중...</div>';
+  document.getElementById('q-stat').style.display = 'none';
+
+  try {
+    let q = query(collection(db,'일지db'), where('date','==',date), orderBy('timestamp','asc'));
+    const snap = await getDocs(q);
+    let docs = snap.docs.map(d => ({id:d.id,...d.data()}));
+    if (car) docs = docs.filter(d => d.carNumber === car);
+    // 일반 사용자는 본인 차량만
+    if (window.currentUser.type === 'vehicle') docs = docs.filter(d => d.carNumber === window.currentUser.carNumber);
+    renderCollectResults(docs);
+  } catch(e) { document.getElementById('q-results').innerHTML = `<div class="empty-state">조회 실패: ${e.message}</div>`; }
+};
+
+window.searchByClient = async function() {
+  const client = document.getElementById('qc-client').value.trim();
+  const start = document.getElementById('qc-start').value;
+  const end = document.getElementById('qc-end').value;
+  const car = document.getElementById('qc-car').value.trim();
+  if (!client) { toast('거래처명을 입력하세요.', 'error'); return; }
+  if (!start || !end) { toast('날짜 범위를 선택하세요.', 'error'); return; }
+
+  document.getElementById('q-results').innerHTML = '<div class="loading-text"><span class="spinner"></span>조회 중...</div>';
+  document.getElementById('q-stat').style.display = 'none';
+
+  try {
+    let q = query(collection(db,'일지db'),
+      where('clientName','>=',client), where('clientName','<=',client+'\uf8ff'),
+      where('date','>=',start), where('date','<=',end), orderBy('clientName'), orderBy('date','asc'));
+    const snap = await getDocs(q);
+    let docs = snap.docs.map(d => ({id:d.id,...d.data()}));
+    if (car) docs = docs.filter(d => d.carNumber === car);
+    if (window.currentUser.type === 'vehicle') docs = docs.filter(d => d.carNumber === window.currentUser.carNumber);
+    renderCollectResults(docs);
+  } catch(e) { document.getElementById('q-results').innerHTML = `<div class="empty-state">조회 실패: ${e.message}</div>`; }
+};
+
+function renderCollectResults(docs) {
+  if (docs.length === 0) {
+    document.getElementById('q-results').innerHTML = '<div class="empty-state">조회된 내역이 없습니다.</div>';
+    document.getElementById('q-stat').style.display = 'none';
+    return;
+  }
+
+  let totalCollect = 0, totalWeight = 0;
+  CONTAINER_SIZES.forEach(sz => {
+    docs.forEach(d => {
+      const c = parseInt(d[`collect${sz}`]||0);
+      const w = parseFloat(d[`collect${sz}weight`]||0);
+      if (c > 0) { totalCollect += c; totalWeight += w; }
+    });
+  });
+
+  const stat = document.getElementById('q-stat');
+  stat.textContent = `총 ${docs.length}건 · 총 수거 ${totalCollect}개 · 무게 ${totalWeight.toFixed(1)}kg`;
+  stat.style.display = '';
+
+  const html = docs.map(d => {
+    const tags = CONTAINER_SIZES.map(sz => {
+      const c = parseInt(d[`collect${sz}`]||0);
+      const dv = parseInt(d[`deliver${sz}`]||0);
+      const parts = [];
+      if (c > 0) parts.push(`<span class="tag collect">수거 ${sz} ${c}개</span>`);
+      if (dv > 0) parts.push(`<span class="tag deliver">납품 ${sz} ${dv}개</span>`);
+      return parts.join('');
+    }).join('');
+    const memo = d.memo ? `<div class="result-memo">📝 ${d.memo}</div>` : '';
+    return `
+      <div class="result-item" onclick="showCollectDetail('${d.id}', collectResultsCache)">
+        <div class="result-item-header">
+          <div class="result-date">${d.date}</div>
+          <div class="result-car">${d.carNumber}</div>
+        </div>
+        <div class="result-client">${d.clientName}</div>
+        <div class="result-tags">${tags || '<span class="tag">수량 없음</span>'}</div>
+        ${memo}
+      </div>`;
+  }).join('');
+
+  document.getElementById('q-results').innerHTML = html;
+  window.collectResultsCache = docs;
+}
+
+window.showCollectDetail = function(id, cache) {
+  const d = (cache||[]).find(x=>x.id===id);
+  if (!d) return;
+
+  let body = `<div style="margin-bottom:12px">
+    <div style="font-size:13px;color:var(--text2)">날짜: ${d.date} · 차량: ${d.carNumber}</div>
+    <div style="font-size:16px;font-weight:600;margin-top:4px">${d.clientName}</div>
+    ${d.memo ? `<div style="font-size:13px;color:var(--text3);margin-top:4px">📝 ${d.memo}</div>` : ''}
+  </div><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <tr style="color:var(--text2)"><th align="left" style="padding:6px 0;border-bottom:1px solid var(--border)">용기</th><th style="padding:6px;border-bottom:1px solid var(--border)">수거</th><th style="padding:6px;border-bottom:1px solid var(--border)">납품</th><th style="padding:6px;border-bottom:1px solid var(--border)">무게</th></tr>`;
+  CONTAINER_SIZES.forEach(sz => {
+    const c = d[`collect${sz}`]||'0', dv = d[`deliver${sz}`]||'0', w = d[`collect${sz}weight`]||'0';
+    if (c!=='0'||dv!=='0') body += `<tr><td style="padding:5px 0">${sz}</td><td align="center" style="padding:5px;color:var(--accent)">${c}</td><td align="center" style="padding:5px;color:var(--accent2)">${dv}</td><td align="center" style="padding:5px;color:var(--text2)">${parseFloat(w).toFixed(1)}</td></tr>`;
+  });
+  body += '</table>';
+
+  document.getElementById('cdm-title').textContent = `${d.clientName} · ${d.date}`;
+  document.getElementById('cdm-body').innerHTML = body;
+
+  const canEdit = window.currentUser.type === 'admin' || window.currentUser.carNumber === d.carNumber;
+  document.getElementById('cdm-actions').innerHTML = `
+    <button class="btn btn-secondary" onclick="closeModal('collectDetailModal')">닫기</button>
+    ${canEdit ? `<button class="btn btn-primary" onclick="editCollect('${d.id}');closeModal('collectDetailModal')">수정</button>
+    <button class="btn btn-danger" onclick="deleteCollect('${d.id}')">삭제</button>` : ''}`;
+  openModal('collectDetailModal');
+};
+
+window.editCollect = function(id) {
+  const d = (window.collectResultsCache||[]).find(x=>x.id===id);
+  if (!d) return;
+  window.editCollectId = id;
+  document.getElementById('collectInputTitle').textContent = '수거일지 수정';
+  document.getElementById('collectSubmitBtn').textContent = '수정 저장';
+  document.getElementById('collectCancelBtn').style.display = '';
+  document.getElementById('ci-date').value = d.date;
+  document.getElementById('ci-car').value = d.carNumber;
+  document.getElementById('ci-client').value = d.clientName;
+  document.getElementById('ci-memo').value = d.memo||'';
+  CONTAINER_SIZES.forEach(sz => {
+    document.getElementById(`ci-c${sz}`).value = d[`collect${sz}`]||'';
+    document.getElementById(`ci-d${sz}`).value = d[`deliver${sz}`]||'';
+    document.getElementById(`ci-w${sz}`).value = d[`collect${sz}weight`]||'';
+  });
+  switchTab('수거입력');
+};
+
+window.deleteCollect = async function(id) {
+  if (!confirm('정말 삭제하시겠습니까?')) return;
+  try {
+    await deleteDoc(doc(db,'일지db',id));
+    toast('삭제 완료!', 'success');
+    closeModal('collectDetailModal');
+    window.collectResultsCache = (window.collectResultsCache||[]).filter(x=>x.id!==id);
+    renderCollectResults(window.collectResultsCache);
+  } catch(e) { toast('삭제 실패: '+e.message, 'error'); }
+};
+
+// ── 상차 입력 폼 빌드 ──
+function buildLoadingInputForm() {
+  const cfg = [
+    { id:'li-box', items: LOADING_ITEMS['박스'] },
+    { id:'li-resin', items: LOADING_ITEMS['합성수지'] },
+    { id:'li-vinyl', items: LOADING_ITEMS['비닐'] },
+    { id:'li-etc', items: LOADING_ITEMS['기타'] },
+  ];
+  cfg.forEach(({ id, items }) => {
+    const el = document.getElementById(id);
+    el.innerHTML = items.map(k => `
+      <div class="loading-item">
+        <span class="loading-item-label">${k.replace(/^[^_]+_/,'')}</span>
+        <input type="number" min="0" placeholder="0" id="li-${k}" inputmode="numeric">
+      </div>`).join('');
+  });
+}
+
+window.submitLoading = async function() {
+  const date = document.getElementById('li-date').value;
+  const workerName = document.getElementById('li-worker').value;
+  if (!date) { toast('날짜를 선택하세요.', 'error'); return; }
+  if (!workerName) { toast('담당자를 선택하세요.', 'error'); return; }
+
+  const items = {};
+  Object.values(LOADING_ITEMS).flat().forEach(k => {
+    const v = parseInt(document.getElementById(`li-${k}`).value||0);
+    if (v > 0) items[k] = v;
+  });
+  if (Object.keys(items).length === 0) { toast('최소 한 개 이상 입력하세요.', 'error'); return; }
+
+  const btn = document.getElementById('loadingSubmitBtn');
+  btn.disabled = true; btn.textContent = '저장 중...';
+
+  const data = { date, workerName, items, timestamp: Timestamp.now() };
+  try {
+    if (window.editLoadingId) {
+      await updateDoc(doc(db,'상차db',window.editLoadingId), { date, workerName, items });
+      toast('수정 완료!', 'success');
+      cancelLoadingEdit();
+    } else {
+      await addDoc(collection(db,'상차db'), data);
+      toast('저장 완료!', 'success');
+      clearLoadingForm();
+    }
+  } catch(e) { toast('저장 실패: '+e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = window.editLoadingId ? '수정 저장' : '저장'; }
+};
+
+function clearLoadingForm() {
+  Object.values(LOADING_ITEMS).flat().forEach(k => { document.getElementById(`li-${k}`).value = ''; });
+}
+
+window.cancelLoadingEdit = function() {
+  window.editLoadingId = null;
+  document.getElementById('loadingInputTitle').textContent = '상차일지 입력';
+  document.getElementById('loadingSubmitBtn').textContent = '저장';
+  document.getElementById('loadingCancelBtn').style.display = 'none';
+  clearLoadingForm();
+};
+
+// ── 상차 조회 ──
+var LOADING_CATS = [
+  { key:'박스',    label:'박스',    color:'#64B5F6' },
+  { key:'합성수지', label:'합성수지', color:'#81C784' },
+  { key:'비닐',   label:'비닐',    color:'#FFB74D' },
+  { key:'기타',   label:'기타',    color:'#BA68C8' },
+];
+
+function renderLoadingCard(d) {
+  var total = Object.values(d.items||{}).reduce(function(a,b){return a+b;},0);
+  var catBoxes = LOADING_CATS.map(function(cat) {
+    var catItems = Object.entries(d.items||{}).filter(function(e) {
+      return cat.key === '기타' ? (e[0]==='태그'||e[0]==='테이프') : e[0].startsWith(cat.key);
+    });
+    if (catItems.length === 0) return '';
+    var rows = [];
+    for (var i = 0; i < catItems.length; i += 2) {
+      var L = catItems[i], R = catItems[i+1];
+      var cell = function(k, v) {
+        return '<div style="flex:1;display:flex;gap:4px;align-items:center">'
+          + '<span style="font-size:13px;color:#ccc">' + k.replace(/^[^_]+_/, '') + '</span>'
+          + '<span style="font-size:13px;color:#fff;font-weight:700"> ' + v + '개</span></div>';
+      };
+      rows.push('<div style="display:flex;gap:8px;margin:3px 0">' + cell(L[0],L[1]) + (R ? cell(R[0],R[1]) : '<div style="flex:1"></div>') + '</div>');
+    }
+    return '<div style="background:#1E1E24;border:1px solid #3A3A42;border-radius:8px;padding:10px;margin-bottom:8px">'
+      + '<div style="font-size:13px;font-weight:700;color:' + cat.color + ';margin-bottom:6px">■ ' + cat.label + '</div>'
+      + rows.join('') + '</div>';
+  }).join('');
+  return '<div class="result-item" onclick="showLoadingDetail(\'' + d.id + '\', loadingResultsCache)">'
+    + '<div class="result-item-header" style="margin-bottom:10px">'
+    + '<div><div style="font-size:15px;font-weight:700;color:#fff">' + d.workerName + ' 님</div>'
+    + '<div style="font-size:13px;color:var(--text2);margin-top:2px">' + d.date + '</div></div>'
+    + '<div style="font-size:13px;color:var(--text2)">총 <span style="color:#fff;font-weight:700">' + total + '</span>개</div>'
+    + '</div>' + catBoxes + '</div>';
+}
+
+window.searchLoading = async function() {
+  var start = document.getElementById('lq-start').value;
+  var end = document.getElementById('lq-end').value;
+  if (!start || !end) { toast('날짜를 선택하세요.', 'error'); return; }
+  var selectedWorker = document.getElementById('lq-worker').value;
+  document.getElementById('lq-results').innerHTML = '<div class="loading-text"><span class="spinner"></span>조회 중...</div>';
+  try {
+    var snap = await getDocs(query(collection(db,'상차db'), where('date','>=',start), where('date','<=',end), orderBy('date','desc')));
+    var docs = snap.docs.map(function(d) { return Object.assign({id:d.id}, d.data()); });
+    // 담당자 드롭다운 선택값으로 필터
+    if (selectedWorker) {
+      docs = docs.filter(function(d) { return d.workerName === selectedWorker; });
+    }
+    if (docs.length === 0) { document.getElementById('lq-results').innerHTML = '<div class="empty-state">조회된 내역이 없습니다.</div>'; return; }
+    window.loadingResultsCache = docs;
+    document.getElementById('lq-results').innerHTML = docs.map(function(d) { return renderLoadingCard(d); }).join('');
+  } catch(e) { document.getElementById('lq-results').innerHTML = '<div class="empty-state">조회 실패: ' + e.message + '</div>'; }
+};
+
+window.showLoadingDetail = function(id, cache) {
+  var d = (cache||[]).find(function(x){return x.id===id;});
+  if (!d) return;
+  var total = Object.values(d.items||{}).reduce(function(a,b){return a+b;},0);
+  var catBoxes = LOADING_CATS.map(function(cat) {
+    var catItems = Object.entries(d.items||{}).filter(function(e) {
+      return cat.key === '기타' ? (e[0]==='태그'||e[0]==='테이프') : e[0].startsWith(cat.key);
+    });
+    if (catItems.length === 0) return '';
+    var rows = catItems.map(function(e) {
+      return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #2a2a2a">'
+        + '<span style="font-size:14px;color:#ccc">' + e[0].replace(/^[^_]+_/,'') + '</span>'
+        + '<span style="font-size:14px;color:#fff;font-weight:700">' + e[1] + '개</span></div>';
+    }).join('');
+    return '<div style="background:#1E1E24;border:1px solid #3A3A42;border-radius:8px;padding:10px;margin-bottom:8px">'
+      + '<div style="font-size:13px;font-weight:700;color:' + cat.color + ';margin-bottom:6px">■ ' + cat.label + '</div>'
+      + rows + '</div>';
+  }).join('');
+  document.getElementById('ldm-title').textContent = d.workerName + ' 님 · ' + d.date;
+  document.getElementById('ldm-body').innerHTML =
+    '<div style="font-size:13px;color:var(--text2);margin-bottom:10px">총 <span style="color:#fff;font-weight:700">' + total + '</span>개</div>' + catBoxes;
+  var canEdit = window.currentUser.type === 'admin';
+  document.getElementById('ldm-actions').innerHTML =
+    '<button class="btn btn-secondary" onclick="closeModal(\'loadingDetailModal\')">닫기</button>'
+    + (canEdit
+      ? '<button class="btn btn-primary" onclick="editLoading(\'' + d.id + '\');closeModal(\'loadingDetailModal\')">수정</button>'
+        + '<button class="btn btn-danger" onclick="deleteLoading(\'' + d.id + '\')">삭제</button>'
+      : '');
+  openModal('loadingDetailModal');
+};
+
+window.editLoading = function(id) {
+  const d = (window.loadingResultsCache||[]).find(x=>x.id===id);
+  if (!d) return;
+  window.editLoadingId = id;
+  document.getElementById('loadingInputTitle').textContent = '상차일지 수정';
+  document.getElementById('loadingSubmitBtn').textContent = '수정 저장';
+  document.getElementById('loadingCancelBtn').style.display = '';
+  document.getElementById('li-date').value = d.date;
+  document.getElementById('li-worker').value = d.workerName;
+  clearLoadingForm();
+  Object.entries(d.items||{}).forEach(([k,v]) => {
+    const el = document.getElementById(`li-${k}`);
+    if (el) el.value = v;
+  });
+  switchTab('상차입력');
+};
+
+window.deleteLoading = async function(id) {
+  if (!confirm('정말 삭제하시겠습니까?')) return;
+  try {
+    await deleteDoc(doc(db,'상차db',id));
+    toast('삭제 완료!', 'success');
+    closeModal('loadingDetailModal');
+    window.loadingResultsCache = (window.loadingResultsCache||[]).filter(function(x){return x.id!==id;});
+    document.getElementById('lq-results').innerHTML = window.loadingResultsCache.map(function(d){return renderLoadingCard(d);}).join('') || '<div class="empty-state">조회된 내역이 없습니다.</div>';
+  } catch(e) { toast('삭제 실패: '+e.message, 'error'); }
+};
+
+// ── 관리자: 차량 ──
+async function loadAdminData() {
+  await loadCars();
+  await loadUsers();
+  await loadWorkerAdmin();
+}
+
+// ── 관리자: 차량 관리 ──
+async function loadCars() {
+  try {
+    const snap = await getDocs(collection(db,'vehicles'));
+    const items = snap.docs.map(d => ({id:d.id,...d.data()}));
+    window.vehicleCache = items;
+    // 드롭다운 갱신
+    window.carList = items.map(d => d.carNumber).filter(Boolean).sort();
+    window.activeCarList = items.filter(d => d.active !== false).map(d => d.carNumber).filter(Boolean).sort();
+    ['qd-car','qc-car'].forEach(function(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const cur = el.value;
+      el.innerHTML = '<option value="">전체</option>';
+      window.carList.forEach(function(c) { el.innerHTML += '<option value="' + c + '">' + c + '</option>'; });
+      el.value = cur;
+    });
+    const ciEl = document.getElementById('ci-car');
+    if (ciEl) {
+      const cur = ciEl.value;
+      ciEl.innerHTML = '<option value="">-- 차량 선택 --</option>';
+      window.activeCarList.forEach(function(c) { ciEl.innerHTML += '<option value="' + c + '">' + c + '</option>'; });
+      ciEl.value = cur;
+    }
+    document.getElementById('carList').innerHTML = items.length === 0
+      ? '<div class="empty-state">등록된 차량이 없습니다.</div>'
+      : items.map(function(v) {
+          const isActive = v.active !== false;
+          return '<div class="vehicle-item">'
+            + '<div class="vehicle-info">'
+            + '<div class="vehicle-car" style="color:' + (isActive ? '#fff' : '#555') + '">' + v.carNumber + '</div>'
+            + '<div class="vehicle-meta">' + (isActive ? '<span style="color:#34D399;font-size:11px">활성</span>' : '<span style="color:#555;font-size:11px">비활성</span>') + '</div>'
+            + '</div>'
+            + '<div class="vehicle-actions">'
+            + '<button class="btn btn-secondary btn-sm" data-id="' + v.id + '" data-active="' + isActive + '" onclick="toggleCarActiveBtn(this)">' + (isActive ? '비활성화' : '활성화') + '</button>'
+            + '</div></div>';
+        }).join('');
+  } catch(e) { console.error(e); }
+}
+
+window.openCarModal = function() {
+  document.getElementById('cm-car').value = '';
+  openModal('carModal');
+};
+
+window.saveCar = async function() {
+  const carNumber = document.getElementById('cm-car').value.trim();
+  if (!carNumber) { toast('차량번호를 입력하세요.', 'error'); return; }
+  try {
+    await addDoc(collection(db,'vehicles'), { carNumber, active: true });
+    toast('차량 추가 완료!', 'success');
+    closeModal('carModal');
+    loadCars();
+  } catch(e) { toast('실패: '+e.message, 'error'); }
+};
+
+window.toggleCarActive = async function(id, isActive) {
+  const msg = isActive ? '비활성화 하시겠습니까?' : '활성화 하시겠습니까?';
+  if (!confirm(msg)) return;
+  try {
+    await updateDoc(doc(db,'vehicles',id), { active: !isActive });
+    toast((isActive ? '비활성화' : '활성화') + ' 완료!', 'success');
+    loadCars();
+  } catch(e) { toast('실패: '+e.message, 'error'); }
+};
+
+// ── 관리자: 계정 관리 (users 컬렉션) ──
+async function loadUsers() {
+  try {
+    const snap = await getDocs(collection(db,'users'));
+    const items = snap.docs.map(d => ({id:d.id,...d.data()}));
+    window.userCache = items;
+    document.getElementById('userList').innerHTML = items.length === 0
+      ? '<div class="empty-state">등록된 계정이 없습니다.</div>'
+      : items.map(function(u) {
+          const p = u.permissions || {};
+          const permLabels = [
+            p.lockCollectInput ? '<span style="color:#64B5F6;font-size:11px">수거입력🔒</span>' : '<span style="color:#64B5F650;font-size:11px">수거입력</span>',
+            p.lockCollectQuery ? '<span style="color:#81C784;font-size:11px">수거조회🔒</span>' : '<span style="color:#81C78450;font-size:11px">수거조회</span>',
+            p.lockLoadingInput ? '<span style="color:#FFB74D;font-size:11px">상차입력🔒</span>' : '<span style="color:#FFB74D50;font-size:11px">상차입력</span>',
+            p.lockLoadingQuery ? '<span style="color:#BA68C8;font-size:11px">상차조회🔒</span>' : '<span style="color:#BA68C850;font-size:11px">상차조회</span>',
+          ].join(' ');
+          const carTags = (u.cars||[]).map(function(c) { return '<span style="background:#2a2a2a;border:1px solid #3a3a3a;border-radius:4px;padding:2px 6px;font-size:11px;color:#60A5FA">' + c + '</span>'; }).join(' ');
+          return '<div class="vehicle-item" style="flex-direction:column;align-items:flex-start;gap:6px">'
+            + '<div style="display:flex;justify-content:space-between;width:100%;align-items:center">'
+            + '<div><div class="vehicle-car">' + u.userId + '</div>'
+            + '<div class="vehicle-meta">' + (u.name||'') + '</div></div>'
+            + '<div class="vehicle-actions">'
+            + '<button class="btn btn-secondary btn-sm" data-id="' + u.id + '" onclick="openUserEditModalBtn(this)">수정</button>'
+            + '<button class="btn btn-danger btn-sm" data-id="' + u.id + '" onclick="deleteUserBtn(this)">삭제</button>'
+            + '</div></div>'
+            + '<div>' + carTags + '</div>'
+            + '<div>' + permLabels + '</div>'
+            + '</div>';
+        }).join('');
+  } catch(e) { console.error(e); }
+}
+
+window.openUserModal = function() {
+  window.userEditId = null;
+  document.getElementById('userModalTitle').textContent = '계정 추가';
+  document.getElementById('um-id').value = '';
+  document.getElementById('um-name').value = '';
+  document.getElementById('um-pw').value = '';
+  document.getElementById('um-p-ci').checked = true;
+  document.getElementById('um-p-cq').checked = true;
+  document.getElementById('um-p-li').checked = true;
+  document.getElementById('um-p-lq').checked = true;
+  // 차량 체크박스 목록 채우기
+  const carsDiv = document.getElementById('um-cars');
+  carsDiv.innerHTML = (window.activeCarList||[]).map(function(c) {
+    return '<label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">'
+      + '<input type="checkbox" class="um-car-check" value="' + c + '" style="width:14px;height:14px;accent-color:#3D82F6"> ' + c + '</label>';
+  }).join('');
+  openModal('userModal');
+};
+
+window.openUserEditModal = function(id) {
+  const u = (window.userCache||[]).find(function(x){return x.id===id;});
+  if (!u) return;
+  window.userEditId = id;
+  document.getElementById('userModalTitle').textContent = '계정 수정';
+  document.getElementById('um-id').value = u.userId||'';
+  document.getElementById('um-name').value = u.name||'';
+  document.getElementById('um-pw').value = '';
+  const p = u.permissions || { lockCollectInput:true, lockCollectQuery:true, lockLoadingInput:true, lockLoadingQuery:true };
+  document.getElementById('um-p-ci').checked = !!p.lockCollectInput;
+  document.getElementById('um-p-cq').checked = !!p.lockCollectQuery;
+  document.getElementById('um-p-li').checked = !!p.lockLoadingInput;
+  document.getElementById('um-p-lq').checked = !!p.lockLoadingQuery;
+  const carsDiv = document.getElementById('um-cars');
+  const userCars = u.cars||[];
+  carsDiv.innerHTML = (window.activeCarList||[]).map(function(c) {
+    return '<label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">'
+      + '<input type="checkbox" class="um-car-check" value="' + c + '"' + (userCars.includes(c) ? ' checked' : '') + ' style="width:14px;height:14px;accent-color:#3D82F6"> ' + c + '</label>';
+  }).join('');
+  openModal('userModal');
+};
+
+window.saveUser = async function() {
+  const userId = document.getElementById('um-id').value.trim();
+  const name = document.getElementById('um-name').value.trim();
+  const password = document.getElementById('um-pw').value.trim();
+  if (!userId) { toast('아이디를 입력하세요.', 'error'); return; }
+  const cars = Array.from(document.querySelectorAll('.um-car-check:checked')).map(function(el){return el.value;});
+  const permissions = {
+    lockCollectInput: document.getElementById('um-p-ci').checked,
+    lockCollectQuery:  document.getElementById('um-p-cq').checked,
+    lockLoadingInput:  document.getElementById('um-p-li').checked,
+    lockLoadingQuery:  document.getElementById('um-p-lq').checked,
+  };
+  try {
+    if (window.userEditId) {
+      const data = { userId, name, cars, permissions };
+      if (password) data.password = password;
+      await updateDoc(doc(db,'users',window.userEditId), data);
+      toast('수정 완료!', 'success');
+    } else {
+      if (!password) { toast('비밀번호를 입력하세요.', 'error'); return; }
+      await addDoc(collection(db,'users'), { userId, name, password, cars, permissions });
+      toast('추가 완료!', 'success');
+    }
+    closeModal('userModal');
+    loadUsers();
+  } catch(e) { toast('실패: '+e.message, 'error'); }
+};
+
+window.deleteUser = async function(id) {
+  if (!confirm('계정을 삭제하시겠습니까?')) return;
+  try {
+    await deleteDoc(doc(db,'users',id));
+    toast('삭제 완료!', 'success');
+    loadUsers();
+  } catch(e) { toast('삭제 실패', 'error'); }
+};
+
+
+window.toggleCarActiveBtn = function(btn) { toggleCarActive(btn.dataset.id, btn.dataset.active === 'true'); };
+window.openUserEditModalBtn = function(btn) { openUserEditModal(btn.dataset.id); };
+window.deleteUserBtn = function(btn) { deleteUser(btn.dataset.id); };
+
+// ── 관리자: 담당자 ──
+async function loadWorkerAdmin() {
+  try {
+    const snap = await getDocs(collection(db,'workers'));
+    const items = snap.docs.map(d => ({id:d.id,...d.data()}));
+    window.workerAdminCache = items;
+    document.getElementById('workerList').innerHTML = items.length === 0
+      ? '<div class="empty-state">등록된 담당자가 없습니다.</div>'
+      : items.map(w => `
+        <div class="vehicle-item">
+          <div class="vehicle-car">${w.name}</div>
+          <button class="btn btn-danger btn-sm" onclick="deleteWorkerAdmin('${w.id}')">삭제</button>
+        </div>`).join('');
+  } catch(e) {}
+}
+
+window.openWorkerModal = function() {
+  document.getElementById('wm-name').value = '';
+  openModal('workerModal');
+};
+
+window.saveWorker = async function() {
+  const name = document.getElementById('wm-name').value.trim();
+  if (!name) { toast('이름을 입력하세요.', 'error'); return; }
+  try {
+    await addDoc(collection(db,'workers'), { name });
+    toast('추가 완료!', 'success');
+    closeModal('workerModal');
+    loadWorkerAdmin();
+    await loadMasterData();
+  } catch(e) { toast('실패: '+e.message, 'error'); }
+};
+
+window.deleteWorkerAdmin = async function(id) {
+  if (!confirm('담당자를 삭제하시겠습니까?')) return;
+  try {
+    await deleteDoc(doc(db,'workers',id));
+    toast('삭제 완료!', 'success');
+    loadWorkerAdmin();
+  } catch(e) { toast('삭제 실패', 'error'); }
+};
+
+// ── 비밀번호 변경 ──
+window.openChangePasswordModal = function(target) {
+  window.changePwTarget = target;
+  document.getElementById('cp-cur').value = '';
+  document.getElementById('cp-new').value = '';
+  document.getElementById('cp-con').value = '';
+  openModal('changePwModal');
+};
+
+window.changePassword = async function() {
+  const cur = document.getElementById('cp-cur').value;
+  const nw = document.getElementById('cp-new').value;
+  const con = document.getElementById('cp-con').value;
+  if (!cur || !nw || !con) { toast('모든 항목을 입력하세요.', 'error'); return; }
+  if (nw !== con) { toast('새 비밀번호가 일치하지 않습니다.', 'error'); return; }
+
+  try {
+    if (window.changePwTarget === 'admin') {
+      const adminDoc = await getDoc(doc(db,'adminConfig','auth'));
+      if (!adminDoc.exists() || adminDoc.data().password !== cur) { toast('현재 비밀번호가 틀렸습니다.', 'error'); return; }
+      await setDoc(doc(db,'adminConfig','auth'), { password: nw });
+    } else {
+      // 차량 비밀번호 변경
+      const u = window.currentUser;
+      const vDoc = await getDoc(doc(db,'vehicles',u.docId));
+      if (!vDoc.exists() || vDoc.data().password !== cur) { toast('현재 비밀번호가 틀렸습니다.', 'error'); return; }
+      await updateDoc(doc(db,'vehicles',u.docId), { password: nw });
+    }
+    toast('비밀번호 변경 완료!', 'success');
+    closeModal('changePwModal');
+  } catch(e) { toast('변경 실패: '+e.message, 'error'); }
+};
+
+// ── 로그아웃 ──
+window.doLogout = function() {
+  if (!confirm('로그아웃 하시겠습니까?')) return;
+  window.currentUser = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginErr').style.display = 'none';
+};
+
+// ── 탭 전환 ──
+window.switchTab = function(name) {
+  document.querySelectorAll('.tab-item').forEach(el => el.classList.toggle('active', el.textContent.replace('⚙️ ','') === name || el.textContent === name));
+  document.querySelectorAll('.page').forEach(el => el.classList.toggle('active', el.id === 'page-'+name));
+  // 관리자 탭 진입 시 새로고침
+  if (name === '관리자' && window.currentUser.type === 'admin') loadAdminData();
+};
+
+// ── 모달 유틸 ──
+window.openModal = function(id) { document.getElementById(id).classList.add('show'); };
+window.closeModal = function(id) { document.getElementById(id).classList.remove('show'); };
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('show'); });
+});
+
+// ── 토스트 ──
+window.toast = function(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (type ? ' '+type : '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = '', 2800);
+};
+
+// ── 초성 필터 자동완성 ──
+const CHOSUNG = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+function getChosung(str) {
+  return [...str].map(ch => {
+    const c = ch.charCodeAt(0);
+    if (c >= 0xAC00 && c <= 0xD7A3) return CHOSUNG[Math.floor((c-0xAC00)/(21*28))];
+    return ch;
+  }).join('');
+}
+
+window.acFilter = function(inputId, listId, dataKey) {
+  const val = document.getElementById(inputId).value.trim();
+  const list = document.getElementById(listId);
+  const data = window[dataKey] || [];
+
+  if (!val) { list.classList.remove('show'); return; }
+
+  const isChosung = [...val].every(c => c >= 'ㄱ' && c <= 'ㅎ');
+  const filtered = data.filter(item => {
+    if (isChosung) return getChosung(item).includes(val);
+    return item.toLowerCase().includes(val.toLowerCase()) || getChosung(item).includes(val);
+  }).slice(0, 10);
+
+  if (filtered.length === 0) { list.classList.remove('show'); return; }
+
+  list.innerHTML = filtered.map(item =>
+    `<div class="autocomplete-item" onclick="selectAc('${inputId}','${listId}','${item.replace(/'/g,"\\'")}')">${item}</div>`
+  ).join('');
+  list.classList.add('show');
+};
+
+window.selectAc = function(inputId, listId, value) {
+  document.getElementById(inputId).value = value;
+  document.getElementById(listId).classList.remove('show');
+};
+
+// 외부 클릭 시 자동완성 닫기
+document.addEventListener('click', e => {
+  document.querySelectorAll('.autocomplete-list').forEach(el => {
+    if (!el.previousElementSibling?.contains(e.target) && !el.contains(e.target)) {
+      el.classList.remove('show');
+    }
+  });
+});
+
+// ── Firestore 미초기화 시 안내 ──
+window.addEventListener('load', () => {
+  // 실제 apiKey가 설정되어 있는지 체크
+  if (firebaseConfig.apiKey.includes('PLACEHOLDER')) {
+    document.getElementById('loginErr').textContent = '⚠️ Firebase API Key를 설정해주세요.';
+    document.getElementById('loginErr').style.display = 'block';
+  }
+});
+
+</script>
+</body>
+</html>
