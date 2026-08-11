@@ -680,25 +680,26 @@ window.doLogin = async function() {
 document.getElementById('loginId').addEventListener('keydown', function(e) { if(e.key==='Enter') document.getElementById('loginPassword').focus(); });
 document.getElementById('loginPassword').addEventListener('keydown', function(e) { if(e.key==='Enter') doLogin(); });
 
-// 뒤로가기 막기
+// 뒤로가기 완전 차단
+history.pushState(null, '', location.href);
+history.pushState(null, '', location.href);
 history.pushState(null, '', location.href);
 window.addEventListener('popstate', function() {
-  history.pushState(null, '', location.href);
+  history.go(1);
 });
 
 // 세션 복원 (새로고침/재접속 시 자동 로그인)
-(function() {
+window.addEventListener('load', function() {
   var session = localStorage.getItem('envitec_session');
   if (session) {
     try {
       window.currentUser = JSON.parse(session);
-      // Firebase 로드 후 startApp 실행
-      setTimeout(function() { startApp(); }, 500);
+      startApp();
     } catch(e) {
       localStorage.removeItem('envitec_session');
     }
   }
-})();
+});
 
 async function startApp() {
   document.getElementById('loginScreen').style.display = 'none';
@@ -724,16 +725,17 @@ async function startApp() {
 
   // 세션 저장 (로그인 유지)
   localStorage.setItem('envitec_session', JSON.stringify(window.currentUser));
-  // 뒤로가기 막기
-  history.pushState(null, '', location.href);
+  // 뒤로가기 막기 - 여러번 쌓아서 완전 차단
+  for (var i = 0; i < 5; i++) history.pushState(null, '', location.href);
 
-  // 날짜 기본값
+  // 날짜 기본값 (항상 오늘 날짜로)
   document.getElementById('ci-date').value = today();
   document.getElementById('li-date').value = today();
   document.getElementById('qd-date').value = today();
   document.getElementById('qc-start').value = monthAgo();
   document.getElementById('qc-end').value = today();
   document.getElementById('lq-start').value = monthStart();
+  document.getElementById('lq-end').value = today();
   document.getElementById('lq-end').value = today();
 
   // 차량 자동 입력 + 잠금 권한 적용
