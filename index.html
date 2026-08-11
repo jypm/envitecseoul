@@ -603,15 +603,16 @@ window.LOADING_ITEMS = LOADING_ITEMS;
 
 // 오늘 날짜
 function today() {
-  return new Date().toISOString().split('T')[0];
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 function monthAgo() {
   const d = new Date(); d.setMonth(d.getMonth()-1);
-  return d.toISOString().split('T')[0];
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 function monthStart() {
   const d = new Date(); d.setDate(1);
-  return d.toISOString().split('T')[0];
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-01';
 }
 window.todayDate = today;
 
@@ -704,6 +705,7 @@ window.addEventListener('load', function() {
 async function startApp() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
+  history.pushState(null, '', location.href);
 
   const u = window.currentUser;
   // 모든 탭 숨기기
