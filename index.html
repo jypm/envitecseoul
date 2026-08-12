@@ -1166,7 +1166,7 @@ window.showCollectDetail = function(id, cache) {
   document.getElementById('cdm-title').textContent = `${d.clientName} · ${d.date}`;
   document.getElementById('cdm-body').innerHTML = body;
 
-  const canEdit = window.currentUser.type === 'admin' || window.currentUser.carNumber === d.carNumber;
+  const canEdit = window.currentUser.type === 'admin' || (window.currentUser.cars && window.currentUser.cars.includes(d.carNumber));
   document.getElementById('cdm-actions').innerHTML = `
     <button class="btn btn-secondary" onclick="closeModal('collectDetailModal')">닫기</button>
     ${canEdit ? `<button class="btn btn-primary" onclick="editCollect('${d.id}');closeModal('collectDetailModal')">수정</button>
