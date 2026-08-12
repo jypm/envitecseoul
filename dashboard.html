@@ -38,6 +38,11 @@
   #dashApp { display:none; }
   .logout-btn { background:none; border:1px solid #2e2e38; border-radius:6px; color:#888; font-size:12px; padding:5px 10px; cursor:pointer; float:right; margin-bottom:10px; }
 </style>
+<link rel="manifest" href="manifest_dashboard.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="운행보고서">
+<link rel="apple-touch-icon" href="dashboard_icon.png">
+<meta name="theme-color" content="#0f1923">
 </head>
 <body>
 
@@ -1630,7 +1635,7 @@ const clientCodeList = [
 document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
 // 로그인
-const DASH_PW = '0360'; // 대시보드 비밀번호
+const DASH_PW = '0330'; // 대시보드 비밀번호
 
 function dashLogin() {
   const pw = document.getElementById('dashPw').value;
