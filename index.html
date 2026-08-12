@@ -893,7 +893,16 @@ window.submitCollect = async function() {
       });
       await updateDoc(doc(db,'일지db',window.editCollectId), updateData);
       toast('수정 완료!', 'success');
+      // 수정된 데이터를 캐시에 반영
+      if (window.collectResultsCache) {
+        const idx = window.collectResultsCache.findIndex(x => x.id === window.editCollectId);
+        if (idx !== -1) {
+          window.collectResultsCache[idx] = Object.assign(window.collectResultsCache[idx], updateData);
+          renderCollectResults(window.collectResultsCache);
+        }
+      }
       cancelCollectEdit();
+      switchTab('수거조회');
     } else {
       await addDoc(collection(db,'일지db'), data);
       toast('저장 완료!', 'success');
