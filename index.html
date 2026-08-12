@@ -967,8 +967,14 @@ window.searchByDate = async function() {
     const snap = await getDocs(q);
     let docs = snap.docs.map(d => ({id:d.id,...d.data()}));
     if (car) docs = docs.filter(d => d.carNumber === car);
-    // 일반 사용자는 본인 차량만
-    if (window.currentUser.type === 'vehicle') docs = docs.filter(d => d.carNumber === window.currentUser.carNumber);
+    // 잠금 시 담당 차량만 필터
+    if (window.currentUser.type === 'vehicle') {
+      const lk = window.currentUser.permissions || {};
+      if (lk.lockCollectQuery) {
+        const cars = window.currentUser.cars || [];
+        docs = docs.filter(d => cars.includes(d.carNumber));
+      }
+    }
     renderCollectResults(docs);
   } catch(e) { document.getElementById('q-results').innerHTML = `<div class="empty-state">조회 실패: ${e.message}</div>`; }
 };
@@ -991,7 +997,14 @@ window.searchByClient = async function() {
     const snap = await getDocs(q);
     let docs = snap.docs.map(d => ({id:d.id,...d.data()}));
     if (car) docs = docs.filter(d => d.carNumber === car);
-    if (window.currentUser.type === 'vehicle') docs = docs.filter(d => d.carNumber === window.currentUser.carNumber);
+    // 잠금 시 담당 차량만 필터
+    if (window.currentUser.type === 'vehicle') {
+      const lk = window.currentUser.permissions || {};
+      if (lk.lockCollectQuery) {
+        const cars = window.currentUser.cars || [];
+        docs = docs.filter(d => cars.includes(d.carNumber));
+      }
+    }
     renderCollectResults(docs);
   } catch(e) { document.getElementById('q-results').innerHTML = `<div class="empty-state">조회 실패: ${e.message}</div>`; }
 };
