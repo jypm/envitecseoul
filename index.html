@@ -215,7 +215,7 @@
       <div class="header-title">🚛 엔비텍코리아 서울지점</div>
       <div class="header-user" id="headerUser"></div>
     </div>
-    <button class="header-logout" onclick="doLogout()">로그아웃</button>
+    <div style="display:flex;gap:6px"><button class="header-logout" id="changePwBtn" onclick="openChangePasswordModal('user')" style="display:none">🔑</button><button class="header-logout" onclick="doLogout()">로그아웃</button></div>
   </header>
 
   <div class="tab-bar" id="tabBar">
@@ -509,16 +509,16 @@
   <div class="modal">
     <h3>비밀번호 변경</h3>
     <div class="form-row">
-      <label class="form-label">현재 비밀번호</label>
-      <input id="cp-cur" class="form-input" type="password">
+      <label class="form-label">현재 비밀번호 (숫자 4자리)</label>
+      <input id="cp-cur" class="form-input" type="password" maxlength="4" inputmode="numeric" style="font-size:22px;letter-spacing:8px;text-align:center">
     </div>
     <div class="form-row">
-      <label class="form-label">새 비밀번호</label>
-      <input id="cp-new" class="form-input" type="password">
+      <label class="form-label">새 비밀번호 (숫자 4자리)</label>
+      <input id="cp-new" class="form-input" type="password" maxlength="4" inputmode="numeric" style="font-size:22px;letter-spacing:8px;text-align:center">
     </div>
     <div class="form-row">
       <label class="form-label">새 비밀번호 확인</label>
-      <input id="cp-con" class="form-input" type="password">
+      <input id="cp-con" class="form-input" type="password" maxlength="4" inputmode="numeric" style="font-size:22px;letter-spacing:8px;text-align:center">
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('changePwModal')">취소</button>
@@ -714,6 +714,7 @@ async function startApp() {
     document.querySelectorAll('.admin-only').forEach(function(el){ el.style.display = ''; });
   } else {
     document.getElementById('headerUser').textContent = u.userId + (u.name ? ' · ' + u.name : '');
+    document.getElementById('changePwBtn').style.display = '';
     document.querySelector('.admin-only').style.display = 'none';
     // 잠금 권한 적용
     const p = u.permissions || { lockCollectInput:true, lockCollectQuery:true, lockLoadingInput:true, lockLoadingQuery:true };
@@ -1561,11 +1562,12 @@ window.changePassword = async function() {
       if (!adminDoc.exists() || adminDoc.data().password !== cur) { toast('현재 비밀번호가 틀렸습니다.', 'error'); return; }
       await setDoc(doc(db,'adminConfig','auth'), { password: nw });
     } else {
-      // 차량 비밀번호 변경
+      // 사용자 비밀번호 변경 (users 컬렉션)
       const u = window.currentUser;
-      const vDoc = await getDoc(doc(db,'vehicles',u.docId));
-      if (!vDoc.exists() || vDoc.data().password !== cur) { toast('현재 비밀번호가 틀렸습니다.', 'error'); return; }
-      await updateDoc(doc(db,'vehicles',u.docId), { password: nw });
+      if (!/^[0-9]{4}$/.test(nw)) { toast('새 비밀번호는 숫자 4자리여야 합니다.', 'error'); return; }
+      const uDoc = await getDoc(doc(db,'users',u.docId));
+      if (!uDoc.exists() || uDoc.data().password !== cur) { toast('현재 비밀번호가 틀렸습니다.', 'error'); return; }
+      await updateDoc(doc(db,'users',u.docId), { password: nw });
     }
     toast('비밀번호 변경 완료!', 'success');
     closeModal('changePwModal');
