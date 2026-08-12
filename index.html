@@ -854,9 +854,9 @@ function buildCollectInputForm() {
     el.innerHTML = group.sizes.map(sz => `
       <div class="collect-row">
         <span class="collect-row-label">${group.labels[sz]||sz}</span>
-        <input class="collect-num-input" type="number" min="0" placeholder="0" id="ci-c${sz}" inputmode="numeric" style="color:#64B5F6">
-        <input class="collect-num-input" type="number" min="0" step="0.1" placeholder="0.0" id="ci-w${sz}" inputmode="decimal" style="color:#4DB6AC">
-        <input class="collect-num-input" type="number" min="0" placeholder="0" id="ci-d${sz}" inputmode="numeric" style="color:#E57373">
+        <input class="collect-num-input" type="number" min="0" placeholder="" id="ci-c${sz}" inputmode="numeric" style="color:#64B5F6">
+        <input class="collect-num-input" type="number" min="0" step="0.1" placeholder="" id="ci-w${sz}" inputmode="decimal" style="color:#4DB6AC">
+        <input class="collect-num-input" type="number" min="0" placeholder="" id="ci-d${sz}" inputmode="numeric" style="color:#E57373">
       </div>`).join('');
   });
 }
@@ -874,9 +874,9 @@ window.submitCollect = async function() {
 
   const data = { date, carNumber, clientName, memo, timestamp: Timestamp.now() };
   CONTAINER_SIZES.forEach(sz => {
-    data[`collect${sz}`] = document.getElementById(`ci-c${sz}`).value || '0';
-    data[`deliver${sz}`] = document.getElementById(`ci-d${sz}`).value || '0';
-    data[`collect${sz}weight`] = document.getElementById(`ci-w${sz}`).value || '0';
+    data[`collect${sz}`] = document.getElementById(`ci-c${sz}`).value || '';
+    data[`deliver${sz}`] = document.getElementById(`ci-d${sz}`).value || '';
+    data[`collect${sz}weight`] = document.getElementById(`ci-w${sz}`).value || '';
   });
 
   const btn = document.getElementById('collectSubmitBtn');
@@ -1116,7 +1116,7 @@ function buildLoadingInputForm() {
     el.innerHTML = items.map(k => `
       <div class="loading-item">
         <span class="loading-item-label">${k.replace(/^[^_]+_/,'')}</span>
-        <input type="number" min="0" placeholder="0" id="li-${k}" inputmode="numeric">
+        <input type="number" min="0" placeholder="" id="li-${k}" inputmode="numeric">
       </div>`).join('');
   });
 }
