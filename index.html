@@ -744,24 +744,25 @@ async function startApp() {
   if (u.type === 'vehicle') {
     const lk = u.permissions || { lockCollectInput:true, lockCollectQuery:true, lockLoadingInput:true, lockLoadingQuery:true };
 
-    // 수거입력 차량번호
-    document.getElementById('ci-car').value = u.carNumber;
+    const cars = u.cars || [];
+    const firstCar = cars.length > 0 ? cars[0] : '';
+
+    // 수거입력 차량번호 - 잠금 시 담당 차량만 표시 + 자동선택
     if (lk.lockCollectInput) {
-      document.getElementById('ci-car').disabled = true;
-      document.getElementById('ci-car').style.opacity = '0.5';
-      document.getElementById('ci-car').style.cursor = 'not-allowed';
+      const ciCar = document.getElementById('ci-car');
+      ciCar.innerHTML = '<option value="">-- 차량 선택 --</option>';
+      cars.forEach(function(c) { ciCar.innerHTML += '<option value="' + c + '">' + c + '</option>'; });
+      if (cars.length === 1) { ciCar.value = firstCar; ciCar.disabled = true; ciCar.style.opacity = '0.5'; ciCar.style.cursor = 'not-allowed'; }
     }
 
-    // 수거조회 차량번호
-    document.getElementById('qd-car').value = u.carNumber;
-    document.getElementById('qc-car').value = u.carNumber;
+    // 수거조회 차량번호 - 잠금 시 담당 차량만 표시 + 자동선택
     if (lk.lockCollectQuery) {
-      document.getElementById('qd-car').disabled = true;
-      document.getElementById('qd-car').style.opacity = '0.5';
-      document.getElementById('qd-car').style.cursor = 'not-allowed';
-      document.getElementById('qc-car').disabled = true;
-      document.getElementById('qc-car').style.opacity = '0.5';
-      document.getElementById('qc-car').style.cursor = 'not-allowed';
+      ['qd-car','qc-car'].forEach(function(id) {
+        const el = document.getElementById(id);
+        el.innerHTML = '<option value="">전체</option>';
+        cars.forEach(function(c) { el.innerHTML += '<option value="' + c + '">' + c + '</option>'; });
+        if (cars.length === 1) { el.value = firstCar; el.disabled = true; el.style.opacity = '0.5'; el.style.cursor = 'not-allowed'; }
+      });
     }
 
     // 상차입력 담당자 - 잠금 시 본인 자동선택+비활성화
