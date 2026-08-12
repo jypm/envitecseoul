@@ -884,7 +884,14 @@ window.submitCollect = async function() {
 
   try {
     if (window.editCollectId) {
-      await updateDoc(doc(db,'일지db',window.editCollectId), data);
+      // 수정 시 timestamp 유지 (정렬 순서 변경 방지)
+      const updateData = { date, carNumber, clientName, memo };
+      CONTAINER_SIZES.forEach(sz => {
+        updateData[`collect${sz}`] = data[`collect${sz}`];
+        updateData[`deliver${sz}`] = data[`deliver${sz}`];
+        updateData[`collect${sz}weight`] = data[`collect${sz}weight`];
+      });
+      await updateDoc(doc(db,'일지db',window.editCollectId), updateData);
       toast('수정 완료!', 'success');
       cancelCollectEdit();
     } else {
