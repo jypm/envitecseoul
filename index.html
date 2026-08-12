@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon.png" type="image/png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="엔비텍">
 <link rel="apple-touch-icon" href="icon.png">
@@ -229,6 +228,7 @@
     <div class="tab-item" onclick="switchTab('수거조회')">수거조회</div>
     <div class="tab-item" onclick="switchTab('상차입력')">상차입력</div>
     <div class="tab-item" onclick="switchTab('상차조회')">상차조회</div>
+    <div class="tab-item" onclick="switchTab('출퇴근')" id="tab-attendance" style="display:none">출퇴근</div>
     <div class="tab-item admin-only" onclick="switchTab('관리자')" style="display:none">⚙️ 관리자</div>
   </div>
 
@@ -418,6 +418,31 @@
     </div>
 
     <!-- ====== 관리자 ====== -->
+    <div class="page" id="page-출퇴근">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <button onclick="prevMonth()" style="background:#1E1E24;border:1px solid #2e2e38;border-radius:8px;color:#fff;padding:6px 12px;cursor:pointer;font-size:16px">‹</button>
+          <div id="calTitle" style="font-size:16px;font-weight:700;color:#fff"></div>
+          <button onclick="nextMonth()" style="background:#1E1E24;border:1px solid #2e2e38;border-radius:8px;color:#fff;padding:6px 12px;cursor:pointer;font-size:16px">›</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px">
+          <div style="text-align:center;font-size:12px;color:#E57373;font-weight:700">일</div>
+          <div style="text-align:center;font-size:12px;color:#888;font-weight:700">월</div>
+          <div style="text-align:center;font-size:12px;color:#888;font-weight:700">화</div>
+          <div style="text-align:center;font-size:12px;color:#888;font-weight:700">수</div>
+          <div style="text-align:center;font-size:12px;color:#888;font-weight:700">목</div>
+          <div style="text-align:center;font-size:12px;color:#888;font-weight:700">금</div>
+          <div style="text-align:center;font-size:12px;color:#60A5FA;font-weight:700">토</div>
+        </div>
+        <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>
+      </div>
+      <div style="display:flex;gap:10px;font-size:12px;color:#888;padding:0 4px">
+        <span>🟢 출퇴근 완료</span>
+        <span>🟡 출근만</span>
+        <span>⬜ 미입력</span>
+      </div>
+    </div>
+
     <div class="page" id="page-관리자">
       <div class="admin-section">
         <h3>🚗 차량 관리</h3>
@@ -511,6 +536,39 @@
 </div>
 
 <!-- 모달: 비밀번호 변경 -->
+<div class="modal-overlay" id="attendanceModal">
+  <div class="modal">
+    <h3 id="attModalTitle">출퇴근 입력</h3>
+    <div class="form-row">
+      <label class="form-label" style="color:#64B5F6">🟢 출근</label>
+      <input id="att-in-date" class="form-input" type="date" style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <input id="att-in-h" class="form-input" type="number" min="0" max="23" placeholder="시" inputmode="numeric" style="flex:1;font-size:20px;font-weight:700;color:#64B5F6;text-align:center">
+        <span style="font-size:20px;color:#888;font-weight:700">:</span>
+        <input id="att-in-m" class="form-input" type="number" min="0" max="59" placeholder="분" inputmode="numeric" style="flex:1;font-size:20px;font-weight:700;color:#64B5F6;text-align:center">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label" style="color:#E57373">🔴 퇴근</label>
+      <input id="att-out-date" class="form-input" type="date" style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <input id="att-out-h" class="form-input" type="number" min="0" max="23" placeholder="시" inputmode="numeric" style="flex:1;font-size:20px;font-weight:700;color:#E57373;text-align:center">
+        <span style="font-size:20px;color:#888;font-weight:700">:</span>
+        <input id="att-out-m" class="form-input" type="number" min="0" max="59" placeholder="분" inputmode="numeric" style="flex:1;font-size:20px;font-weight:700;color:#E57373;text-align:center">
+      </div>
+    </div>
+    <div id="att-workhours" style="font-size:13px;color:#34D399;text-align:center;margin-top:8px"></div>
+    <div class="form-row" style="margin-top:8px">
+      <label class="form-label">메모 (선택)</label>
+      <input id="att-memo" class="form-input" type="text" placeholder="예: 특근, 반차 등">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('attendanceModal')">취소</button>
+      <button class="btn btn-primary" onclick="saveAttendance()">저장</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="changePwModal">
   <div class="modal">
     <h3>비밀번호 변경</h3>
@@ -726,6 +784,7 @@ async function startApp() {
   } else {
     document.getElementById('headerUser').textContent = u.userId + (u.name ? ' · ' + u.name : '');
     document.getElementById('changePwBtn').style.display = '';
+    document.getElementById('tab-attendance').style.display = '';
     document.querySelector('.admin-only').style.display = 'none';
     // 잠금 권한 적용
     const p = u.permissions || { lockCollectInput:true, lockCollectQuery:true, lockLoadingInput:true, lockLoadingQuery:true };
@@ -1585,6 +1644,154 @@ window.changePassword = async function() {
   } catch(e) { toast('변경 실패: '+e.message, 'error'); }
 };
 
+// ── 출퇴근 달력 ──
+var calYear = new Date().getFullYear();
+var calMonth = new Date().getMonth();
+var attendanceData = {};
+var currentAttDate = '';
+
+window.prevMonth = function() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); };
+window.nextMonth = function() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); };
+
+async function loadAttendanceMonth() {
+  try {
+    const u = window.currentUser;
+    const startDate = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-01';
+    const endDate = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-31';
+    const snap = await getDocs(query(
+      collection(db,'attendance'),
+      where('userId','==',u.userId),
+      where('outDate','>=',startDate),
+      where('outDate','<=',endDate)
+    ));
+    attendanceData = {};
+    snap.forEach(function(d) {
+      const data = d.data();
+      // 퇴근 날짜 기준으로 달력에 표시
+      const key = data.outDate || data.inDate;
+      attendanceData[key] = { id: d.id, ...data };
+    });
+    renderCalendar();
+  } catch(e) { renderCalendar(); }
+}
+
+function renderCalendar() {
+  document.getElementById('calTitle').textContent = calYear + '년 ' + (calMonth+1) + '월';
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const lastDate = new Date(calYear, calMonth+1, 0).getDate();
+  const todayStr = today();
+  let html = '';
+  for(var i=0; i<firstDay; i++) html += '<div></div>';
+  for(var d=1; d<=lastDate; d++) {
+    const dateStr = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const att = attendanceData[dateStr];
+    const isToday = dateStr === todayStr;
+    const dayOfWeek = new Date(calYear, calMonth, d).getDay();
+    const dayColor = dayOfWeek===0 ? '#E57373' : dayOfWeek===6 ? '#60A5FA' : '#fff';
+    let bg = '#1E1E24', border = '#2e2e38', infoHtml = '';
+    if(att) {
+      if(att.outTime) { bg = '#1a2e1a'; border = '#34D399'; }
+      else { bg = '#2e2a10'; border = '#FBBF24'; }
+      infoHtml = '<div style="font-size:9px;color:#64B5F6;line-height:1.2">' + (att.inTime||'') + '</div>'
+        + (att.outTime ? '<div style="font-size:9px;color:#E57373;line-height:1.2">' + att.outTime + '</div>' : '')
+        + (att.memo ? '<div style="font-size:9px;color:#FBBF24;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">' + (att.memo && att.memo.length > 5 ? att.memo.substring(0,5)+'…' : att.memo||'') + '</div>' : '');
+    }
+    html += '<div onclick="openAttModal(\'' + dateStr + '\')" style="background:' + bg + ';border:1px solid ' + border + ';border-radius:8px;padding:4px;height:62px;overflow:hidden;cursor:pointer;' + (isToday?'box-shadow:0 0 0 2px #3D82F6;':'') + '">'
+      + '<div style="font-size:13px;font-weight:700;color:' + dayColor + '">' + d + '</div>'
+      + infoHtml
+      + '</div>';
+  }
+  document.getElementById('calGrid').innerHTML = html;
+}
+
+window.openAttModal = function(dateStr) {
+  currentAttDate = dateStr;
+  document.getElementById('attModalTitle').textContent = dateStr + ' 출퇴근';
+  const att = attendanceData[dateStr];
+  // 퇴근 날짜 기준 - 클릭한 날짜가 퇴근날
+  document.getElementById('att-out-date').value = dateStr;
+  document.getElementById('att-in-date').value = att ? att.inDate||dateStr : dateStr;
+  // 시/분 분리
+  const inT = att && att.inTime ? att.inTime.split(':') : ['',''];
+  const outT = att && att.outTime ? att.outTime.split(':') : ['',''];
+  document.getElementById('att-in-h').value = inT[0];
+  document.getElementById('att-in-m').value = inT[1];
+  document.getElementById('att-out-h').value = outT[0];
+  document.getElementById('att-out-m').value = outT[1];
+  document.getElementById('att-memo').value = att ? att.memo||'' : '';
+  updateWorkHours();
+  ['att-in-h','att-in-m','att-out-h','att-out-m','att-out-date'].forEach(function(id) {
+    document.getElementById(id).oninput = updateWorkHours;
+  });
+  openModal('attendanceModal');
+};
+
+function getTimeStr(hId, mId) {
+  const h = document.getElementById(hId).value;
+  const m = document.getElementById(mId).value;
+  if(h===''||m==='') return '';
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
+
+function updateWorkHours() {
+  const inDate = document.getElementById('att-in-date').value;
+  const outDate = document.getElementById('att-out-date').value;
+  const inTime = getTimeStr('att-in-h','att-in-m');
+  const outTime = getTimeStr('att-out-h','att-out-m');
+  const el = document.getElementById('att-workhours');
+  if(inDate && inTime && outDate && outTime) {
+    const inDt = new Date(inDate + 'T' + inTime);
+    const outDt = new Date(outDate + 'T' + outTime);
+    const diff = (outDt - inDt) / 1000 / 60;
+    if(diff > 0) {
+      const h = Math.floor(diff/60), m = Math.round(diff%60);
+      el.textContent = '근무시간: ' + h + '시간 ' + m + '분';
+    } else { el.textContent = ''; }
+  } else { el.textContent = ''; }
+}
+// 이벤트 리스너는 openAttModal에서 등록
+
+window.saveAttendance = async function() {
+  const u = window.currentUser;
+  const inDate = document.getElementById('att-in-date').value;
+  const inTime = getTimeStr('att-in-h','att-in-m');
+  const outDate = document.getElementById('att-out-date').value;
+  const outTime = getTimeStr('att-out-h','att-out-m');
+  if(!inDate || !inTime) { toast('출근 날짜/시간을 입력하세요.', 'error'); return; }
+
+  const inDt = inTime ? new Date(inDate+'T'+inTime) : null;
+  const outDt = (outDate && outTime) ? new Date(outDate+'T'+outTime) : null;
+  const workMinutes = (inDt && outDt) ? Math.round((outDt-inDt)/1000/60) : 0;
+
+  const memo = document.getElementById('att-memo').value.trim();
+  const data = { userId: u.userId, name: u.name||'', inDate, inTime, outDate: outDate||'', outTime: outTime||'', workMinutes, memo, updatedAt: Timestamp.now() };
+
+  try {
+    const key = outDate || inDate;
+    // 기존 데이터 찾기 (outDate 기준 또는 inDate 기준)
+    let existing = attendanceData[key];
+    if(!existing) {
+      // inDate 기준으로도 찾아보기
+      existing = attendanceData[inDate];
+    }
+    if(existing) {
+      await updateDoc(doc(db,'attendance',existing.id), data);
+      // 기존 키 제거 후 새 키로 저장
+      Object.keys(attendanceData).forEach(function(k) {
+        if(attendanceData[k].id === existing.id) delete attendanceData[k];
+      });
+    } else {
+      const ref = await addDoc(collection(db,'attendance'), data);
+      data.id = ref.id;
+    }
+    attendanceData[key] = data;
+    renderCalendar();
+    toast('저장 완료!', 'success');
+    closeModal('attendanceModal');
+  } catch(e) { toast('저장 실패: '+e.message, 'error'); }
+};
+
+// switchTab에서 출퇴근 탭 진입 시 달력 로드
 // ── 로그아웃 ──
 window.doLogout = function() {
   if (!confirm('로그아웃 하시겠습니까?')) return;
@@ -1603,6 +1810,7 @@ window.switchTab = function(name) {
   document.querySelectorAll('.page').forEach(el => el.classList.toggle('active', el.id === 'page-'+name));
   // 관리자 탭 진입 시 새로고침
   if (name === '관리자' && window.currentUser.type === 'admin') loadAdminData();
+  if (name === '출퇴근') { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); loadAttendanceMonth(); }
 };
 
 // ── 모달 유틸 ──
