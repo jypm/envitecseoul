@@ -27,10 +27,37 @@
         .summary-chip span { font-weight: bold; color: #60A5FA; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  #loginScreen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#121216; }
+  .login-box { background:#1E1E24; border:1px solid #2e2e38; border-radius:16px; padding:32px 28px; width:100%; max-width:320px; text-align:center; }
+  .login-box h2 { font-size:16px; color:#888; margin-bottom:20px; }
+  .login-input { width:100%; padding:14px; background:#121216; border:1px solid #2e2e38; border-radius:10px; color:#fff; font-size:22px; text-align:center; letter-spacing:8px; outline:none; box-sizing:border-box; }
+  .login-input:focus { border-color:#3D82F6; }
+  .login-btn { width:100%; padding:14px; margin-top:12px; background:#3D82F6; border:none; border-radius:10px; color:#fff; font-size:15px; font-weight:700; cursor:pointer; }
+  .login-err { color:#ff5555; font-size:13px; margin-top:8px; display:none; }
+  #dashApp { display:none; }
+  .logout-btn { background:none; border:1px solid #2e2e38; border-radius:6px; color:#888; font-size:12px; padding:5px 10px; cursor:pointer; float:right; margin-bottom:10px; }
+</style>
 </head>
 <body>
 
-    <h2>📊 사무실 운행보고서 엑셀 연동 대시보드</h2>
+<!-- 로그인 화면 -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div style="font-size:24px;margin-bottom:8px">📊</div>
+    <div style="font-size:18px;font-weight:700;color:#3D82F6;margin-bottom:4px">엔비텍코리아</div>
+    <div style="font-size:13px;color:#888;margin-bottom:24px">운행보고서 대시보드</div>
+    <h2>비밀번호 입력</h2>
+    <input id="dashPw" class="login-input" type="password" maxlength="4" inputmode="numeric" placeholder="••••">
+    <div class="login-err" id="dashErr">비밀번호가 올바르지 않습니다.</div>
+    <button class="login-btn" onclick="dashLogin()">확인</button>
+  </div>
+</div>
+
+<!-- 대시보드 -->
+<div id="dashApp">
+  <button class="logout-btn" onclick="dashLogout()">로그아웃</button>
+  <h2>📊 사무실 운행보고서 엑셀 연동 대시보드</h2>
 
     <div class="box">
         <label for="startDate"><b>시작일: </b></label>
@@ -48,8 +75,8 @@
             <option value="9699">9699</option>
             <option value="9471">9471</option>
             <option value="8957">8957</option>
-            <option value="241">241</option>
-            <option value="293">293</option>
+            <option value="0241">0241</option>
+            <option value="0293">0293</option>
             <option value="7205">7205</option>
             <option value="1675">1675</option>
             <option value="2753">2753</option>
@@ -1597,5 +1624,45 @@ const clientCodeList = [
         };
     </script>
 
+</div>
+<script>
+// 우클릭 막기
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+// 로그인
+const DASH_PW = '0360'; // 대시보드 비밀번호
+
+function dashLogin() {
+  const pw = document.getElementById('dashPw').value;
+  if (pw === DASH_PW) {
+    localStorage.setItem('dash_session', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashApp').style.display = 'block';
+    document.getElementById('dashErr').style.display = 'none';
+  } else {
+    document.getElementById('dashErr').style.display = 'block';
+    document.getElementById('dashPw').value = '';
+  }
+}
+
+function dashLogout() {
+  if (!confirm('로그아웃 하시겠습니까?')) return;
+  localStorage.removeItem('dash_session');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('dashApp').style.display = 'none';
+  document.getElementById('dashPw').value = '';
+}
+
+// 엔터키
+document.getElementById('dashPw').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') dashLogin();
+});
+
+// 세션 복원
+if (localStorage.getItem('dash_session')) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashApp').style.display = 'block';
+}
+</script>
 </body>
 </html>
