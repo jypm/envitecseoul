@@ -564,6 +564,7 @@
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('attendanceModal')">취소</button>
+      <button class="btn btn-danger" id="attDeleteBtn" onclick="deleteAttendance()" style="display:none">삭제</button>
       <button class="btn btn-primary" onclick="saveAttendance()">저장</button>
     </div>
   </div>
@@ -1754,6 +1755,20 @@ function updateWorkHours() {
   } else { el.textContent = ''; }
 }
 // 이벤트 리스너는 openAttModal에서 등록
+
+window.deleteAttendance = async function() {
+  if(!confirm('이 날의 출퇴근 기록을 삭제하시겠습니까?')) return;
+  const key = currentAttDate;
+  const existing = attendanceData[key];
+  if(!existing) { toast('삭제할 데이터가 없습니다.', 'error'); return; }
+  try {
+    await deleteDoc(doc(db,'attendance',existing.id));
+    delete attendanceData[key];
+    renderCalendar();
+    toast('삭제 완료!', 'success');
+    closeModal('attendanceModal');
+  } catch(e) { toast('삭제 실패: '+e.message, 'error'); }
+};
 
 window.saveAttendance = async function() {
   const u = window.currentUser;
