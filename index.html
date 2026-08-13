@@ -805,9 +805,12 @@ async function startApp() {
 
   // 날짜 기본값 (항상 오늘 날짜로)
   document.getElementById('ci-date').value = today();
-  // 마지막 입력 거래처 표시
-  const carNum = u.type === 'vehicle' ? u.cars[0] || '' : '';
-  showLastInput(carNum, today());
+  // 마지막 입력 거래처 표시 (loadMasterData 후 호출)
+  setTimeout(function() {
+    const ciCar = document.getElementById('ci-car');
+    const carNum = ciCar ? ciCar.value : '';
+    showLastInput(carNum, today());
+  }, 1000);
   document.getElementById('li-date').value = today();
   document.getElementById('qd-date').value = today();
   document.getElementById('qc-start').value = monthAgo();
