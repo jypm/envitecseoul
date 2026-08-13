@@ -250,11 +250,11 @@
           </div>
         </div>
 
-        <div id="lastInputInfo" style="display:none;font-size:12px;color:#60A5FA;margin-top:8px;padding:6px 10px;background:#1a2535;border-radius:8px;border-left:3px solid #3D82F6">
-          마지막 입력: <span id="lastInputName"></span>
-        </div>
         <div class="form-row" style="margin-top:10px">
-          <label class="form-label">거래처명</label>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <label class="form-label" style="margin-bottom:0">거래처명</label>
+            <span id="lastInputInfo" style="display:none;font-size:11px;color:#60A5FA">마지막: <span id="lastInputName"></span></span>
+          </div>
           <div class="autocomplete-wrap">
             <input id="ci-client" class="form-input" type="text" placeholder="거래처명 검색 (초성 가능)" autocomplete="off" oninput="acFilter('ci-client','ci-client-list','clientList')">
             <div class="autocomplete-list" id="ci-client-list"></div>
