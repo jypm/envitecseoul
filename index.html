@@ -1674,12 +1674,16 @@ var HOLIDAYS = {
 var calYear = new Date().getFullYear();
 var calMonth = new Date().getMonth();
 var attendanceData = {};
+var attendanceCache = {}; // 월별 캐시 {YYYY-MM: true}
 var currentAttDate = '';
 
-window.prevMonth = function() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); };
-window.nextMonth = function() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); };
+window.prevMonth = function() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} loadAttendanceMonth(); };
+window.nextMonth = function() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} loadAttendanceMonth(); };
 
 async function loadAttendanceMonth() {
+  const cacheKey = calYear + '-' + String(calMonth+1).padStart(2,'0');
+  // 이미 로드한 달이면 재조회 안함
+  if (attendanceCache[cacheKey]) { renderCalendar(); return; }
   try {
     const u = window.currentUser;
     const startDate = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-01';
@@ -1689,7 +1693,7 @@ async function loadAttendanceMonth() {
       collection(db,'attendance'),
       where('userId','==',u.userId)
     ));
-    attendanceData = {};
+    attendanceCache[cacheKey] = true;
     snap.forEach(function(d) {
       const data = d.data();
       const key = data.outDate || data.inDate;
@@ -1843,6 +1847,7 @@ window.saveAttendance = async function() {
       data.id = ref.id;
     }
     attendanceData[key] = data;
+    attendanceCache[key.substring(0,7)] = true;
     renderCalendar();
     toast('저장 완료!', 'success');
     closeModal('attendanceModal');
