@@ -1658,18 +1658,22 @@ async function loadAttendanceMonth() {
     const u = window.currentUser;
     const startDate = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-01';
     const endDate = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-31';
+    // userId로만 쿼리 후 클라이언트에서 날짜 필터링
     const snap = await getDocs(query(
       collection(db,'attendance'),
-      where('userId','==',u.userId),
-      where('outDate','>=',startDate),
-      where('outDate','<=',endDate)
+      where('userId','==',u.userId)
     ));
     attendanceData = {};
     snap.forEach(function(d) {
       const data = d.data();
-      // 퇴근 날짜 기준으로 달력에 표시
       const key = data.outDate || data.inDate;
-      attendanceData[key] = { id: d.id, ...data };
+      // 해당 월 데이터만 필터
+      if(key >= startDate && key <= endDate) {
+        // 같은 날짜 중 가장 최근 데이터만 유지
+        if(!attendanceData[key] || data.updatedAt > attendanceData[key].updatedAt) {
+          attendanceData[key] = { id: d.id, ...data };
+        }
+      }
     });
     renderCalendar();
   } catch(e) { renderCalendar(); }
