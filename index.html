@@ -68,8 +68,9 @@
     -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
   .tab-bar::-webkit-scrollbar { display: none; }
-  .tab-item { flex: 0 0 auto; padding: 12px 18px; font-size: 14px; color: #ffffff; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all .2s; }
+  .tab-item { flex: 0 0 auto; padding: 10px 12px; font-size: 13px; color: #ffffff; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all .2s; border-right: 1px solid #2e2e38; }
   .tab-item.active { color: #3D82F6; border-bottom-color: #3D82F6; font-weight: 600; }
+  .tab-item:last-child { border-right: none; }
 
   /* ── 콘텐츠 ── */
   .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -539,28 +540,30 @@
 <div class="modal-overlay" id="attendanceModal">
   <div class="modal">
     <h3 id="attModalTitle">출퇴근 입력</h3>
-    <div class="form-row">
-      <label class="form-label" style="color:#64B5F6">🟢 출근</label>
-      <input id="att-in-date" class="form-input" type="date" style="margin-bottom:8px">
-      <div style="display:flex;align-items:center;gap:6px">
-        <input id="att-in-h" class="form-input" type="number" min="0" max="23" placeholder="시" inputmode="numeric" style="flex:1;font-size:20px;font-weight:700;color:#64B5F6;text-align:center">
-        <span style="font-size:20px;color:#888;font-weight:700">:</span>
-        <input id="att-in-m" class="form-input" type="number" min="0" max="59" placeholder="분" inputmode="numeric" style="flex:1;font-size:20px;font-weight:700;color:#64B5F6;text-align:center">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div>
+        <div style="font-size:12px;color:#64B5F6;margin-bottom:4px">🟢 출근</div>
+        <input id="att-in-date" class="form-input" type="date" style="margin-bottom:6px;font-size:12px">
+        <div style="display:flex;align-items:center;gap:4px">
+          <input id="att-in-h" class="form-input" type="number" min="0" max="23" placeholder="시" inputmode="numeric" style="font-size:16px;font-weight:700;color:#64B5F6;text-align:center;padding:8px 4px">
+          <span style="color:#888;font-weight:700">:</span>
+          <input id="att-in-m" class="form-input" type="number" min="0" max="59" placeholder="분" inputmode="numeric" style="font-size:16px;font-weight:700;color:#64B5F6;text-align:center;padding:8px 4px">
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#E57373;margin-bottom:4px">🔴 퇴근</div>
+        <input id="att-out-date" class="form-input" type="date" style="margin-bottom:6px;font-size:12px">
+        <div style="display:flex;align-items:center;gap:4px">
+          <input id="att-out-h" class="form-input" type="number" min="0" max="23" placeholder="시" inputmode="numeric" style="font-size:16px;font-weight:700;color:#E57373;text-align:center;padding:8px 4px">
+          <span style="color:#888;font-weight:700">:</span>
+          <input id="att-out-m" class="form-input" type="number" min="0" max="59" placeholder="분" inputmode="numeric" style="font-size:16px;font-weight:700;color:#E57373;text-align:center;padding:8px 4px">
+        </div>
       </div>
     </div>
+    <div id="att-workhours" style="font-size:13px;color:#34D399;text-align:center;margin-bottom:10px"></div>
     <div class="form-row">
-      <label class="form-label" style="color:#E57373">🔴 퇴근</label>
-      <input id="att-out-date" class="form-input" type="date" style="margin-bottom:8px">
-      <div style="display:flex;align-items:center;gap:6px">
-        <input id="att-out-h" class="form-input" type="number" min="0" max="23" placeholder="시" inputmode="numeric" style="flex:1;font-size:20px;font-weight:700;color:#E57373;text-align:center">
-        <span style="font-size:20px;color:#888;font-weight:700">:</span>
-        <input id="att-out-m" class="form-input" type="number" min="0" max="59" placeholder="분" inputmode="numeric" style="flex:1;font-size:20px;font-weight:700;color:#E57373;text-align:center">
-      </div>
-    </div>
-    <div id="att-workhours" style="font-size:13px;color:#34D399;text-align:center;margin-top:8px"></div>
-    <div class="form-row" style="margin-top:8px">
       <label class="form-label">메모 (선택)</label>
-      <input id="att-memo" class="form-input" type="text" placeholder="예: 특근, 반차 등">
+      <textarea id="att-memo" class="form-input" placeholder="특근, 반차, 메모..." style="height:64px;resize:none"></textarea>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('attendanceModal')">취소</button>
@@ -1646,6 +1649,32 @@ window.changePassword = async function() {
 };
 
 // ── 출퇴근 달력 ──
+// 2026년 공휴일
+var HOLIDAYS = {
+  '2026-01-01': '신정',
+  '2026-02-16': '설날연휴',
+  '2026-02-17': '설날',
+  '2026-02-18': '설날연휴',
+  '2026-03-01': '삼일절',
+  '2026-03-02': '대체공휴일',
+  '2026-05-01': '노동절',
+  '2026-05-05': '어린이날',
+  '2026-05-24': '부처님오신날',
+  '2026-05-25': '대체공휴일',
+  '2026-06-03': '지방선거',
+  '2026-06-06': '현충일',
+  '2026-07-17': '제헌절',
+  '2026-08-15': '광복절',
+  '2026-08-17': '대체공휴일',
+  '2026-09-24': '추석연휴',
+  '2026-09-25': '추석',
+  '2026-09-26': '추석연휴',
+  '2026-10-03': '개천절',
+  '2026-10-05': '대체공휴일',
+  '2026-10-09': '한글날',
+  '2026-12-25': '크리스마스',
+};
+
 var calYear = new Date().getFullYear();
 var calMonth = new Date().getMonth();
 var attendanceData = {};
@@ -1692,7 +1721,8 @@ function renderCalendar() {
     const att = attendanceData[dateStr];
     const isToday = dateStr === todayStr;
     const dayOfWeek = new Date(calYear, calMonth, d).getDay();
-    const dayColor = dayOfWeek===0 ? '#E57373' : dayOfWeek===6 ? '#60A5FA' : '#fff';
+    const isHoliday = !!HOLIDAYS[dateStr];
+    const dayColor = (dayOfWeek===0 || isHoliday) ? '#E57373' : dayOfWeek===6 ? '#60A5FA' : '#fff';
     let bg = '#1E1E24', border = '#2e2e38', infoHtml = '';
     if(att) {
       if(att.outTime) { bg = '#1a2e1a'; border = '#34D399'; }
