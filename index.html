@@ -558,8 +558,8 @@
     </div>
     <div id="att-workhours" style="font-size:13px;color:#34D399;text-align:center;margin-bottom:10px"></div>
     <div class="form-row">
-      <label class="form-label">메모 (선택)</label>
-      <textarea id="att-memo" class="form-input" placeholder="특근, 반차, 메모..." style="height:64px;resize:none"></textarea>
+      <label class="form-label">메모</label>
+      <textarea id="att-memo" class="form-input" placeholder="특근, 반차, 메모..." style="min-height:64px;resize:none;overflow:hidden" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('attendanceModal')">취소</button>
