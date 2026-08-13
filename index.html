@@ -1788,11 +1788,21 @@ function updateWorkHours() {
 window.deleteAttendance = async function() {
   if(!confirm('이 날의 출퇴근 기록을 삭제하시겠습니까?')) return;
   const key = currentAttDate;
-  const existing = attendanceData[key];
-  if(!existing) { toast('삭제할 데이터가 없습니다.', 'error'); return; }
+  // attendanceData에서 직접 찾거나 모든 키에서 찾기
+  let existing = attendanceData[key];
+  if(!existing) {
+    // 모든 데이터에서 해당 날짜 찾기
+    Object.values(attendanceData).forEach(function(d) {
+      if(d.outDate === key || d.inDate === key) existing = d;
+    });
+  }
+  if(!existing || !existing.id) { toast('삭제할 데이터가 없습니다.', 'error'); return; }
   try {
     await deleteDoc(doc(db,'attendance',existing.id));
-    delete attendanceData[key];
+    // 모든 관련 키 삭제
+    Object.keys(attendanceData).forEach(function(k) {
+      if(attendanceData[k].id === existing.id) delete attendanceData[k];
+    });
     renderCalendar();
     toast('삭제 완료!', 'success');
     closeModal('attendanceModal');
@@ -1806,6 +1816,7 @@ window.saveAttendance = async function() {
   const outDate = document.getElementById('att-out-date').value;
   const outTime = getTimeStr('att-out-h','att-out-m');
   if(!inDate) { toast('날짜를 확인하세요.', 'error'); return; }
+  if(!inTime && !outTime && !memo) { toast('시간 또는 메모를 입력하세요.', 'error'); return; }
 
   const inDt = inTime ? new Date(inDate+'T'+inTime) : null;
   const outDt = (outDate && outTime) ? new Date(outDate+'T'+outTime) : null;
