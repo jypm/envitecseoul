@@ -1816,14 +1816,14 @@ window.saveAttendance = async function() {
   const outDate = document.getElementById('att-out-date').value;
   const outTime = getTimeStr('att-out-h','att-out-m');
   if(!inDate) { toast('날짜를 확인하세요.', 'error'); return; }
-  if(!inTime && !outTime && !memo) { toast('시간 또는 메모를 입력하세요.', 'error'); return; }
+  if(!inTime && !outTime && !memoText) { toast('시간 또는 메모를 입력하세요.', 'error'); return; }
 
   const inDt = inTime ? new Date(inDate+'T'+inTime) : null;
   const outDt = (outDate && outTime) ? new Date(outDate+'T'+outTime) : null;
   const workMinutes = (inDt && outDt) ? Math.round((outDt-inDt)/1000/60) : 0;
 
-  const memo = document.getElementById('att-memo').value.trim();
-  const data = { userId: u.userId, name: u.name||'', inDate, inTime, outDate: outDate||'', outTime: outTime||'', workMinutes, memo, updatedAt: Timestamp.now() };
+  const memoText = document.getElementById('att-memo').value.trim();
+  const data = { userId: u.userId, name: u.name||'', inDate, inTime, outDate: outDate||'', outTime: outTime||'', workMinutes, memo: memoText, updatedAt: Timestamp.now() };
 
   try {
     const key = outDate || inDate;
