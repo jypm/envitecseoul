@@ -1809,7 +1809,7 @@ window.saveAttendance = async function() {
   const inTime = getTimeStr('att-in-h','att-in-m');
   const outDate = document.getElementById('att-out-date').value;
   const outTime = getTimeStr('att-out-h','att-out-m');
-  if(!inDate || !inTime) { toast('출근 날짜/시간을 입력하세요.', 'error'); return; }
+  if(!inDate) { toast('날짜를 확인하세요.', 'error'); return; }
 
   const inDt = inTime ? new Date(inDate+'T'+inTime) : null;
   const outDt = (outDate && outTime) ? new Date(outDate+'T'+outTime) : null;
