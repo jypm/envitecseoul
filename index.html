@@ -1724,6 +1724,9 @@ window.openAttModal = function(dateStr) {
   document.getElementById('att-out-h').value = outT[0];
   document.getElementById('att-out-m').value = outT[1];
   document.getElementById('att-memo').value = att ? att.memo||'' : '';
+  // 기존 데이터 있으면 삭제 버튼 표시
+  const deleteBtn = document.getElementById('attDeleteBtn');
+  if(deleteBtn) deleteBtn.style.display = att ? '' : 'none';
   updateWorkHours();
   ['att-in-h','att-in-m','att-out-h','att-out-m','att-out-date'].forEach(function(id) {
     document.getElementById(id).oninput = updateWorkHours;
