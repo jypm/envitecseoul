@@ -68,9 +68,8 @@
     -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
   .tab-bar::-webkit-scrollbar { display: none; }
-  .tab-item { flex: 0 0 auto; padding: 10px 12px; font-size: 13px; color: #ffffff; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all .2s; border-right: 1px solid #2e2e38; }
-  .tab-item.active { color: #3D82F6; border-bottom-color: #3D82F6; font-weight: 600; }
-  .tab-item:last-child { border-right: none; }
+  .tab-item { flex: 0 0 auto; padding: 8px 14px; font-size: 13px; color: #888; font-weight: 600; cursor: pointer; border-radius: 10px; white-space: nowrap; transition: all .2s; background: #1E1E24; border: none; }
+  .tab-item.active { color: #fff; background: #3D82F6; font-weight: 600; }
 
   /* ── 콘텐츠 ── */
   .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
