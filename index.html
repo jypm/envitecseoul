@@ -2001,16 +2001,19 @@ window.loadPrevMemo = async function(clientName) {
       const d = snap.docs[0].data();
       if(d.memo) {
         txt.textContent = d.memo;
+        txt.style.color = '#FBBF24';
         box.style.display = '';
       } else {
         txt.textContent = '메모 없음';
-        box.style.display = '';
         txt.style.color = '#555';
+        box.style.display = '';
       }
     } else {
-      box.style.display = 'none';
+      txt.textContent = '이전 데이터 없음';
+      txt.style.color = '#555';
+      box.style.display = '';
     }
-  } catch(e) { box.style.display = 'none'; };
+  } catch(e) { box.style.display = 'none'; }
 }
 
 window.acFilter = function(inputId, listId, dataKey) {
@@ -2043,7 +2046,7 @@ window.selectAc = function(inputId, listId, value) {
   }
 };
 
-// 외부 클릭 시 자동완성 닫기
+// 외부 클릭 시 자동완성 닫기.
 document.addEventListener('click', e => {
   document.querySelectorAll('.autocomplete-list').forEach(el => {
     if (!el.previousElementSibling?.contains(e.target) && !el.contains(e.target)) {
