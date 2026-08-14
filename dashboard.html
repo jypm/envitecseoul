@@ -1641,7 +1641,7 @@ const DASH_PW = '0000'; // 대시보드 비밀번호
 function dashLogin() {
   const pw = document.getElementById('dashPw').value;
   if (pw === DASH_PW) {
-    localStorage.setItem('dash_session', '1');
+    sessionStorage.setItem('dash_session', '1');
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashApp').style.display = 'block';
     document.getElementById('dashErr').style.display = 'none';
@@ -1653,7 +1653,7 @@ function dashLogin() {
 
 function dashLogout() {
   if (!confirm('로그아웃 하시겠습니까?')) return;
-  localStorage.removeItem('dash_session');
+  sessionStorage.removeItem('dash_session');
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('dashApp').style.display = 'none';
   document.getElementById('dashPw').value = '';
@@ -1665,7 +1665,7 @@ document.getElementById('dashPw').addEventListener('keydown', function(e) {
 });
 
 // 세션 복원
-if (localStorage.getItem('dash_session')) {
+if (sessionStorage.getItem('dash_session')) {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('dashApp').style.display = 'block';
 }
