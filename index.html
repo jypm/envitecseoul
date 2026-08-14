@@ -836,7 +836,7 @@ async function startApp() {
       const ciCar = document.getElementById('ci-car');
       ciCar.innerHTML = '<option value="">-- 차량 선택 --</option>';
       cars.forEach(function(c) { ciCar.innerHTML += '<option value="' + c + '">' + c + '</option>'; });
-      if (cars.length === 1) { ciCar.value = firstCar; ciCar.disabled = true; ciCar.style.opacity = '0.5'; ciCar.style.cursor = 'not-allowed'; }
+      if (cars.length === 1) { ciCar.value = firstCar; ciCar.disabled = true; ciCar.style.opacity = '0.5'; ciCar.style.cursor = 'not-allowed'; showLastInput(firstCar, today()); }
     }
 
     // 수거조회 차량번호 - 잠금 시 담당 차량만 표시 + 자동선택
