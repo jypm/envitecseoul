@@ -1986,7 +1986,7 @@ function getChosung(str) {
   }).join('');
 }
 
-async function loadPrevMemo(clientName) {
+window.loadPrevMemo = async function(clientName) {
   const box = document.getElementById('prevMemoBox');
   const txt = document.getElementById('prevMemoText');
   if(!box || !txt || !clientName) { if(box) box.style.display = 'none'; return; }
@@ -2010,7 +2010,7 @@ async function loadPrevMemo(clientName) {
     } else {
       box.style.display = 'none';
     }
-  } catch(e) { box.style.display = 'none'; }
+  } catch(e) { box.style.display = 'none'; };
 }
 
 window.acFilter = function(inputId, listId, dataKey) {
