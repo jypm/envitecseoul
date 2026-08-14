@@ -129,7 +129,7 @@
   .tag.collect { border-color: #3D82F640; color: #60A5FA; }
   .tag.deliver { border-color: #34D39940; color: #34D399; }
   .result-memo { font-size: 12px; color: var(--text3); margin-top: 6px; }
-  .prev-memo-box { display:none; font-size:11px; color:#60A5FA; line-height:1.5; word-break:break-all; text-align:right; max-width:100%; }
+  .prev-memo-box { display:none; font-size:11px; line-height:1.5; word-break:break-all; text-align:right; max-width:100%; }
   .prev-memo-box.visible { display:block; }
   input::-webkit-search-cancel-button, input::-webkit-clear-button { display:none; -webkit-appearance:none; }
   input[type=text]::-ms-clear { display:none; }
@@ -254,7 +254,7 @@
 
         <div class="form-row" style="margin-top:10px">
           <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:4px">
-            <span id="lastInputInfo" style="display:none;font-size:11px;color:#60A5FA">마지막: <span id="lastInputName"></span></span>
+            <span id="lastInputInfo" style="display:none;font-size:11px"><span style="color:#ffffff">마지막 : </span><span id="lastInputName" style="color:#60A5FA"></span></span>
           </div>
           <div class="autocomplete-wrap">
             <input id="ci-client" class="form-input" type="text" placeholder="거래처명 검색 (초성 가능)" autocomplete="off" oninput="acFilter('ci-client','ci-client-list','clientList')">
@@ -265,7 +265,7 @@
         <div class="form-row">
           <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:4px">
             <div id="prevMemoBox" class="prev-memo-box">
-              <span id="prevMemoText"></span>
+              <span style="color:#ffffff">이전 : </span><span id="prevMemoText" style="color:#FBBF24"></span>
             </div>
           </div>
           <input id="ci-memo" class="form-input" type="text" placeholder="메모 (선택)" autocomplete="off">
@@ -2010,10 +2010,12 @@ window.loadPrevMemo = async function(clientName) {
         txt.textContent = d.memo;
         box.classList.add('visible');
       } else {
-        box.classList.remove('visible');
+        txt.textContent = '메모없음';
+        box.classList.add('visible');
       }
     } else {
-      box.classList.remove('visible');
+      txt.textContent = '메모없음';
+      box.classList.add('visible');
     }
   } catch(e) {
     console.error('[loadPrevMemo] 오류:', e);
