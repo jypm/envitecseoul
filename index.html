@@ -810,12 +810,12 @@ async function startApp() {
 
   // 날짜 기본값 (항상 오늘 날짜로)
   document.getElementById('ci-date').value = today();
-  // 마지막 입력 거래처 표시 (loadMasterData 후 호출)
-  setTimeout(function() {
+  // 마지막 입력 거래처 표시
+  (async () => {
     const ciCar = document.getElementById('ci-car');
     const carNum = ciCar ? ciCar.value : '';
-    showLastInput(carNum, today());
-  }, 1000);
+    await showLastInput(carNum, today());
+  })();
   document.getElementById('li-date').value = today();
   document.getElementById('qd-date').value = today();
   document.getElementById('qc-start').value = monthAgo();
@@ -991,9 +991,11 @@ window.submitCollect = async function() {
     } else {
       await addDoc(collection(db,'일지db'), data);
       toast('저장 완료!', 'success');
-      // 마지막 입력 거래처 저장 (차량번호 기준, 오늘 날짜)
-      const lastKey = 'last_input_' + (carNumber || 'admin') + '_' + date;
-      localStorage.setItem(lastKey, clientName);
+      // 마지막 입력 거래처 Firestore에 저장 (사용자/차량 기준, 오늘 날짜)
+      try {
+        const docId = window.currentUser.docId || 'admin';
+        await setDoc(doc(db,'lastInput', docId), { clientName, date });
+      } catch(e) {}
       showLastInput(carNumber, date);
       clearCollectForm();
     }
@@ -1928,15 +1930,23 @@ window.saveAttendance = async function() {
 
 // switchTab에서 출퇴근 탭 진입 시 달력 로드
 // ── 마지막 입력 거래처 표시 ──
-function showLastInput(carNumber, date) {
-  const key = 'last_input_' + (carNumber || 'admin') + '_' + date;
-  const lastClient = localStorage.getItem(key);
+async function showLastInput(carNumber, date) {
   const infoEl = document.getElementById('lastInputInfo');
   const nameEl = document.getElementById('lastInputName');
-  if(lastClient && infoEl && nameEl) {
-    nameEl.textContent = lastClient;
-    infoEl.style.display = '';
-  } else if(infoEl) {
+  if(!infoEl || !nameEl) return;
+  try {
+    const docId = window.currentUser?.docId || 'admin';
+    const snap = await getDoc(doc(db,'lastInput', docId));
+    if(snap.exists()) {
+      const d = snap.data();
+      if(d.date === date && d.clientName) {
+        nameEl.textContent = d.clientName;
+        infoEl.style.display = '';
+        return;
+      }
+    }
+    infoEl.style.display = 'none';
+  } catch(e) {
     infoEl.style.display = 'none';
   }
 }
