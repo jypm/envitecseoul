@@ -2037,12 +2037,12 @@ window.acFilter = function(inputId, listId, dataKey) {
   list.classList.add('show');
 };
 
-window.selectAc = function(inputId, listId, value) {
+window.selectAc = async function(inputId, listId, value) {
   document.getElementById(inputId).value = value;
   document.getElementById(listId).classList.remove('show');
   // 거래처 선택 시 이전 메모 로드
   if(inputId === 'ci-client') {
-    loadPrevMemo(value);
+    await loadPrevMemo(value);
   }
 };
 
