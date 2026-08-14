@@ -248,7 +248,7 @@
             <input id="ci-date" class="form-input" type="date">
           </div>
           <div class="form-row" style="margin-bottom:0">
-<select id="ci-car" class="form-select"><option value="">-- 차량 선택 --</option></select>
+<select id="ci-car" class="form-select" onchange="showLastInput(this.value, document.getElementById('ci-date').value)"><option value="">-- 차량 선택 --</option></select>
           </div>
         </div>
 
@@ -991,11 +991,6 @@ window.submitCollect = async function() {
     } else {
       await addDoc(collection(db,'일지db'), data);
       toast('저장 완료!', 'success');
-      // 마지막 입력 거래처 Firestore에 저장 (사용자/차량 기준, 오늘 날짜)
-      try {
-        const docId = window.currentUser.docId || 'admin';
-        await setDoc(doc(db,'lastInput', docId), { clientName, date });
-      } catch(e) {}
       showLastInput(carNumber, date);
       clearCollectForm();
     }
@@ -1226,22 +1221,10 @@ window.deleteCollect = async function(id) {
     window.collectResultsCache = (window.collectResultsCache||[]).filter(x=>x.id!==id);
     renderCollectResults(window.collectResultsCache);
 
-    // 삭제 후 lastInput 갱신 - 오늘 날짜 기준 직전 기록으로
+    // 삭제 후 lastInput 갱신 - 로그인 사용자 차량 기준
     if(delData) {
-      const todayDate = delData.date;
-      const docId = window.currentUser?.docId || 'admin';
-      const snap = await getDocs(query(
-        collection(db,'일지db'),
-        where('date','==',todayDate)
-      ));
-      if(!snap.empty) {
-        const docs = snap.docs.map(d=>d.data());
-        docs.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
-        await setDoc(doc(db,'lastInput',docId), { clientName: docs[0].clientName, date: todayDate });
-      } else {
-        await setDoc(doc(db,'lastInput',docId), { clientName: '', date: '' });
-      }
-      await showLastInput('', todayDate);
+      const userCar = document.getElementById('ci-car')?.value || delData.carNumber;
+      await showLastInput(userCar, delData.date);
     }
   } catch(e) { toast('삭제 실패: '+e.message, 'error'); }
 };
@@ -1956,18 +1939,21 @@ async function showLastInput(carNumber, date) {
   const infoEl = document.getElementById('lastInputInfo');
   const nameEl = document.getElementById('lastInputName');
   if(!infoEl || !nameEl) return;
+  if(!carNumber || !date) { infoEl.style.display = 'none'; return; }
   try {
-    const docId = window.currentUser?.docId || 'admin';
-    const snap = await getDoc(doc(db,'lastInput', docId));
-    if(snap.exists()) {
-      const d = snap.data();
-      if(d.date === date && d.clientName) {
-        nameEl.textContent = d.clientName;
-        infoEl.style.display = '';
-        return;
-      }
+    const snap = await getDocs(query(
+      collection(db,'일지db'),
+      where('date','==',date),
+      where('carNumber','==',carNumber)
+    ));
+    if(!snap.empty) {
+      const docs = snap.docs.map(d=>d.data());
+      docs.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+      nameEl.textContent = docs[0].clientName;
+      infoEl.style.display = '';
+    } else {
+      infoEl.style.display = 'none';
     }
-    infoEl.style.display = 'none';
   } catch(e) {
     infoEl.style.display = 'none';
   }
