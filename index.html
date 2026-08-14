@@ -263,6 +263,9 @@
 
         <div class="form-row">
           <label class="form-label">메모</label>
+          <div id="prevMemoBox" style="display:none;font-size:12px;color:#FBBF24;background:#2a2410;border:1px solid #FBBF2440;border-radius:8px;padding:6px 10px;margin-bottom:6px;line-height:1.5">
+            <span style="color:#888;font-size:11px">이전 메모: </span><span id="prevMemoText"></span>
+          </div>
           <input id="ci-memo" class="form-input" type="text" placeholder="메모 (선택)">
         </div>
       </div>
@@ -617,7 +620,7 @@
 <!-- ==================== Firebase SDK ==================== -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, getDocs, query, where, orderBy, getDoc, setDoc, Timestamp }
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, getDocs, query, where, orderBy, getDoc, setDoc, Timestamp, limit }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ── Firebase 설정 ──
@@ -1007,6 +1010,7 @@ window.submitCollect = async function() {
 function clearCollectForm() {
   document.getElementById('ci-client').value = '';
   document.getElementById('ci-memo').value = '';
+  document.getElementById('prevMemoBox').style.display = 'none';
   CONTAINER_SIZES.forEach(sz => {
     document.getElementById(`ci-c${sz}`).value = '';
     document.getElementById(`ci-d${sz}`).value = '';
@@ -1982,6 +1986,33 @@ function getChosung(str) {
   }).join('');
 }
 
+async function loadPrevMemo(clientName) {
+  const box = document.getElementById('prevMemoBox');
+  const txt = document.getElementById('prevMemoText');
+  if(!box || !txt || !clientName) { if(box) box.style.display = 'none'; return; }
+  try {
+    const snap = await getDocs(query(
+      collection(db,'일지db'),
+      where('clientName','==',clientName),
+      orderBy('timestamp','desc'),
+      limit(1)
+    ));
+    if(!snap.empty) {
+      const d = snap.docs[0].data();
+      if(d.memo) {
+        txt.textContent = d.memo;
+        box.style.display = '';
+      } else {
+        txt.textContent = '메모 없음';
+        box.style.display = '';
+        txt.style.color = '#555';
+      }
+    } else {
+      box.style.display = 'none';
+    }
+  } catch(e) { box.style.display = 'none'; }
+}
+
 window.acFilter = function(inputId, listId, dataKey) {
   const val = document.getElementById(inputId).value.trim();
   const list = document.getElementById(listId);
@@ -2006,6 +2037,10 @@ window.acFilter = function(inputId, listId, dataKey) {
 window.selectAc = function(inputId, listId, value) {
   document.getElementById(inputId).value = value;
   document.getElementById(listId).classList.remove('show');
+  // 거래처 선택 시 이전 메모 로드
+  if(inputId === 'ci-client') {
+    loadPrevMemo(value);
+  }
 };
 
 // 외부 클릭 시 자동완성 닫기
