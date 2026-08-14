@@ -1656,6 +1656,60 @@ window.changePassword = async function() {
   } catch(e) { toast('변경 실패: '+e.message, 'error'); }
 };
 
+// ── 권한 적용 ──
+function applyPermissions() {
+  const u = window.currentUser;
+  if (!u || u.type !== 'vehicle') return;
+  const lk = u.permissions || { lockCollectInput:true, lockCollectQuery:true, lockLoadingInput:true, lockLoadingQuery:true };
+  const cars = u.cars || [];
+  const allCars = window.carList || [];
+  const firstCar = cars.length > 0 ? cars[0] : '';
+
+  // 수거입력 차량번호
+  const ciCar = document.getElementById('ci-car');
+  const inputCars = lk.lockCollectInput ? cars : allCars;
+  ciCar.innerHTML = '<option value="">-- 차량 선택 --</option>';
+  inputCars.forEach(function(c) { ciCar.innerHTML += '<option value="' + c + '">' + c + '</option>'; });
+  if (lk.lockCollectInput && cars.length >= 1) { ciCar.value = firstCar; }
+  if (lk.lockCollectInput && cars.length === 1) { ciCar.disabled = true; ciCar.style.opacity = '0.5'; ciCar.style.cursor = 'not-allowed'; }
+  else { ciCar.disabled = false; ciCar.style.opacity = ''; ciCar.style.cursor = ''; }
+
+  // 수거조회 차량번호
+  const queryCars = lk.lockCollectQuery ? cars : allCars;
+  ['qd-car','qc-car'].forEach(function(id) {
+    const el = document.getElementById(id);
+    el.innerHTML = '<option value="">전체</option>';
+    queryCars.forEach(function(c) { el.innerHTML += '<option value="' + c + '">' + c + '</option>'; });
+    if (lk.lockCollectQuery && cars.length >= 1) { el.value = firstCar; }
+    if (lk.lockCollectQuery && cars.length === 1) { el.disabled = true; el.style.opacity = '0.5'; el.style.cursor = 'not-allowed'; }
+    else { el.disabled = false; el.style.opacity = ''; el.style.cursor = ''; }
+  });
+
+  // 상차입력 담당자
+  if (u.name) {
+    const liWorker = document.getElementById('li-worker');
+    liWorker.value = u.name;
+    liWorker.disabled = !!lk.lockLoadingInput;
+    liWorker.style.opacity = lk.lockLoadingInput ? '0.5' : '';
+    liWorker.style.cursor = lk.lockLoadingInput ? 'not-allowed' : '';
+  }
+
+  // 상차조회 담당자
+  if (u.name) {
+    const lqWorker = document.getElementById('lq-worker');
+    if (lk.lockLoadingQuery) {
+      lqWorker.value = u.name;
+      lqWorker.disabled = true;
+      lqWorker.style.opacity = '0.5';
+      lqWorker.style.cursor = 'not-allowed';
+    } else {
+      lqWorker.disabled = false;
+      lqWorker.style.opacity = '';
+      lqWorker.style.cursor = '';
+    }
+  }
+}
+
 // ── 출퇴근 달력 ──
 // 2026년 공휴일
 var HOLIDAYS = {
