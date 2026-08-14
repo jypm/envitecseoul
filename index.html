@@ -129,7 +129,7 @@
   .tag.collect { border-color: #3D82F640; color: #60A5FA; }
   .tag.deliver { border-color: #34D39940; color: #34D399; }
   .result-memo { font-size: 12px; color: var(--text3); margin-top: 6px; }
-  .prev-memo-box { display:none; font-size:11px; color:#60A5FA; line-height:1.5; word-break:break-all; text-align:right; }
+  .prev-memo-box { display:none; font-size:11px; color:#60A5FA; line-height:1.5; word-break:break-all; text-align:right; max-width:100%; }
   .prev-memo-box.visible { display:block; }
   input::-webkit-search-cancel-button, input::-webkit-clear-button { display:none; -webkit-appearance:none; }
   input[type=text]::-ms-clear { display:none; }
@@ -245,17 +245,15 @@
 
         <div class="form-row-2">
           <div class="form-row" style="margin-bottom:0">
-            <label class="form-label">날짜</label>
             <input id="ci-date" class="form-input" type="date">
           </div>
           <div class="form-row" style="margin-bottom:0">
-            <label class="form-label">차량번호</label>
 <select id="ci-car" class="form-select"><option value="">-- 차량 선택 --</option></select>
           </div>
         </div>
 
         <div class="form-row" style="margin-top:10px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:4px">
             <span id="lastInputInfo" style="display:none;font-size:11px;color:#60A5FA">마지막: <span id="lastInputName"></span></span>
           </div>
           <div class="autocomplete-wrap">
@@ -265,13 +263,12 @@
         </div>
 
         <div class="form-row">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-            <div id="prevMemoBox" class="prev-memo-box" style="display:none;margin-left:auto;font-size:11px;color:#60A5FA;background:none;border:none;padding:0;max-width:100%;-webkit-line-clamp:2">
+          <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:4px">
+            <div id="prevMemoBox" class="prev-memo-box">
               <span id="prevMemoText"></span>
             </div>
           </div>
           <input id="ci-memo" class="form-input" type="text" placeholder="메모 (선택)" autocomplete="off">
-        </div>
         </div>
       </div>
 
@@ -1994,17 +1991,11 @@ function getChosung(str) {
 window.loadPrevMemo = async function(clientName) {
   const box = document.getElementById('prevMemoBox');
   const txt = document.getElementById('prevMemoText');
-  if(!box || !txt || !clientName) { if(box) box.style.display = 'none'; return; }
+  if(!box || !txt || !clientName) { if(box) box.classList.remove('visible'); return; }
   try {
-    // 복합 인덱스 불필요: date 범위 + clientName 필터 후 클라이언트 정렬
-    // 최근 90일로 범위 제한해 읽기 쿼터 절약
-    const toDate = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const now = new Date();
-    const past90 = new Date(now); past90.setDate(past90.getDate() - 90);
     const snap = await getDocs(query(
       collection(db,'일지db'),
-      where('clientName','==',clientName),
-      where('date','>=',toDate(past90))
+      where('clientName','==',clientName)
     ));
     if(!snap.empty) {
       // timestamp 기준 최신 1건 추출
@@ -2017,7 +2008,6 @@ window.loadPrevMemo = async function(clientName) {
       const d = docs[0];
       if(d.memo) {
         txt.textContent = d.memo;
-        txt.style.color = '#FBBF24';
         box.classList.add('visible');
       } else {
         box.classList.remove('visible');
