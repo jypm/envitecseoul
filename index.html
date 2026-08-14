@@ -1228,21 +1228,20 @@ window.deleteCollect = async function(id) {
 
     // 삭제 후 lastInput 갱신 - 오늘 날짜 기준 직전 기록으로
     if(delData) {
-      const today = delData.date;
+      const todayDate = delData.date;
       const docId = window.currentUser?.docId || 'admin';
       const snap = await getDocs(query(
         collection(db,'일지db'),
-        where('date','==',today),
-        where('carNumber','==',delData.carNumber)
+        where('date','==',todayDate)
       ));
       if(!snap.empty) {
         const docs = snap.docs.map(d=>d.data());
         docs.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
-        await setDoc(doc(db,'lastInput',docId), { clientName: docs[0].clientName, date: today });
+        await setDoc(doc(db,'lastInput',docId), { clientName: docs[0].clientName, date: todayDate });
       } else {
         await setDoc(doc(db,'lastInput',docId), { clientName: '', date: '' });
       }
-      await showLastInput(delData.carNumber, today);
+      await showLastInput('', todayDate);
     }
   } catch(e) { toast('삭제 실패: '+e.message, 'error'); }
 };
