@@ -474,7 +474,16 @@
 </div><!-- /app -->
 
 <!-- ==================== 모달: 차량 추가 ==================== -->
-<div class="modal-overlay" id="carModal">
+<div class="modal-overlay" id="exitModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;justify-content:center;align-items:center;display:none">
+  <div style="background:#1E1E24;border-radius:16px;padding:28px 24px;width:280px;text-align:center;border:1px solid #333">
+    <div style="font-size:28px;margin-bottom:12px">📱</div>
+    <div style="font-size:16px;color:#fff;margin-bottom:8px">앱을 종료하시겠습니까?</div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button onclick="closeExitModal()" style="flex:1;padding:12px;border-radius:10px;border:1px solid #333;background:#2a2a2a;color:#aaa;font-size:15px;cursor:pointer">취소</button>
+      <button onclick="window.history.go(-(window.history.length))" style="flex:1;padding:12px;border-radius:10px;border:none;background:#e53935;color:#fff;font-size:15px;cursor:pointer">종료</button>
+    </div>
+  </div>
+</div>
   <div class="modal">
     <h3 id="carModalTitle">차량 추가</h3>
     <div class="form-row">
@@ -753,13 +762,40 @@ window.doLogin = async function() {
 document.getElementById('loginId').addEventListener('keydown', function(e) { if(e.key==='Enter') document.getElementById('loginPassword').focus(); });
 document.getElementById('loginPassword').addEventListener('keydown', function(e) { if(e.key==='Enter') doLogin(); });
 
-// 뒤로가기 완전 차단
+// 뒤로가기 제어
+let _backBlocking = false;
 history.pushState(null, '', location.href);
 history.pushState(null, '', location.href);
 history.pushState(null, '', location.href);
 window.addEventListener('popstate', function() {
+  if (!window.currentUser) {
+    // 로그인 화면에서 뒤로가기 → 앱 종료
+    window.history.go(-(window.history.length));
+    return;
+  }
+  if (_backBlocking) return;
+  _backBlocking = true;
   history.go(1);
+  setTimeout(function() { _backBlocking = false; }, 100);
+  // 열린 모달 있으면 닫기
+  const modals = ['carModal','userModal','workerModal','attendanceModal','changePwModal','collectDetailModal','loadingDetailModal','exitModal'];
+  for (const id of modals) {
+    const el = document.getElementById(id);
+    if (el && el.style.display !== 'none' && el.style.display !== '') {
+      closeModal(id);
+      return;
+    }
+  }
+  // 모달 없으면 종료 확인
+  setTimeout(function() { openExitModal(); }, 100);
 });
+
+window.openExitModal = function() {
+  document.getElementById('exitModal').style.display = 'flex';
+}
+window.closeExitModal = function() {
+  document.getElementById('exitModal').style.display = 'none';
+}
 
 // 세션 복원 (새로고침/재접속 시 자동 로그인)
 window.addEventListener('load', function() {
@@ -777,7 +813,7 @@ window.addEventListener('load', function() {
 async function startApp() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
-  history.pushState(null, '', location.href);
+  for (var i = 0; i < 5; i++) history.pushState(null, '', location.href);
 
   const u = window.currentUser;
   // 모든 탭 숨기기
