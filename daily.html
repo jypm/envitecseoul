@@ -64,21 +64,17 @@ td.col-client .client-seq { font-size:10px; color:var(--text3); margin-right:4px
 /* 입력 셀 */
 td { border-bottom:1px solid var(--border); padding:4px 2px; text-align:center; vertical-align:middle; }
 td input[type=number] { width:36px; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:5px 2px; font-size:13px; text-align:center; outline:none; -moz-appearance:textfield; }
-td input.c-box { color:#60A5FA !important; }
-td input.c-resin { color:#67E8F9 !important; }
-td input.d-box { color:#F87171 !important; }
-td input.d-resin { color:#FBBF24 !important; }
-td input[type=number]::-webkit-inner-spin-button,
-td input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
-td input[type=number]:focus { border-color:var(--accent); background:var(--surface2); }
-td input.c-box::placeholder { color:#0a0d14; font-size:10px; }
-td input.c-resin::placeholder { color:#080e12; font-size:10px; }
-td input.d-box::placeholder { color:#120808; font-size:10px; }
-td input.d-resin::placeholder { color:#110d06; font-size:10px; }
 td input.c-box { color:#fff; }
 td input.c-resin { color:#fff; }
 td input.d-box { color:#fff; }
 td input.d-resin { color:#fff; }
+td input[type=number]::-webkit-inner-spin-button,
+td input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
+td input[type=number]:focus { border-color:var(--accent); background:var(--surface2); }
+td input.c-box::placeholder, td input.c-box::-webkit-input-placeholder { color:#0f1525; font-size:10px; }
+td input.c-resin::placeholder, td input.c-resin::-webkit-input-placeholder { color:#0f2020; font-size:10px; }
+td input.d-box::placeholder, td input.d-box::-webkit-input-placeholder { color:#200f0f; font-size:10px; }
+td input.d-resin::placeholder, td input.d-resin::-webkit-input-placeholder { color:#201a0f; font-size:10px; }
 
 /* 구분선 */
 .sep { border-left:2px solid var(--border); }
