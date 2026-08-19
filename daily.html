@@ -58,7 +58,7 @@ thead th.group-header { border-bottom:none; padding-bottom:2px; color:#333345; f
 /* 거래처 열 고정 */
 td.col-client { position:sticky; left:0; background:var(--surface2); z-index:5; padding:8px 10px; border-right:1px solid var(--border); min-width:110px; max-width:130px; }
 td.col-client .client-name { font-size:13px; color:var(--text); font-weight:500; }
-td.col-client .client-memo { font-size:10px; color:#FBBF24; margin-top:2px; white-space:normal; word-break:break-all; line-height:1.4; }
+td.col-client .client-memo { font-size:10px; color:#FBBF24; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px; }
 td.col-client .client-seq { font-size:10px; color:var(--text3); margin-right:4px; }
 
 /* 입력 셀 */
@@ -182,7 +182,21 @@ td input::placeholder { color:#333345; font-size:10px; }
       <div id="addRowAcList" style="display:none;position:absolute;top:100%;left:0;right:0;background:#252535;border:1px solid #3a3a55;border-radius:8px;z-index:50;max-height:200px;overflow-y:auto;margin-top:4px"></div>
     </div>
   </div>
-</div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 로그아웃 확인 -->
+<div class="modal-overlay" id="exitModal">
+  <div class="modal" style="max-width:280px;text-align:center">
+    <div style="font-size:24px;margin-bottom:12px">👋</div>
+    <div style="font-size:15px;color:var(--text);margin-bottom:20px">로그아웃 하시겠어요?</div>
+    <div style="display:flex;gap:10px">
+      <button onclick="document.getElementById('exitModal').classList.remove('show');window._exitOpen=false;" style="flex:1;padding:11px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:14px;cursor:pointer">아니요</button>
+      <button onclick="doLogout()" style="flex:1;padding:11px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:600;cursor:pointer">네</button>
+    </div>
+  </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -238,7 +252,9 @@ window.doLogin = async function() {
     const adminDoc = await getDoc(doc(db, 'adminConfig', 'auth'));
     if (id === 'admin' && adminDoc.exists() && adminDoc.data().password === pw) {
       currentUser = { type: 'admin', name: '관리자', userId: 'admin' };
+      localStorage.setItem('daily_session', JSON.stringify(currentUser));
       startApp();
+      for (let i = 0; i < 5; i++) history.pushState(null, '', location.href);
       return;
     }
     // 일반 사용자
@@ -246,7 +262,9 @@ window.doLogin = async function() {
     for (const ud of snap.docs) {
       if (ud.data().password === pw) {
         currentUser = { type:'vehicle', userId:id, name:ud.data().name||'', docId:ud.id, cars:ud.data().cars||[] };
+        localStorage.setItem('daily_session', JSON.stringify(currentUser));
         startApp();
+        for (let i = 0; i < 5; i++) history.pushState(null, '', location.href);
         return;
       }
     }
@@ -437,13 +455,15 @@ window.saveAll = async function() {
   const todayStr = today();
   const carNumber = currentUser.cars?.[0] || '';
   let count = 0;
+  const baseTime = Date.now();
 
   for (let idx = 0; idx < courseClients.length; idx++) {
     const name = courseClients[idx];
     const row = document.querySelector(`tr[data-idx="${idx}"]`);
     if (!row) continue;
 
-    const data = { clientName: name, date: todayStr, carNumber, timestamp: Timestamp.now() };
+    const ts = Timestamp.fromMillis(baseTime + idx * 1000);
+    const data = { clientName: name, date: todayStr, carNumber, seq: idx + 1, timestamp: ts };
     let hasData = false;
 
     // 수거
@@ -467,7 +487,7 @@ window.saveAll = async function() {
     try {
       await addDoc(collection(db,'일지db'), data);
       count++;
-    } catch(e) {}
+    } catch(e) { console.error(e); }
   }
 
   if (count > 0) toast(`${count}건 저장 완료!`, 'success');
@@ -593,6 +613,62 @@ async function showNotice() {
 window.closeNotice = function() {
   document.getElementById('noticeModal').classList.remove('show');
 };
+
+// ── 로그아웃 ──
+window.doLogout = function() {
+  currentUser = null;
+  localStorage.removeItem('daily_session');
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginPw').value = '';
+  history.go(-(history.length - 1));
+};
+
+// ── 뒤로가기 제어 (jyppass 방식) ──
+let _blocking = false;
+let _exitOpen = false;
+history.pushState(null, '', location.href);
+history.pushState(null, '', location.href);
+history.pushState(null, '', location.href);
+
+window.addEventListener('popstate', function() {
+  if (!currentUser) return;
+  if (_blocking) return;
+  _blocking = true;
+  history.go(1);
+  setTimeout(() => { _blocking = false; }, 100);
+  if (_exitOpen) { closeExit(); return; }
+  setTimeout(() => openExit(), 100);
+});
+
+function openExit() {
+  _exitOpen = true;
+  document.getElementById('exitModal').classList.add('show');
+}
+function closeExit() {
+  _exitOpen = false;
+  document.getElementById('exitModal').classList.remove('show');
+}
+
+// ── 세션 복원 ──
+history.pushState(null, '', location.href);
+history.pushState(null, '', location.href);
+history.pushState(null, '', location.href);
+
+(async function() {
+  const session = localStorage.getItem('daily_session');
+  if (session) {
+    try {
+      currentUser = JSON.parse(session);
+      startApp();
+      setTimeout(() => {
+        for (let i = 0; i < 5; i++) history.pushState(null, '', location.href);
+      }, 300);
+    } catch(e) {
+      localStorage.removeItem('daily_session');
+    }
+  }
+})();
 
 </script>
 </body>
