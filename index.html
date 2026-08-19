@@ -727,7 +727,8 @@ window.doLogin = async function() {
       const adminDoc = await getDoc(doc(db, 'adminConfig', 'auth'));
       if (adminDoc.exists() && adminDoc.data().password === pw) {
         window.currentUser = { type: 'admin' };
-        startApp();
+        await startApp();
+        for (var i = 0; i < 5; i++) history.pushState(null, '', location.href);
         return;
       }
     } catch(e) {}
@@ -752,6 +753,7 @@ window.doLogin = async function() {
           permissions: up
         };
         startApp();
+        for (var i = 0; i < 5; i++) history.pushState(null, '', location.href);
         return;
       }
     }
@@ -832,8 +834,6 @@ async function startApp() {
 
   // 세션 저장 (로그인 유지)
   localStorage.setItem('envitec_session', JSON.stringify(window.currentUser));
-  // 뒤로가기 막기 - 여러번 쌓아서 완전 차단
-  for (var i = 0; i < 5; i++) history.pushState(null, '', location.href);
 
   // 날짜 기본값 (항상 오늘 날짜로)
   document.getElementById('ci-date').value = today();
