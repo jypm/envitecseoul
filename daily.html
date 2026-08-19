@@ -557,19 +557,21 @@ function renderTable() {
       ${prevMemo ? `<div class="client-memo">${prevMemo}</div>` : ''}
       ${todayMemo ? `<div style="font-size:10px;color:#34D399;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">📝 ${todayMemo}</div>` : ''}
     </td>`;
-    // 수거 10칸
+    // 수거 박스(0~4) 파란색, 합성(5~9) 하늘색
     SIZES.forEach((sz, i) => {
       const v = cache.collect[sz] || '';
+      const color = i < 5 ? '#4a6fa5' : '#3a7a8a';
       html += `<td${i===5?' class="sep"':''}>
-        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="collect" data-key="${sz}" min="0" value="${v}">
+        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="collect" data-key="${sz}" min="0" value="${v}" style="color:${color}">
       </td>`;
     });
-    // 납품 10칸
+    // 납품 박스(0~4) 빨간색, 합성(5~9) 주황색
     html += `<td class="sep"></td>`;
     SIZES.forEach((sz, i) => {
       const v = cache.deliver[sz] || '';
+      const color = i < 5 ? '#8a3a3a' : '#8a6a2a';
       html += `<td>
-        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="deliver" data-key="${sz}" min="0" value="${v}">
+        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="deliver" data-key="${sz}" min="0" value="${v}" style="color:${color}">
       </td>`;
     });
     html += '</tr>';
@@ -763,24 +765,70 @@ function renderCourseClientList() {
     return;
   }
   el.innerHTML = tempCourseClients.map((name, i) => `
-    <div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--border)">
+    <div class="course-drag-item" data-idx="${i}" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);cursor:grab;touch-action:none">
+      <span style="font-size:16px;color:var(--text3);cursor:grab;padding:0 4px">☰</span>
       <span style="font-size:11px;color:var(--text3);min-width:20px">${i+1}.</span>
       <span style="flex:1;font-size:13px;color:var(--text)">${name}</span>
-      <button onclick="moveCourseClient(${i},-1)" style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--text2);font-size:12px;cursor:pointer;padding:2px 6px" ${i===0?'disabled':''}>▲</button>
-      <button onclick="moveCourseClient(${i},1)" style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--text2);font-size:12px;cursor:pointer;padding:2px 6px" ${i===tempCourseClients.length-1?'disabled':''}>▼</button>
       <button onclick="removeCourseClient(${i})" style="background:none;border:none;color:#F87171;font-size:16px;cursor:pointer;padding:0 4px">✕</button>
     </div>
   `).join('');
+  initCourseDrag();
 }
 
-window.moveCourseClient = function(idx, dir) {
-  const newIdx = idx + dir;
-  if (newIdx < 0 || newIdx >= tempCourseClients.length) return;
-  const tmp = tempCourseClients[idx];
-  tempCourseClients[idx] = tempCourseClients[newIdx];
-  tempCourseClients[newIdx] = tmp;
-  renderCourseClientList();
-};
+function initCourseDrag() {
+  const items = document.querySelectorAll('.course-drag-item');
+  let dragIdx = null, dragEl = null, startY = 0, origTop = 0;
+
+  items.forEach(item => {
+    item.addEventListener('touchstart', e => {
+      dragIdx = parseInt(item.dataset.idx);
+      dragEl = item;
+      startY = e.touches[0].clientY;
+      origTop = item.getBoundingClientRect().top;
+      item.style.opacity = '0.5';
+      item.style.background = 'var(--surface)';
+    }, { passive: true });
+
+    item.addEventListener('touchmove', e => {
+      if (dragIdx === null) return;
+      e.preventDefault();
+      const y = e.touches[0].clientY;
+      const diff = y - startY;
+      const allItems = [...document.querySelectorAll('.course-drag-item')];
+      allItems.forEach((el, i) => {
+        if (i === dragIdx) return;
+        const rect = el.getBoundingClientRect();
+        const mid = rect.top + rect.height / 2;
+        if (diff > 0 && y > mid && i > dragIdx) {
+          el.style.transform = 'translateY(-40px)';
+        } else if (diff < 0 && y < mid && i < dragIdx) {
+          el.style.transform = 'translateY(40px)';
+        } else {
+          el.style.transform = '';
+        }
+      });
+    }, { passive: false });
+
+    item.addEventListener('touchend', e => {
+      if (dragIdx === null) return;
+      const y = e.changedTouches[0].clientY;
+      const allItems = [...document.querySelectorAll('.course-drag-item')];
+      let targetIdx = dragIdx;
+      allItems.forEach((el, i) => {
+        if (i === dragIdx) return;
+        const rect = el.getBoundingClientRect();
+        const mid = rect.top + rect.height / 2;
+        if (Math.abs(y - mid) < 30) targetIdx = i;
+      });
+      if (targetIdx !== dragIdx) {
+        const item = tempCourseClients.splice(dragIdx, 1)[0];
+        tempCourseClients.splice(targetIdx, 0, item);
+      }
+      dragIdx = null; dragEl = null;
+      renderCourseClientList();
+    });
+  });
+}
 
 window.removeCourseClient = function(idx) {
   tempCourseClients.splice(idx, 1);
