@@ -2116,6 +2116,11 @@ window.addEventListener('load', () => {
   }
 });
 
+// ── 초기 history 쌓기 ──
+history.pushState(null, '', location.href);
+history.pushState(null, '', location.href);
+history.pushState(null, '', location.href);
+
 // ── 세션 복원 ──
 (async function() {
   var session = localStorage.getItem('envitec_session');
@@ -2129,10 +2134,6 @@ window.addEventListener('load', () => {
     } catch(e) {
       localStorage.removeItem('envitec_session');
     }
-  } else {
-    history.pushState(null, '', location.href);
-    history.pushState(null, '', location.href);
-    history.pushState(null, '', location.href);
   }
 })();
 
