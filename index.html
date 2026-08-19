@@ -225,7 +225,7 @@
       <div class="header-title">🚛 엔비텍코리아 서울지점</div>
       <div class="header-user" id="headerUser"></div>
     </div>
-    <div style="display:flex;gap:6px"><button class="header-logout" id="changePwBtn" onclick="openChangePasswordModal('user')" style="display:none">🔑 비번변경</button><button class="header-logout" onclick="doLogout()">로그아웃</button></div>
+    <div style="display:flex;gap:6px"><button class="header-logout" id="changePwBtn" onclick="openChangePasswordModal('user')" style="display:none">🔑 비번변경</button><button class="header-logout" onclick="openExitModal()">로그아웃</button></div>
   </header>
 
   <div class="tab-bar" id="tabBar">
@@ -766,16 +766,27 @@ document.getElementById('loginPassword').addEventListener('keydown', function(e)
 
 // 뒤로가기 제어
 let _backBlocking = false;
+let _exitModalOpen = false;
+
 history.pushState(null, '', location.href);
 history.pushState(null, '', location.href);
 history.pushState(null, '', location.href);
+
 window.addEventListener('popstate', function() {
   if (!window.currentUser) return;
   if (_backBlocking) return;
   _backBlocking = true;
   history.go(1);
   setTimeout(function() { _backBlocking = false; }, 100);
-  const modals = ['carModal','userModal','workerModal','attendanceModal','changePwModal','collectDetailModal','loadingDetailModal','exitModal'];
+
+  // 로그아웃 팝업 열려있으면 닫기
+  if (_exitModalOpen) {
+    closeExitModal();
+    return;
+  }
+
+  // 다른 모달 열려있으면 닫기
+  const modals = ['carModal','userModal','workerModal','attendanceModal','changePwModal','collectDetailModal','loadingDetailModal'];
   for (const id of modals) {
     const el = document.getElementById(id);
     if (el && (el.style.display === 'flex' || el.classList.contains('active'))) {
@@ -783,13 +794,17 @@ window.addEventListener('popstate', function() {
       return;
     }
   }
+
+  // 아무것도 없으면 로그아웃 팝업
   setTimeout(function() { openExitModal(); }, 100);
 });
 
 window.openExitModal = function() {
+  _exitModalOpen = true;
   document.getElementById('exitModal').style.display = 'flex';
 }
 window.closeExitModal = function() {
+  _exitModalOpen = false;
   document.getElementById('exitModal').style.display = 'none';
 }
 
@@ -800,6 +815,7 @@ window.addEventListener('load', function() {
     try {
       window.currentUser = JSON.parse(session);
       startApp();
+      for (var i = 0; i < 5; i++) history.pushState(null, '', location.href);
     } catch(e) {
       localStorage.removeItem('envitec_session');
     }
