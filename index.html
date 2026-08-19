@@ -474,7 +474,7 @@
 </div><!-- /app -->
 
 <!-- ==================== 모달: 차량 추가 ==================== -->
-<div class="modal-overlay" id="exitModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;justify-content:center;align-items:center">
+<div class="modal-overlay" id="exitModal" style="z-index:9999">
   <div style="background:#1E1E24;border-radius:16px;padding:28px 24px;width:280px;text-align:center;border:1px solid #333">
     <div style="font-size:28px;margin-bottom:12px">👋</div>
     <div style="font-size:16px;color:#fff;margin-bottom:8px">로그아웃 하시겠어요?</div>
@@ -772,11 +772,11 @@ let _exitModalOpen = false;
 
 window.openExitModal = function() {
   _exitModalOpen = true;
-  document.getElementById('exitModal').style.display = 'flex';
+  document.getElementById('exitModal').classList.add('show');
 }
 window.closeExitModal = function() {
   _exitModalOpen = false;
-  document.getElementById('exitModal').style.display = 'none';
+  document.getElementById('exitModal').classList.remove('show');
 }
 
 window.addEventListener('popstate', function() {
@@ -794,7 +794,7 @@ window.addEventListener('popstate', function() {
   const modals = ['carModal','userModal','workerModal','attendanceModal','changePwModal','collectDetailModal','loadingDetailModal'];
   for (const id of modals) {
     const el = document.getElementById(id);
-    if (el && (el.style.display === 'flex' || el.classList.contains('active'))) {
+    if (el && el.classList.contains('show')) {
       closeModal(id);
       return;
     }
