@@ -560,7 +560,7 @@ function renderTable() {
     // 수거 박스(0~4) 파란색, 합성(5~9) 하늘색
     SIZES.forEach((sz, i) => {
       const v = cache.collect[sz] || '';
-      const color = i < 5 ? '#4a6fa5' : '#3a7a8a';
+      const color = i < 5 ? '#60A5FA' : '#67E8F9';
       html += `<td${i===5?' class="sep"':''}>
         <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="collect" data-key="${sz}" min="0" value="${v}" style="color:${color}">
       </td>`;
@@ -569,7 +569,7 @@ function renderTable() {
     html += `<td class="sep"></td>`;
     SIZES.forEach((sz, i) => {
       const v = cache.deliver[sz] || '';
-      const color = i < 5 ? '#8a3a3a' : '#8a6a2a';
+      const color = i < 5 ? '#F87171' : '#FBBF24';
       html += `<td>
         <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="deliver" data-key="${sz}" min="0" value="${v}" style="color:${color}">
       </td>`;
