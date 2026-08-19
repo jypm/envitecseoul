@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>수거 일지 입력</title>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #141418;
+  --surface2: #1c1c22;
+  --border: #2a2a35;
+  --text: #f0f0f5;
+  --text2: #a0a0b0;
+  --text3: #55556a;
+  --accent: #3D82F6;
+  --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, 'Noto Sans KR', sans-serif; font-size: 14px; }
+
+/* 로그인 화면 */
+#loginScreen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
+.login-box { width:100%; max-width:320px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:32px 24px; }
+.login-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:6px; text-align:center; }
+.login-sub { font-size:12px; color:var(--text3); text-align:center; margin-bottom:24px; }
+.form-input { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px 14px; color:var(--text); font-size:15px; outline:none; }
+.form-input:focus { border-color:var(--accent); }
+.login-err { font-size:12px; color:#F87171; margin-top:6px; display:none; text-align:center; }
+.btn-primary { width:100%; background:var(--accent); border:none; border-radius:8px; padding:13px; color:#fff; font-size:15px; font-weight:600; cursor:pointer; margin-top:16px; }
+
+/* 앱 */
+#app { display:none; flex-direction:column; height:100vh; }
+
+/* 헤더 */
+.header { background:var(--surface); border-bottom:1px solid var(--border); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.header-title { font-size:14px; font-weight:700; color:var(--text); }
+.header-sub { font-size:11px; color:var(--text2); margin-top:2px; }
+.header-right { display:flex; gap:8px; align-items:center; }
+.btn-sm { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:6px 12px; color:var(--text2); font-size:12px; cursor:pointer; }
+.btn-save { background:var(--accent); border:none; border-radius:8px; padding:6px 14px; color:#fff; font-size:12px; font-weight:600; cursor:pointer; }
+
+/* 주차 선택 */
+.week-bar { background:var(--surface); border-bottom:1px solid var(--border); padding:8px 14px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:wrap; }
+.week-btn { background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:5px 12px; color:var(--text2); font-size:12px; cursor:pointer; }
+.week-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+.date-label { font-size:12px; color:var(--text3); margin-left:auto; }
+
+/* 테이블 영역 */
+.table-wrap { flex:1; overflow:auto; -webkit-overflow-scrolling:touch; }
+table { border-collapse: collapse; min-width: max-content; }
+
+/* 헤더 행 */
+thead th { position:sticky; top:0; background:var(--surface); z-index:10; padding:8px 4px; font-size:11px; color:var(--text2); border-bottom:1px solid var(--border); white-space:nowrap; text-align:center; }
+thead th.col-client { position:sticky; top:0; left:0; z-index:20; background:var(--surface); padding:8px 10px; text-align:left; min-width:110px; }
+thead th.group-header { border-bottom:none; padding-bottom:2px; color:var(--text3); font-size:10px; }
+
+/* 거래처 열 고정 */
+td.col-client { position:sticky; left:0; background:var(--surface2); z-index:5; padding:8px 10px; border-right:1px solid var(--border); min-width:110px; max-width:130px; }
+td.col-client .client-name { font-size:13px; color:var(--text); font-weight:500; }
+td.col-client .client-memo { font-size:10px; color:#FBBF24; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px; }
+td.col-client .client-seq { font-size:10px; color:var(--text3); margin-right:4px; }
+
+/* 입력 셀 */
+td { border-bottom:1px solid var(--border); padding:4px 2px; text-align:center; vertical-align:middle; }
+td input[type=number] { width:36px; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:5px 2px; color:var(--text); font-size:13px; text-align:center; outline:none; -moz-appearance:textfield; }
+td input[type=number]::-webkit-inner-spin-button,
+td input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
+td input[type=number]:focus { border-color:var(--accent); background:var(--surface2); }
+td input::placeholder { color:var(--text3); font-size:10px; }
+
+/* 구분선 */
+.sep { border-left:2px solid var(--border); }
+
+/* 행 추가 */
+.add-row td { padding:8px; text-align:center; }
+.btn-add-row { background:none; border:1px dashed var(--border); border-radius:8px; padding:6px 16px; color:var(--text3); font-size:12px; cursor:pointer; width:100%; }
+
+/* 공지 모달 */
+.modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:100; justify-content:center; align-items:center; }
+.modal-overlay.show { display:flex; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; width:90%; max-width:320px; position:relative; }
+.modal h3 { font-size:15px; margin-bottom:12px; }
+.modal-close { position:absolute; top:12px; right:12px; background:none; border:none; color:var(--text2); font-size:20px; cursor:pointer; }
+
+/* 코스 설정 모달 */
+.course-modal { max-width:360px; max-height:80vh; overflow-y:auto; }
+.course-day-item { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); }
+.course-day-label { font-size:12px; color:var(--text2); min-width:36px; }
+
+/* 토스트 */
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#1e1e2e; border:1px solid var(--border); border-radius:10px; padding:10px 20px; font-size:13px; color:var(--text); z-index:200; display:none; }
+.toast.show { display:block; }
+</style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-title">🚛 수거 일지</div>
+    <div class="login-sub">엔비텍코리아 서울지점</div>
+    <input id="loginId" class="form-input" type="text" placeholder="아이디" autocomplete="off" style="margin-bottom:8px">
+    <input id="loginPw" class="form-input" type="password" placeholder="비밀번호" inputmode="numeric" maxlength="4">
+    <div id="loginErr" class="login-err">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+    <button class="btn-primary" onclick="doLogin()">로그인</button>
+  </div>
+</div>
+
+<!-- 앱 -->
+<div id="app">
+  <div class="header">
+    <div>
+      <div class="header-title">🚛 수거 일지 입력</div>
+      <div class="header-sub" id="headerSub">박재영 · 2026-08-19</div>
+    </div>
+    <div class="header-right">
+      <button class="btn-sm" onclick="openCourseModal()">코스 설정</button>
+      <button class="btn-save" onclick="saveAll()">저장</button>
+    </div>
+  </div>
+
+  <!-- 주차/요일 선택 -->
+  <div class="week-bar">
+    <button class="week-btn" id="wk-A" onclick="selectWeek('A')">A주차</button>
+    <button class="week-btn" id="wk-B" onclick="selectWeek('B')">B주차</button>
+    <div style="width:1px;height:16px;background:var(--border)"></div>
+    <button class="week-btn" id="dy-월" onclick="selectDay('월')">월</button>
+    <button class="week-btn" id="dy-화" onclick="selectDay('화')">화</button>
+    <button class="week-btn" id="dy-수" onclick="selectDay('수')">수</button>
+    <button class="week-btn" id="dy-목" onclick="selectDay('목')">목</button>
+    <button class="week-btn" id="dy-금" onclick="selectDay('금')">금</button>
+    <span class="date-label" id="dateLabel"></span>
+  </div>
+
+  <!-- 테이블 -->
+  <div class="table-wrap">
+    <table id="dailyTable">
+      <thead>
+        <tr>
+          <th class="col-client" rowspan="2">거래처</th>
+          <th colspan="10" class="group-header">수거</th>
+          <th colspan="10" class="group-header sep">납품</th>
+        </tr>
+        <tr id="subHeader"></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 공지 모달 -->
+<div class="modal-overlay" id="noticeModal">
+  <div class="modal" style="text-align:center">
+    <button class="modal-close" onclick="closeNotice()">✕</button>
+    <div id="noticeText" style="font-size:16px;color:#fff;line-height:1.7;white-space:pre-wrap"></div>
+  </div>
+</div>
+
+<!-- 코스 설정 모달 -->
+<div class="modal-overlay" id="courseModal">
+  <div class="modal course-modal">
+    <button class="modal-close" onclick="closeCourseModal()">✕</button>
+    <h3>📋 코스 설정</h3>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px">거래처를 순서대로 입력하세요 (줄바꿈으로 구분)</div>
+    <div style="margin-bottom:8px;font-size:12px;color:var(--text3)" id="courseWeekDayLabel">A주차 월요일</div>
+    <textarea id="courseInput" rows="10" class="form-input" style="resize:none;font-size:13px;line-height:1.8" placeholder="거래처명 입력&#10;(한 줄에 하나씩)"></textarea>
+    <button class="btn-save" style="width:100%;margin-top:10px;padding:10px" onclick="saveCourse()">저장</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, doc, getDocs, query, where, getDoc, setDoc, Timestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCka6GbEUJBUf-5BFxvD0O-Hv9dS-T3Big",
+  authDomain: "jypenvitec.firebaseapp.com",
+  projectId: "jypenvitec",
+  storageBucket: "jypenvitec.appspot.com",
+  messagingSenderId: "760975820830",
+  appId: "1:760975820830:web:8b20d40a3d1cf3a1f8e9de"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 상수
+const COLS = ['4L','12L','30L','50L','63L','1L합','2L합','5L합','10L합','20L합'];
+const DAYS = ['월','화','수','목','금'];
+const DB_KEYS = ['box4','box12','box30','box50','box63','resin1','resin2','resin5','resin10','resin20'];
+
+let currentUser = null;
+let currentWeek = 'A';
+let currentDay = '';
+let courseClients = []; // 오늘 코스 거래처 목록
+let memoCache = {}; // 거래처별 최근 메모
+
+// ── 유틸 ──
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getKorDay() {
+  const days = ['일','월','화','수','목','금','토'];
+  return days[new Date().getDay()];
+}
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.borderColor = type === 'success' ? '#34D399' : '#F87171';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ── 로그인 ──
+window.doLogin = async function() {
+  const id = document.getElementById('loginId').value.trim();
+  const pw = document.getElementById('loginPw').value.trim();
+  document.getElementById('loginErr').style.display = 'none';
+  try {
+    // 관리자 체크
+    const adminDoc = await getDoc(doc(db, 'adminConfig', 'auth'));
+    if (id === 'admin' && adminDoc.exists() && adminDoc.data().password === pw) {
+      currentUser = { type: 'admin', name: '관리자', userId: 'admin' };
+      startApp();
+      return;
+    }
+    // 일반 사용자
+    const snap = await getDocs(query(collection(db,'users'), where('userId','==',id)));
+    for (const ud of snap.docs) {
+      if (ud.data().password === pw) {
+        currentUser = { type:'vehicle', userId:id, name:ud.data().name||'', docId:ud.id, cars:ud.data().cars||[] };
+        startApp();
+        return;
+      }
+    }
+  } catch(e) {}
+  document.getElementById('loginErr').style.display = 'block';
+};
+
+document.getElementById('loginId').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('loginPw').focus(); });
+document.getElementById('loginPw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ── 앱 시작 ──
+function startApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+
+  const todayStr = today();
+  const korDay = getKorDay();
+  document.getElementById('headerSub').textContent = (currentUser.name || currentUser.userId) + ' · ' + todayStr;
+  document.getElementById('dateLabel').textContent = todayStr;
+
+  // 서브헤더 렌더
+  renderSubHeader();
+
+  // 오늘 요일 자동 선택
+  if (DAYS.includes(korDay)) {
+    currentDay = korDay;
+    document.getElementById('dy-' + korDay).classList.add('active');
+  } else {
+    currentDay = '월';
+    document.getElementById('dy-월').classList.add('active');
+  }
+
+  // 저장된 주차 불러오기
+  const savedWeek = localStorage.getItem('daily_week_' + currentUser.userId) || 'A';
+  selectWeek(savedWeek, false);
+
+  // 공지 팝업
+  showNotice();
+}
+
+// ── 서브헤더 ──
+function renderSubHeader() {
+  const tr = document.getElementById('subHeader');
+  let html = '';
+  COLS.forEach((c, i) => {
+    html += `<td style="padding:4px 2px;font-size:10px;color:var(--text3);text-align:center;border-bottom:1px solid var(--border);white-space:nowrap${i===5?' border-left:2px solid var(--border)':''}">${c}</td>`;
+  });
+  html += `<td style="border-left:2px solid var(--border);padding:4px 2px;font-size:10px;color:var(--text3);text-align:center;border-bottom:1px solid var(--border)"></td>`;
+  COLS.forEach((c, i) => {
+    html += `<td style="padding:4px 2px;font-size:10px;color:var(--text3);text-align:center;border-bottom:1px solid var(--border);white-space:nowrap">${c}</td>`;
+  });
+  tr.innerHTML = html;
+}
+
+// ── 주차 선택 ──
+window.selectWeek = function(week, reload=true) {
+  currentWeek = week;
+  localStorage.setItem('daily_week_' + currentUser.userId, week);
+  document.querySelectorAll('[id^="wk-"]').forEach(el => el.classList.remove('active'));
+  document.getElementById('wk-' + week).classList.add('active');
+  if (reload) loadCourse();
+};
+
+// ── 요일 선택 ──
+window.selectDay = function(day) {
+  currentDay = day;
+  document.querySelectorAll('[id^="dy-"]').forEach(el => el.classList.remove('active'));
+  document.getElementById('dy-' + day).classList.add('active');
+  loadCourse();
+};
+
+// ── 코스 불러오기 ──
+async function loadCourse() {
+  const key = currentUser.userId + '_' + currentWeek + '_' + currentDay;
+  try {
+    const snap = await getDoc(doc(db, 'courses', key));
+    courseClients = snap.exists() ? (snap.data().clients || []) : [];
+  } catch(e) {
+    courseClients = [];
+  }
+  await loadMemos();
+  renderTable();
+}
+
+// ── 최근 메모 불러오기 ──
+async function loadMemos() {
+  if (!courseClients.length) return;
+  memoCache = {};
+  for (const name of courseClients) {
+    try {
+      const snap = await getDocs(query(collection(db,'일지db'), where('clientName','==',name)));
+      if (!snap.empty) {
+        const docs = snap.docs.map(d=>d.data()).filter(d=>d.memo);
+        if (docs.length) {
+          docs.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+          memoCache[name] = docs[0].memo;
+        }
+      }
+    } catch(e) {}
+  }
+}
+
+// ── 테이블 렌더 ──
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  let html = '';
+
+  courseClients.forEach((name, idx) => {
+    html += `<tr data-idx="${idx}">`;
+    html += `<td class="col-client">
+      <span class="client-seq">${idx+1}.</span>
+      <span class="client-name">${name}</span>
+      ${memoCache[name] ? `<div class="client-memo">${memoCache[name]}</div>` : ''}
+    </td>`;
+    // 수거 10칸
+    DB_KEYS.forEach((k, i) => {
+      html += `<td${i===5?' class="sep"':''}>
+        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="collect" data-key="${k}" min="0">
+      </td>`;
+    });
+    // 납품 10칸
+    html += `<td class="sep"></td>`;
+    DB_KEYS.forEach((k, i) => {
+      html += `<td>
+        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="deliver" data-key="${k}" min="0">
+      </td>`;
+    });
+    html += '</tr>';
+  });
+
+  // 추가 행 버튼
+  html += `<tr class="add-row"><td colspan="22"><button class="btn-add-row" onclick="addRow()">+ 거래처 추가</button></td></tr>`;
+
+  tbody.innerHTML = html;
+}
+
+// ── 행 추가 ──
+window.addRow = function() {
+  const name = prompt('거래처명 입력:');
+  if (!name || !name.trim()) return;
+  courseClients.push(name.trim());
+  renderTable();
+};
+
+// ── 전체 저장 ──
+window.saveAll = async function() {
+  const todayStr = today();
+  const carNumber = currentUser.cars?.[0] || '';
+  let count = 0;
+
+  for (let idx = 0; idx < courseClients.length; idx++) {
+    const name = courseClients[idx];
+    const row = document.querySelector(`tr[data-idx="${idx}"]`);
+    if (!row) continue;
+
+    const data = { clientName: name, date: todayStr, carNumber, timestamp: Timestamp.now() };
+    let hasData = false;
+
+    // 수거
+    DB_KEYS.forEach(k => {
+      const el = row.querySelector(`[data-type="collect"][data-key="${k}"]`);
+      const v = parseInt(el?.value) || 0;
+      if (v > 0) hasData = true;
+      data['collect_' + k] = v;
+    });
+
+    // 납품
+    DB_KEYS.forEach(k => {
+      const el = row.querySelector(`[data-type="deliver"][data-key="${k}"]`);
+      const v = parseInt(el?.value) || 0;
+      if (v > 0) hasData = true;
+      data['deliver_' + k] = v;
+    });
+
+    if (!hasData) continue;
+
+    try {
+      await addDoc(collection(db,'일지db'), data);
+      count++;
+    } catch(e) {}
+  }
+
+  if (count > 0) toast(`${count}건 저장 완료!`, 'success');
+  else toast('입력된 데이터가 없어요', 'error');
+};
+
+// ── 코스 설정 모달 ──
+window.openCourseModal = async function() {
+  document.getElementById('courseWeekDayLabel').textContent = currentWeek + '주차 ' + currentDay + '요일';
+  const key = currentUser.userId + '_' + currentWeek + '_' + currentDay;
+  try {
+    const snap = await getDoc(doc(db, 'courses', key));
+    const clients = snap.exists() ? (snap.data().clients || []) : [];
+    document.getElementById('courseInput').value = clients.join('\n');
+  } catch(e) {
+    document.getElementById('courseInput').value = '';
+  }
+  document.getElementById('courseModal').classList.add('show');
+};
+
+window.closeCourseModal = function() {
+  document.getElementById('courseModal').classList.remove('show');
+};
+
+window.saveCourse = async function() {
+  const text = document.getElementById('courseInput').value;
+  const clients = text.split('\n').map(s=>s.trim()).filter(Boolean);
+  const key = currentUser.userId + '_' + currentWeek + '_' + currentDay;
+  try {
+    await setDoc(doc(db, 'courses', key), { clients, userId: currentUser.userId, week: currentWeek, day: currentDay });
+    courseClients = clients;
+    await loadMemos();
+    renderTable();
+    closeCourseModal();
+    toast('코스 저장 완료!', 'success');
+  } catch(e) {
+    toast('저장 실패: ' + e.message, 'error');
+  }
+};
+
+// ── 공지 ──
+async function showNotice() {
+  try {
+    const snap = await getDoc(doc(db, 'adminConfig', 'notice'));
+    const data = snap.exists() ? snap.data() : {};
+    const content = data.content || '오늘도 안전운전 하세요! 🚛';
+    const el = document.getElementById('noticeText');
+    el.textContent = content;
+    el.style.fontSize = data.fontSize || '16px';
+    el.style.color = data.color || '#ffffff';
+  } catch(e) {
+    document.getElementById('noticeText').textContent = '오늘도 안전운전 하세요! 🚛';
+  }
+  document.getElementById('noticeModal').classList.add('show');
+  document.getElementById('noticeModal').onclick = e => { if(e.target.id==='noticeModal') closeNotice(); };
+}
+
+window.closeNotice = function() {
+  document.getElementById('noticeModal').classList.remove('show');
+};
+
+</script>
+</body>
+</html>
