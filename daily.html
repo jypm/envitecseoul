@@ -3,9 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="dark">
 <title>수거 일지 입력</title>
 <style>
+* { color-scheme: dark; }
 :root {
+  color-scheme: light dark;
   --bg: #0a0a0f;
   --surface: #141418;
   --surface2: #1c1c22;
@@ -71,10 +74,10 @@ td input.d-resin { color:#fff; }
 td input[type=number]::-webkit-inner-spin-button,
 td input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 td input[type=number]:focus { border-color:var(--accent); background:var(--surface2); }
-td input.c-box::placeholder, td input.c-box::-webkit-input-placeholder { color:#0f1525; font-size:10px; }
-td input.c-resin::placeholder, td input.c-resin::-webkit-input-placeholder { color:#0f2020; font-size:10px; }
-td input.d-box::placeholder, td input.d-box::-webkit-input-placeholder { color:#200f0f; font-size:10px; }
-td input.d-resin::placeholder, td input.d-resin::-webkit-input-placeholder { color:#201a0f; font-size:10px; }
+td input.c-box::placeholder, td input.c-box::-webkit-input-placeholder { color:#2244aa !important; font-size:10px; }
+td input.c-resin::placeholder, td input.c-resin::-webkit-input-placeholder { color:#116666 !important; font-size:10px; }
+td input.d-box::placeholder, td input.d-box::-webkit-input-placeholder { color:#aa2222 !important; font-size:10px; }
+td input.d-resin::placeholder, td input.d-resin::-webkit-input-placeholder { color:#886622 !important; font-size:10px; }
 
 /* 구분선 */
 .sep { border-left:2px solid var(--border); }
