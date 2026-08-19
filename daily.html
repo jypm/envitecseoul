@@ -71,10 +71,10 @@ td input.d-resin { color:#FBBF24 !important; }
 td input[type=number]::-webkit-inner-spin-button,
 td input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 td input[type=number]:focus { border-color:var(--accent); background:var(--surface2); }
-td input.c-box::placeholder { color:#1e3d6e; font-size:10px; }
-td input.c-resin::placeholder { color:#134a57; font-size:10px; }
-td input.d-box::placeholder { color:#6e2020; font-size:10px; }
-td input.d-resin::placeholder { color:#6e4a10; font-size:10px; }
+td input.c-box::placeholder { color:#1a2a3a; font-size:10px; }
+td input.c-resin::placeholder { color:#0f2a30; font-size:10px; }
+td input.d-box::placeholder { color:#2a1010; font-size:10px; }
+td input.d-resin::placeholder { color:#2a1a05; font-size:10px; }
 td input.c-box { color:#fff; }
 td input.c-resin { color:#fff; }
 td input.d-box { color:#fff; }
@@ -347,8 +347,8 @@ async function startApp() {
 // ── 서브헤더 ──
 function renderSubHeader() {
   const tr = document.getElementById('subHeader');
-  const cColors = ['#1e3d6e','#1e3d6e','#1e3d6e','#1e3d6e','#1e3d6e','#134a57','#134a57','#134a57','#134a57','#134a57'];
-  const dColors = ['#6e2020','#6e2020','#6e2020','#6e2020','#6e2020','#6e4a10','#6e4a10','#6e4a10','#6e4a10','#6e4a10'];
+  const cColors = ['#1a2a3a','#1a2a3a','#1a2a3a','#1a2a3a','#1a2a3a','#0f2a30','#0f2a30','#0f2a30','#0f2a30','#0f2a30'];
+  const dColors = ['#2a1010','#2a1010','#2a1010','#2a1010','#2a1010','#2a1a05','#2a1a05','#2a1a05','#2a1a05','#2a1a05'];
   let html = '';
   COLS.forEach((c, i) => {
     html += '<td style="padding:4px 2px;font-size:10px;color:' + cColors[i] + ';text-align:center;border-bottom:1px solid var(--border);white-space:nowrap' + (i===5?' border-left:2px solid var(--border)':'') + '">' + c + '</td>';
