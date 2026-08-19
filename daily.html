@@ -162,10 +162,13 @@ td input::placeholder { color:var(--text3); font-size:10px; }
   <div class="modal course-modal">
     <button class="modal-close" onclick="closeCourseModal()">✕</button>
     <h3>📋 코스 설정</h3>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:12px">거래처를 순서대로 입력하세요 (줄바꿈으로 구분)</div>
     <div style="margin-bottom:8px;font-size:12px;color:var(--text3)" id="courseWeekDayLabel">A주차 월요일</div>
-    <textarea id="courseInput" rows="10" class="form-input" style="resize:none;font-size:13px;line-height:1.8" placeholder="거래처명 입력&#10;(한 줄에 하나씩)"></textarea>
-    <button class="btn-save" style="width:100%;margin-top:10px;padding:10px" onclick="saveCourse()">저장</button>
+    <div style="position:relative;margin-bottom:8px">
+      <input id="courseSearch" class="form-input" type="text" placeholder="거래처 검색 (초성 가능)" autocomplete="off" oninput="courseAcFilter()">
+      <div id="courseAcList" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;z-index:50;max-height:180px;overflow-y:auto"></div>
+    </div>
+    <div id="courseClientList" style="margin-bottom:12px;max-height:300px;overflow-y:auto"></div>
+    <button class="btn-save" style="width:100%;padding:10px" onclick="saveCourse()">저장</button>
   </div>
 </div>
 
@@ -270,8 +273,8 @@ function startApp() {
   const savedWeek = localStorage.getItem('daily_week_' + currentUser.userId) || 'A';
   selectWeek(savedWeek, false);
 
-  // 공지 팝업
-  showNotice();
+  // 코스 불러오기
+  loadCourse();
 }
 
 // ── 서브헤더 ──
@@ -420,17 +423,38 @@ window.saveAll = async function() {
   else toast('입력된 데이터가 없어요', 'error');
 };
 
+// ── 초성 ──
+const CHOSUNG = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+function getChosung(str) {
+  return [...str].map(ch => {
+    const c = ch.charCodeAt(0);
+    if (c >= 0xAC00 && c <= 0xD7A3) return CHOSUNG[Math.floor((c-0xAC00)/(21*28))];
+    return ch;
+  }).join('');
+}
+
+let allClients = [];
+let tempCourseClients = [];
+
 // ── 코스 설정 모달 ──
 window.openCourseModal = async function() {
   document.getElementById('courseWeekDayLabel').textContent = currentWeek + '주차 ' + currentDay + '요일';
   const key = currentUser.userId + '_' + currentWeek + '_' + currentDay;
   try {
     const snap = await getDoc(doc(db, 'courses', key));
-    const clients = snap.exists() ? (snap.data().clients || []) : [];
-    document.getElementById('courseInput').value = clients.join('\n');
+    tempCourseClients = snap.exists() ? [...(snap.data().clients || [])] : [...courseClients];
   } catch(e) {
-    document.getElementById('courseInput').value = '';
+    tempCourseClients = [...courseClients];
   }
+  // 거래처 목록 불러오기
+  try {
+    const snap = await getDocs(collection(db, 'clients'));
+    allClients = snap.docs.map(d=>d.data().name).filter(Boolean).sort();
+  } catch(e) { allClients = []; }
+
+  document.getElementById('courseSearch').value = '';
+  document.getElementById('courseAcList').style.display = 'none';
+  renderCourseClientList();
   document.getElementById('courseModal').classList.add('show');
 };
 
@@ -438,13 +462,57 @@ window.closeCourseModal = function() {
   document.getElementById('courseModal').classList.remove('show');
 };
 
+function renderCourseClientList() {
+  const el = document.getElementById('courseClientList');
+  if (!tempCourseClients.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px 0">거래처를 검색해서 추가하세요</div>';
+    return;
+  }
+  el.innerHTML = tempCourseClients.map((name, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:11px;color:var(--text3);min-width:20px">${i+1}.</span>
+      <span style="flex:1;font-size:13px;color:var(--text)">${name}</span>
+      <button onclick="removeCourseClient(${i})" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 4px">✕</button>
+    </div>
+  `).join('');
+}
+
+window.removeCourseClient = function(idx) {
+  tempCourseClients.splice(idx, 1);
+  renderCourseClientList();
+};
+
+window.courseAcFilter = function() {
+  const val = document.getElementById('courseSearch').value.trim();
+  const list = document.getElementById('courseAcList');
+  if (!val) { list.style.display = 'none'; return; }
+
+  const isChosung = [...val].every(c => c >= 'ㄱ' && c <= 'ㅎ');
+  const filtered = allClients.filter(item => {
+    if (isChosung) return getChosung(item).includes(val);
+    return item.toLowerCase().includes(val.toLowerCase()) || getChosung(item).includes(val);
+  }).slice(0, 10);
+
+  if (!filtered.length) { list.style.display = 'none'; return; }
+
+  list.innerHTML = filtered.map(name =>
+    `<div onclick="addCourseClient('${name.replace(/'/g,"\\'")}'))" style="padding:10px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);color:var(--text)">${name}</div>`
+  ).join('');
+  list.style.display = 'block';
+};
+
+window.addCourseClient = function(name) {
+  if (!tempCourseClients.includes(name)) tempCourseClients.push(name);
+  document.getElementById('courseSearch').value = '';
+  document.getElementById('courseAcList').style.display = 'none';
+  renderCourseClientList();
+};
+
 window.saveCourse = async function() {
-  const text = document.getElementById('courseInput').value;
-  const clients = text.split('\n').map(s=>s.trim()).filter(Boolean);
   const key = currentUser.userId + '_' + currentWeek + '_' + currentDay;
   try {
-    await setDoc(doc(db, 'courses', key), { clients, userId: currentUser.userId, week: currentWeek, day: currentDay });
-    courseClients = clients;
+    await setDoc(doc(db, 'courses', key), { clients: tempCourseClients, userId: currentUser.userId, week: currentWeek, day: currentDay });
+    courseClients = [...tempCourseClients];
     await loadMemos();
     renderTable();
     closeCourseModal();
