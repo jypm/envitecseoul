@@ -809,13 +809,12 @@ window.closeExitModal = function() {
 }
 
 // 세션 복원 (새로고침/재접속 시 자동 로그인)
-window.addEventListener('load', function() {
+window.addEventListener('load', async function() {
   var session = localStorage.getItem('envitec_session');
   if (session) {
     try {
       window.currentUser = JSON.parse(session);
-      startApp();
-      for (var i = 0; i < 5; i++) history.pushState(null, '', location.href);
+      await startApp();
     } catch(e) {
       localStorage.removeItem('envitec_session');
     }
