@@ -1989,17 +1989,14 @@ window.showLastInput = async function(carNumber, date) {
 
 // ── 로그아웃 ──
 window.doLogout = function() {
-  window.currentUser = null;
   sessionStorage.removeItem('envitec_session');
   localStorage.removeItem('envitec_session');
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('loginPassword').value = '';
   document.getElementById('loginErr').style.display = 'none';
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (isStandalone) {
-    history.go(-(history.length - 1));
-  }
+  history.go(-(history.length - 1));
+  window.currentUser = null;
 };
 
 // ── 탭 전환 ──
