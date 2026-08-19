@@ -1989,6 +1989,7 @@ window.showLastInput = async function(carNumber, date) {
 
 // ── 로그아웃 ──
 window.doLogout = function() {
+  window.currentUser = null;
   sessionStorage.removeItem('envitec_session');
   localStorage.removeItem('envitec_session');
   document.getElementById('app').style.display = 'none';
@@ -1996,7 +1997,6 @@ window.doLogout = function() {
   document.getElementById('loginPassword').value = '';
   document.getElementById('loginErr').style.display = 'none';
   history.go(-(history.length - 1));
-  window.currentUser = null;
 };
 
 // ── 탭 전환 ──
