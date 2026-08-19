@@ -358,13 +358,6 @@ function renderSubHeader() {
     html += '<td style="padding:4px 2px;font-size:10px;color:' + dColors[i] + ';text-align:center;border-bottom:1px solid var(--border);white-space:nowrap">' + c + '</td>';
   });
   tr.innerHTML = html;
-}">${c}</td>`;
-  });
-  html += `<td style="border-left:2px solid var(--border);padding:4px 2px;font-size:10px;color:var(--text3);text-align:center;border-bottom:1px solid var(--border)"></td>`;
-  COLS.forEach((c, i) => {
-    html += `<td style="padding:4px 2px;font-size:10px;color:var(--text3);text-align:center;border-bottom:1px solid var(--border);white-space:nowrap">${c}</td>`;
-  });
-  tr.innerHTML = html;
 }
 
 // ── 주차 선택 ──
