@@ -2143,11 +2143,18 @@ history.pushState(null, '', location.href);
     try {
       window.currentUser = JSON.parse(session);
       await startApp();
-      setTimeout(function() {
-        for (var i = 0; i < 5; i++) history.pushState(null, '', location.href);
-      }, 1000);
+      // 브라우저 포커스 트릭으로 history 활성화
+      var dummy = document.createElement('input');
+      dummy.style.position = 'fixed';
+      dummy.style.opacity = '0';
+      document.body.appendChild(dummy);
+      dummy.focus();
+      dummy.blur();
+      document.body.removeChild(dummy);
+      for (var i = 0; i < 5; i++) history.pushState(null, '', location.href);
     } catch(e) {
       localStorage.removeItem('envitec_session');
+    }
     }
   }
 })();
