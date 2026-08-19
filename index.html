@@ -2,11 +2,6 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<script>
-  history.pushState(null, '', location.href);
-  history.pushState(null, '', location.href);
-  history.pushState(null, '', location.href);
-</script>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="엔비텍">
@@ -807,6 +802,10 @@ document.getElementById('loginId').addEventListener('keydown', function(e) { if(
 document.getElementById('loginPassword').addEventListener('keydown', function(e) { if(e.key==='Enter') doLogin(); });
 
 // 뒤로가기 제어
+history.pushState(null, '', location.href);
+history.pushState(null, '', location.href);
+history.pushState(null, '', location.href);
+
 let _backBlocking = false;
 let _exitModalOpen = false;
 
@@ -834,6 +833,7 @@ async function showNoticePopup() {
 
 window.closeNoticeModal = function() {
   document.getElementById('noticeModal').classList.remove('show');
+  for (var i = 0; i < 5; i++) history.pushState(null, '', location.href);
 }
 
 window.saveNotice = async function() {
@@ -2224,11 +2224,6 @@ window.addEventListener('load', () => {
     document.getElementById('loginErr').style.display = 'block';
   }
 });
-
-// ── 초기 history 쌓기 ──
-history.pushState(null, '', location.href);
-history.pushState(null, '', location.href);
-history.pushState(null, '', location.href);
 
 // ── 세션 복원 ──
 (async function() {
