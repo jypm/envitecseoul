@@ -1996,7 +1996,10 @@ window.doLogout = function() {
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('loginPassword').value = '';
   document.getElementById('loginErr').style.display = 'none';
-  history.go(-(history.length - 1));
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (isStandalone) {
+    history.go(-(history.length - 1));
+  }
 };
 
 // ── 탭 전환 ──
