@@ -112,7 +112,10 @@ td input::placeholder { color:#333345; font-size:10px; }
   <div class="header">
     <div>
       <div class="header-title">🚛 수거 일지 입력</div>
-      <div class="header-sub" id="headerSub">박재영 · 2026-08-19</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+        <span class="header-sub" id="headerSub">박재영</span>
+        <input type="date" id="selectedDate" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 6px;color:var(--text);font-size:11px;outline:none" onchange="onDateChange()">
+      </div>
     </div>
     <div class="header-right">
       <button class="btn-sm" onclick="openCourseModal()">코스 설정</button>
@@ -282,7 +285,8 @@ function startApp() {
 
   const todayStr = today();
   const korDay = getKorDay();
-  document.getElementById('headerSub').textContent = (currentUser.name || currentUser.userId) + ' · ' + todayStr;
+  document.getElementById('headerSub').textContent = (currentUser.name || currentUser.userId);
+  document.getElementById('selectedDate').value = todayStr;
   document.getElementById('dateLabel').textContent = todayStr;
 
   // 서브헤더 렌더
@@ -452,7 +456,7 @@ window.selectAddRow = async function(name) {
 
 // ── 전체 저장 ──
 window.saveAll = async function() {
-  const todayStr = today();
+  const todayStr = document.getElementById('selectedDate').value || today();
   const carNumber = currentUser.cars?.[0] || '';
   let count = 0;
   const baseTime = Date.now();
@@ -494,7 +498,10 @@ window.saveAll = async function() {
   else toast('입력된 데이터가 없어요', 'error');
 };
 
-// ── 초성 ──
+window.onDateChange = function() {
+  const date = document.getElementById('selectedDate').value;
+  document.getElementById('dateLabel').textContent = date;
+};
 const CHOSUNG = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
 function getChosung(str) {
   return [...str].map(ch => {
