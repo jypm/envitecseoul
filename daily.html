@@ -52,11 +52,11 @@ table { border-collapse: collapse; min-width: max-content; }
 
 /* 헤더 행 */
 thead th { position:sticky; top:0; background:var(--surface); z-index:10; padding:8px 4px; font-size:11px; color:var(--text2); border-bottom:1px solid var(--border); white-space:nowrap; text-align:center; }
-thead th.col-client { position:sticky; top:0; left:0; z-index:20; background:var(--surface); padding:8px 10px; text-align:left; min-width:110px; }
+thead th.col-client { position:sticky; top:0; left:0; z-index:20; background:var(--surface); padding:8px 10px; text-align:left; min-width:120px; }
 thead th.group-header { border-bottom:none; padding-bottom:2px; color:#333345; font-size:10px; }
 
 /* 거래처 열 고정 */
-td.col-client { position:sticky; left:0; background:var(--surface2); z-index:5; padding:8px 10px; border-right:1px solid var(--border); min-width:110px; max-width:130px; }
+td.col-client { position:sticky; left:0; background:var(--surface2); z-index:5; padding:8px 10px; border-right:1px solid var(--border); min-width:120px; max-width:140px; text-align:left; vertical-align:top; }
 td.col-client .client-name { font-size:13px; color:var(--text); font-weight:500; }
 td.col-client .client-memo { font-size:10px; color:#FBBF24; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px; }
 td.col-client .client-seq { font-size:10px; color:var(--text3); margin-right:4px; }
@@ -125,7 +125,7 @@ td input::placeholder { color:#333345; font-size:10px; }
   </div>
 
   <!-- 주차/요일 선택 -->
-  <div class="week-bar">
+  <div class="week-bar" id="weekBar">
     <button class="week-btn" id="wk-A" onclick="selectWeek('A')">A주차</button>
     <button class="week-btn" id="wk-B" onclick="selectWeek('B')">B주차</button>
     <div style="width:1px;height:16px;background:var(--border)"></div>
@@ -135,6 +135,9 @@ td input::placeholder { color:#333345; font-size:10px; }
     <button class="week-btn" id="dy-목" onclick="selectDay('목')">목</button>
     <button class="week-btn" id="dy-금" onclick="selectDay('금')">금</button>
     <span class="date-label" id="dateLabel"></span>
+    <button id="loadBtn" class="btn-sm" onclick="loadData()" style="margin-left:auto;color:#60A5FA;border-color:#60A5FA">불러오기</button>
+    <button id="confirmBtn" class="btn-sm" onclick="confirmData()" style="display:none;color:#34D399;border-color:#34D399">확정</button>
+    <span id="confirmedLabel" style="display:none;font-size:11px;color:#34D399;margin-left:4px">✅ 확정됨</span>
   </div>
 
   <!-- 테이블 -->
@@ -370,9 +373,6 @@ async function loadCourse() {
   } catch(e) {
     courseClients = [];
   }
-  // 임시저장 불러오기
-  const date = document.getElementById('selectedDate')?.value || today();
-  loadTempStorage(date);
   await loadMemos();
   renderTable();
 }
@@ -397,35 +397,134 @@ async function loadMemos() {
 
 // ── 테이블 렌더 ──
 // 입력값 저장 캐시
-let inputCache = {}; // { idx: { collect: {key:val}, deliver: {key:val}, memo: '' } }
+let inputCache = {};
+let isConfirmed = false; // 확정 여부
 
-function saveTempStorage() {
+// ── Firestore 임시저장 ──
+async function saveTempStorage() {
   if (!currentUser) return;
   const date = document.getElementById('selectedDate')?.value || today();
-  const key = `daily_temp_${currentUser.userId}_${date}`;
-  localStorage.setItem(key, JSON.stringify({ clients: courseClients, cache: inputCache }));
+  const key = currentUser.userId + '_' + date;
+  try {
+    await setDoc(doc(db, 'dailyTemp', key), {
+      clients: courseClients,
+      cache: inputCache,
+      date,
+      userId: currentUser.userId,
+      updatedAt: Timestamp.now()
+    });
+  } catch(e) { console.error(e); }
 }
 
-function loadTempStorage(date) {
+async function loadTempStorage(date) {
   if (!currentUser) return false;
-  const key = `daily_temp_${currentUser.userId}_${date}`;
-  const saved = localStorage.getItem(key);
-  if (saved) {
-    try {
-      const data = JSON.parse(saved);
+  const key = currentUser.userId + '_' + date;
+  try {
+    const snap = await getDoc(doc(db, 'dailyTemp', key));
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data.clients) courseClients = data.clients;
       inputCache = data.cache || {};
       return true;
-    } catch(e) {}
-  }
+    }
+  } catch(e) {}
   return false;
 }
 
-function clearTempStorage() {
+async function clearTempStorage() {
   if (!currentUser) return;
   const date = document.getElementById('selectedDate')?.value || today();
-  const key = `daily_temp_${currentUser.userId}_${date}`;
-  localStorage.removeItem(key);
+  const key = currentUser.userId + '_' + date;
+  try {
+    await setDoc(doc(db, 'dailyTemp', key), { deleted: true }, { merge: true });
+  } catch(e) {}
 }
+
+// ── 날짜 변경 ──
+window.onDateChange = function() {
+  const date = document.getElementById('selectedDate').value;
+  document.getElementById('dateLabel').textContent = date;
+  const todayStr = today();
+  isConfirmed = false;
+
+  // 오늘이면 주차/요일 활성, 이전날짜면 비활성
+  const isToday = date === todayStr;
+  ['wk-A','wk-B','dy-월','dy-화','dy-수','dy-목','dy-금'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.disabled = !isToday;
+      el.style.opacity = isToday ? '' : '0.4';
+      el.style.cursor = isToday ? '' : 'not-allowed';
+    }
+  });
+  document.getElementById('loadBtn').style.display = '';
+  document.getElementById('confirmBtn').style.display = 'none';
+  document.getElementById('confirmedLabel').style.display = 'none';
+
+  // 입력칸 초기화
+  inputCache = {};
+  courseClients = [];
+  renderTable();
+};
+
+// ── 불러오기 ──
+window.loadData = async function() {
+  const date = document.getElementById('selectedDate').value || today();
+  const todayStr = today();
+  inputCache = {};
+  courseClients = [];
+
+  if (date === todayStr) {
+    // 오늘: 코스 + 임시저장 불러오기
+    await loadCourse();
+    const hasTmp = await loadTempStorage(date);
+    if (hasTmp) toast('임시저장 데이터 불러왔어요!', 'success');
+  } else {
+    // 이전날짜: DB에서 seq 있는 데이터 불러오기
+    try {
+      const carNumber = currentUser.cars?.[0] || '';
+      const q = carNumber
+        ? query(collection(db,'일지db'), where('date','==',date), where('carNumber','==',carNumber), where('seq','>=',1))
+        : query(collection(db,'일지db'), where('date','==',date), where('seq','>=',1));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const docs = snap.docs.map(d=>({...d.data(), id:d.id}));
+        docs.sort((a,b)=>(a.seq||0)-(b.seq||0));
+        courseClients = docs.map(d=>d.clientName);
+        docs.forEach((d, idx) => {
+          inputCache[idx] = { collect:{}, deliver:{}, memo: d.memo||'' };
+          SIZES.forEach(sz => {
+            inputCache[idx].collect[sz] = d['collect'+sz] ? String(d['collect'+sz]) : '';
+            inputCache[idx].deliver[sz] = d['deliver'+sz] ? String(d['deliver'+sz]) : '';
+          });
+        });
+        await loadMemos();
+        renderTable();
+        toast(`${docs.length}건 불러왔어요!`, 'success');
+      } else {
+        toast('해당 날짜 데이터가 없어요', 'error');
+      }
+    } catch(e) { toast('불러오기 실패: ' + e.message, 'error'); }
+  }
+
+  document.getElementById('confirmBtn').style.display = '';
+  document.getElementById('loadBtn').style.display = 'none';
+};
+
+// ── 확정 ──
+window.confirmData = function() {
+  isConfirmed = true;
+  document.getElementById('confirmBtn').style.display = 'none';
+  document.getElementById('confirmedLabel').style.display = '';
+  // 주차/요일/날짜 잠금
+  ['wk-A','wk-B','dy-월','dy-화','dy-수','dy-목','dy-금'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.disabled = true; el.style.opacity = '0.4'; el.style.cursor = 'not-allowed'; }
+  });
+  document.getElementById('selectedDate').disabled = true;
+  document.getElementById('selectedDate').style.opacity = '0.4';
+  toast('확정됐어요! 이제 입력/수정하세요', 'success');
+};
 
 function saveInputCache() {
   courseClients.forEach((name, idx) => {
@@ -476,7 +575,7 @@ function renderTable() {
     html += '</tr>';
   });
 
-  html += `<tr class="add-row"><td colspan="22"><button class="btn-add-row" onclick="addRow()">+ 거래처 추가</button></td></tr>`;
+  // 추가 버튼 없음 (코스 설정에서만 추가)
   tbody.innerHTML = html;
 }
 
@@ -559,9 +658,9 @@ window.selectAddRow = async function(name) {
 
 // ── 전체 저장 ──
 // ── 임시저장 ──
-window.saveTempAll = function() {
+window.saveTempAll = async function() {
   saveInputCache();
-  saveTempStorage();
+  await saveTempStorage();
   toast('임시저장 완료!', 'success');
 };
 
@@ -619,10 +718,6 @@ window.sendAll = async function() {
   } else toast('입력된 데이터가 없어요', 'error');
 };
 
-window.onDateChange = function() {
-  const date = document.getElementById('selectedDate').value;
-  document.getElementById('dateLabel').textContent = date;
-};
 const CHOSUNG = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
 function getChosung(str) {
   return [...str].map(ch => {
@@ -668,13 +763,24 @@ function renderCourseClientList() {
     return;
   }
   el.innerHTML = tempCourseClients.map((name, i) => `
-    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+    <div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--border)">
       <span style="font-size:11px;color:var(--text3);min-width:20px">${i+1}.</span>
       <span style="flex:1;font-size:13px;color:var(--text)">${name}</span>
-      <button onclick="removeCourseClient(${i})" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 4px">✕</button>
+      <button onclick="moveCourseClient(${i},-1)" style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--text2);font-size:12px;cursor:pointer;padding:2px 6px" ${i===0?'disabled':''}>▲</button>
+      <button onclick="moveCourseClient(${i},1)" style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--text2);font-size:12px;cursor:pointer;padding:2px 6px" ${i===tempCourseClients.length-1?'disabled':''}>▼</button>
+      <button onclick="removeCourseClient(${i})" style="background:none;border:none;color:#F87171;font-size:16px;cursor:pointer;padding:0 4px">✕</button>
     </div>
   `).join('');
 }
+
+window.moveCourseClient = function(idx, dir) {
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= tempCourseClients.length) return;
+  const tmp = tempCourseClients[idx];
+  tempCourseClients[idx] = tempCourseClients[newIdx];
+  tempCourseClients[newIdx] = tmp;
+  renderCourseClientList();
+};
 
 window.removeCourseClient = function(idx) {
   tempCourseClients.splice(idx, 1);
