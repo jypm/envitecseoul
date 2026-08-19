@@ -496,7 +496,7 @@ window.courseAcFilter = function() {
   if (!filtered.length) { list.style.display = 'none'; return; }
 
   list.innerHTML = filtered.map(name =>
-    `<div onclick="addCourseClient('${name.replace(/'/g,"\\'")}'))" style="padding:10px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);color:var(--text)">${name}</div>`
+    `<div onclick="addCourseClient('${name.replace(/'/g,"\\'")}')` + `" style="padding:10px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);color:var(--text)">${name}</div>`
   ).join('');
   list.style.display = 'block';
 };
