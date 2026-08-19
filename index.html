@@ -2,8 +2,6 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
-<script>var vConsole = new VConsole();</script>
 <script>
   history.pushState(null, '', location.href);
   history.pushState(null, '', location.href);
@@ -472,7 +470,35 @@
         <div id="workerList"></div>
       </div>
       <div class="admin-section">
-        <h3>🔐 관리자 비밀번호</h3>
+        <h3>📢 공지 메시지 관리</h3>
+        <div style="margin-bottom:8px">
+          <label style="font-size:12px;color:#888">내용 (비우면 기본 메시지 표시)</label>
+          <textarea id="noticeContent" rows="4" class="form-input" style="resize:none;margin-top:4px" placeholder="오늘도 안전운전 하세요! 🚛"></textarea>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <div style="flex:1">
+            <label style="font-size:12px;color:#888">글자 크기</label>
+            <select id="noticeFontSize" class="form-select" style="margin-top:4px">
+              <option value="13px">작게</option>
+              <option value="16px" selected>보통</option>
+              <option value="20px">크게</option>
+              <option value="24px">아주 크게</option>
+            </select>
+          </div>
+          <div style="flex:1">
+            <label style="font-size:12px;color:#888">글자 색상</label>
+            <select id="noticeFontColor" class="form-select" style="margin-top:4px">
+              <option value="#ffffff">흰색</option>
+              <option value="#FBBF24">노란색</option>
+              <option value="#60A5FA">파란색</option>
+              <option value="#34D399">초록색</option>
+              <option value="#F87171">빨간색</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveNotice()" style="width:100%">저장</button>
+        <button class="btn btn-secondary btn-sm" onclick="previewNotice()" style="width:100%;margin-top:6px">미리보기</button>
+      </div>
         <button class="btn btn-secondary btn-sm" onclick="openChangePasswordModal('admin')">비밀번호 변경</button>
       </div>
     </div>
@@ -489,6 +515,13 @@
       <button onclick="closeExitModal()" style="flex:1;padding:12px;border-radius:10px;border:1px solid #333;background:#2a2a2a;color:#aaa;font-size:15px;cursor:pointer">아니요</button>
       <button onclick="closeExitModal();doLogout();" style="flex:1;padding:12px;border-radius:10px;border:none;background:#3D82F6;color:#fff;font-size:15px;cursor:pointer">네</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="noticeModal" style="z-index:9998">
+  <div class="modal" style="max-width:320px;text-align:center;padding:28px 20px;position:relative">
+    <button onclick="closeNoticeModal()" style="position:absolute;top:12px;right:12px;background:none;border:none;color:#888;font-size:22px;cursor:pointer;line-height:1">✕</button>
+    <div id="noticeText" style="line-height:1.7;white-space:pre-wrap;word-break:break-all"></div>
   </div>
 </div>
 
@@ -777,6 +810,58 @@ document.getElementById('loginPassword').addEventListener('keydown', function(e)
 let _backBlocking = false;
 let _exitModalOpen = false;
 
+// ── 공지 팝업 ──
+async function showNoticePopup() {
+  try {
+    const snap = await getDoc(doc(db, 'adminConfig', 'notice'));
+    const data = snap.exists() ? snap.data() : {};
+    const content = data.content || '오늘도 안전운전 하세요! 🚛';
+    const fontSize = data.fontSize || '16px';
+    const color = data.color || '#ffffff';
+    const el = document.getElementById('noticeText');
+    el.textContent = content;
+    el.style.fontSize = fontSize;
+    el.style.color = color;
+  } catch(e) {
+    document.getElementById('noticeText').textContent = '오늘도 안전운전 하세요! 🚛';
+  }
+  document.getElementById('noticeModal').classList.add('show');
+  // 팝업 밖 터치로 닫기
+  document.getElementById('noticeModal').onclick = function(e) {
+    if (e.target === this) closeNoticeModal();
+  };
+}
+
+window.closeNoticeModal = function() {
+  document.getElementById('noticeModal').classList.remove('show');
+}
+
+window.saveNotice = async function() {
+  const content = document.getElementById('noticeContent').value.trim();
+  const fontSize = document.getElementById('noticeFontSize').value;
+  const color = document.getElementById('noticeFontColor').value;
+  try {
+    await setDoc(doc(db, 'adminConfig', 'notice'), { content, fontSize, color });
+    toast('공지 저장 완료!', 'success');
+  } catch(e) {
+    toast('저장 실패: ' + e.message, 'error');
+  }
+}
+
+window.previewNotice = function() {
+  const content = document.getElementById('noticeContent').value.trim() || '오늘도 안전운전 하세요! 🚛';
+  const fontSize = document.getElementById('noticeFontSize').value;
+  const color = document.getElementById('noticeFontColor').value;
+  const el = document.getElementById('noticeText');
+  el.textContent = content;
+  el.style.fontSize = fontSize;
+  el.style.color = color;
+  document.getElementById('noticeModal').classList.add('show');
+  document.getElementById('noticeModal').onclick = function(e) {
+    if (e.target === this) closeNoticeModal();
+  };
+}
+
 window.openExitModal = function() {
   _exitModalOpen = true;
   document.getElementById('exitModal').classList.add('show');
@@ -787,7 +872,6 @@ window.closeExitModal = function() {
 }
 
 window.addEventListener('popstate', function() {
-  console.log('popstate 발생! currentUser:', !!window.currentUser, 'history.length:', history.length);
   if (!window.currentUser) return;
   if (_backBlocking) return;
   _backBlocking = true;
@@ -1453,6 +1537,16 @@ async function loadAdminData() {
   await loadCars();
   await loadUsers();
   await loadWorkerAdmin();
+  // 공지 내용 불러오기
+  try {
+    const snap = await getDoc(doc(db, 'adminConfig', 'notice'));
+    if (snap.exists()) {
+      const data = snap.data();
+      document.getElementById('noticeContent').value = data.content || '';
+      document.getElementById('noticeFontSize').value = data.fontSize || '16px';
+      document.getElementById('noticeFontColor').value = data.color || '#ffffff';
+    }
+  } catch(e) {}
 }
 
 // ── 관리자: 차량 관리 ──
@@ -2143,18 +2237,10 @@ history.pushState(null, '', location.href);
     try {
       window.currentUser = JSON.parse(session);
       await startApp();
-      // 브라우저 포커스 트릭으로 history 활성화
-      var dummy = document.createElement('input');
-      dummy.style.position = 'fixed';
-      dummy.style.opacity = '0';
-      document.body.appendChild(dummy);
-      dummy.focus();
-      dummy.blur();
-      document.body.removeChild(dummy);
-      for (var i = 0; i < 5; i++) history.pushState(null, '', location.href);
+      // 공지 팝업 표시 (터치 인터랙션 유도)
+      await showNoticePopup();
     } catch(e) {
       localStorage.removeItem('envitec_session');
-    }
     }
   }
 })();
