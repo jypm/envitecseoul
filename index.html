@@ -803,6 +803,13 @@ window.addEventListener('popstate', function() {
   setTimeout(function() { openExitModal(); }, 100);
 });
 
+// 스마트폰 뒤로가기 대응
+window.addEventListener('pageshow', function(e) {
+  if (e.persisted && window.currentUser) {
+    history.go(1);
+  }
+});
+
 async function startApp() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
