@@ -165,14 +165,24 @@ td input::placeholder { color:#333345; font-size:10px; }
     <div style="margin-bottom:8px;font-size:12px;color:var(--text3)" id="courseWeekDayLabel">A주차 월요일</div>
     <div style="position:relative;margin-bottom:8px">
       <input id="courseSearch" class="form-input" type="text" placeholder="거래처 검색 (초성 가능)" autocomplete="off" oninput="courseAcFilter()">
-      <div id="courseAcList" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;z-index:50;max-height:180px;overflow-y:auto"></div>
+      <div id="courseAcList" style="display:none;position:absolute;top:100%;left:0;right:0;background:#252535;border:1px solid #3a3a55;border-radius:8px;z-index:50;max-height:180px;overflow-y:auto;margin-top:4px"></div>
     </div>
     <div id="courseClientList" style="margin-bottom:12px;max-height:300px;overflow-y:auto"></div>
     <button class="btn-save" style="width:100%;padding:10px" onclick="saveCourse()">저장</button>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- 거래처 추가 모달 -->
+<div class="modal-overlay" id="addRowModal">
+  <div class="modal" style="max-width:320px">
+    <button class="modal-close" onclick="closeAddRowModal()">✕</button>
+    <h3 style="margin-bottom:12px">거래처 추가</h3>
+    <div style="position:relative">
+      <input id="addRowSearch" class="form-input" type="text" placeholder="거래처 검색 (초성 가능)" autocomplete="off" oninput="addRowAcFilter()">
+      <div id="addRowAcList" style="display:none;position:absolute;top:100%;left:0;right:0;background:#252535;border:1px solid #3a3a55;border-radius:8px;z-index:50;max-height:200px;overflow-y:auto;margin-top:4px"></div>
+    </div>
+  </div>
+</div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -373,12 +383,53 @@ function renderTable() {
   tbody.innerHTML = html;
 }
 
-// ── 행 추가 ──
+// ── 거래처 추가 ──
 window.addRow = function() {
-  const name = prompt('거래처명 입력:');
-  if (!name || !name.trim()) return;
-  courseClients.push(name.trim());
+  document.getElementById('addRowSearch').value = '';
+  document.getElementById('addRowAcList').style.display = 'none';
+  document.getElementById('addRowModal').classList.add('show');
+  setTimeout(() => document.getElementById('addRowSearch').focus(), 100);
+};
+
+window.closeAddRowModal = function() {
+  document.getElementById('addRowModal').classList.remove('show');
+};
+
+window.addRowAcFilter = function() {
+  const val = document.getElementById('addRowSearch').value.trim();
+  const list = document.getElementById('addRowAcList');
+  if (!val) { list.style.display = 'none'; return; }
+
+  const isChosung = [...val].every(c => c >= 'ㄱ' && c <= 'ㅎ');
+  const filtered = allClients.filter(item => {
+    if (isChosung) return getChosung(item).includes(val);
+    return item.toLowerCase().includes(val.toLowerCase()) || getChosung(item).includes(val);
+  }).slice(0, 10);
+
+  if (!filtered.length) { list.style.display = 'none'; return; }
+
+  list.innerHTML = filtered.map(name =>
+    `<div onclick="selectAddRow('${name.replace(/'/g,"\\'")}')` + `" style="padding:10px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #3a3a55;color:var(--text)">${name}</div>`
+  ).join('');
+  list.style.display = 'block';
+};
+
+window.selectAddRow = async function(name) {
+  courseClients.push(name);
+  if (!memoCache[name]) {
+    try {
+      const snap = await getDocs(query(collection(db,'일지db'), where('clientName','==',name)));
+      if (!snap.empty) {
+        const docs = snap.docs.map(d=>d.data()).filter(d=>d.memo);
+        if (docs.length) {
+          docs.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+          memoCache[name] = docs[0].memo;
+        }
+      }
+    } catch(e) {}
+  }
   renderTable();
+  closeAddRowModal();
 };
 
 // ── 전체 저장 ──
