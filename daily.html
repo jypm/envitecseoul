@@ -187,6 +187,20 @@ td input::placeholder { color:#333345; font-size:10px; }
   </div>
 </div>
 
+<!-- 메모 팝업 -->
+<div class="modal-overlay" id="memoModal">
+  <div class="modal" style="max-width:320px">
+    <button class="modal-close" onclick="document.getElementById('memoModal').classList.remove('show')">✕</button>
+    <h3 id="memoModalTitle" style="margin-bottom:6px;font-size:14px"></h3>
+    <div id="memoPrevText" style="font-size:11px;color:#FBBF24;margin-bottom:12px"></div>
+    <textarea id="memoInput" class="form-input" rows="3" style="resize:none;font-size:14px" placeholder="오늘 메모 입력..."></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button onclick="deleteMemo()" style="padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:#F87171;font-size:13px;cursor:pointer">삭제</button>
+      <button onclick="saveMemo()" style="flex:1;padding:10px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer">저장</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- 로그아웃 확인 -->
@@ -305,6 +319,12 @@ function startApp() {
   const savedWeek = localStorage.getItem('daily_week_' + currentUser.userId) || 'A';
   selectWeek(savedWeek, false);
 
+  // 거래처 목록 미리 로드
+  try {
+    const snap = await getDocs(collection(db, 'clients'));
+    allClients = snap.docs.map(d=>d.data().name).filter(Boolean).sort();
+  } catch(e) { allClients = []; }
+
   // 코스 불러오기
   loadCourse();
 }
@@ -372,38 +392,89 @@ async function loadMemos() {
 }
 
 // ── 테이블 렌더 ──
+// 입력값 저장 캐시
+let inputCache = {}; // { idx: { collect: {key:val}, deliver: {key:val}, memo: '' } }
+
+function saveInputCache() {
+  courseClients.forEach((name, idx) => {
+    const row = document.querySelector(`tr[data-idx="${idx}"]`);
+    if (!row) return;
+    if (!inputCache[idx]) inputCache[idx] = { collect:{}, deliver:{}, memo: inputCache[idx]?.memo || '' };
+    DB_KEYS.forEach(k => {
+      const c = row.querySelector(`[data-type="collect"][data-key="${k}"]`);
+      const d = row.querySelector(`[data-type="deliver"][data-key="${k}"]`);
+      if (c) inputCache[idx].collect[k] = c.value;
+      if (d) inputCache[idx].deliver[k] = d.value;
+    });
+  });
+}
+
 function renderTable() {
+  saveInputCache();
   const tbody = document.getElementById('tableBody');
   let html = '';
 
   courseClients.forEach((name, idx) => {
+    const cache = inputCache[idx] || { collect:{}, deliver:{}, memo:'' };
+    const todayMemo = cache.memo || '';
+    const prevMemo = memoCache[name] || '';
+
     html += `<tr data-idx="${idx}">`;
-    html += `<td class="col-client">
+    html += `<td class="col-client" onclick="openMemoModal(${idx})" style="cursor:pointer">
       <span class="client-seq">${idx+1}.</span>
       <span class="client-name">${name}</span>
-      ${memoCache[name] ? `<div class="client-memo">${memoCache[name]}</div>` : ''}
+      ${prevMemo ? `<div class="client-memo">${prevMemo}</div>` : ''}
+      ${todayMemo ? `<div style="font-size:10px;color:#34D399;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">📝 ${todayMemo}</div>` : ''}
     </td>`;
     // 수거 10칸
     DB_KEYS.forEach((k, i) => {
+      const v = cache.collect[k] || '';
       html += `<td${i===5?' class="sep"':''}>
-        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="collect" data-key="${k}" min="0">
+        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="collect" data-key="${k}" min="0" value="${v}">
       </td>`;
     });
     // 납품 10칸
     html += `<td class="sep"></td>`;
     DB_KEYS.forEach((k, i) => {
+      const v = cache.deliver[k] || '';
       html += `<td>
-        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="deliver" data-key="${k}" min="0">
+        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="deliver" data-key="${k}" min="0" value="${v}">
       </td>`;
     });
     html += '</tr>';
   });
 
-  // 추가 행 버튼
   html += `<tr class="add-row"><td colspan="22"><button class="btn-add-row" onclick="addRow()">+ 거래처 추가</button></td></tr>`;
-
   tbody.innerHTML = html;
 }
+
+// ── 메모 팝업 ──
+let _memoIdx = -1;
+window.openMemoModal = function(idx) {
+  _memoIdx = idx;
+  const name = courseClients[idx];
+  const cache = inputCache[idx] || {};
+  document.getElementById('memoModalTitle').textContent = name;
+  document.getElementById('memoPrevText').textContent = memoCache[name] ? '이전: ' + memoCache[name] : '이전 메모 없음';
+  document.getElementById('memoInput').value = cache.memo || '';
+  document.getElementById('memoModal').classList.add('show');
+  setTimeout(() => document.getElementById('memoInput').focus(), 100);
+};
+
+window.saveMemo = function() {
+  if (_memoIdx < 0) return;
+  if (!inputCache[_memoIdx]) inputCache[_memoIdx] = { collect:{}, deliver:{} };
+  inputCache[_memoIdx].memo = document.getElementById('memoInput').value.trim();
+  document.getElementById('memoModal').classList.remove('show');
+  renderTable();
+};
+
+window.deleteMemo = function() {
+  if (_memoIdx < 0) return;
+  if (inputCache[_memoIdx]) inputCache[_memoIdx].memo = '';
+  document.getElementById('memoModal').classList.remove('show');
+  renderTable();
+};
 
 // ── 거래처 추가 ──
 window.addRow = function() {
@@ -467,14 +538,17 @@ window.saveAll = async function() {
     if (!row) continue;
 
     const ts = Timestamp.fromMillis(baseTime + idx * 1000);
-    const data = { clientName: name, date: todayStr, carNumber, seq: idx + 1, timestamp: ts };
+    const cache = inputCache[idx] || { collect:{}, deliver:{}, memo:'' };
+    const data = { clientName: name, date: todayStr, carNumber, seq: idx + 1, timestamp: ts, memo: cache.memo || '' };
     let hasData = false;
 
     // 수거
+    if (!inputCache[idx]) inputCache[idx] = { collect:{}, deliver:{}, memo:'' };
     DB_KEYS.forEach(k => {
       const el = row.querySelector(`[data-type="collect"][data-key="${k}"]`);
       const v = parseInt(el?.value) || 0;
       if (v > 0) hasData = true;
+      inputCache[idx].collect[k] = v ? String(v) : '';
       data['collect_' + k] = v;
     });
 
@@ -483,8 +557,11 @@ window.saveAll = async function() {
       const el = row.querySelector(`[data-type="deliver"][data-key="${k}"]`);
       const v = parseInt(el?.value) || 0;
       if (v > 0) hasData = true;
+      inputCache[idx].deliver[k] = v ? String(v) : '';
       data['deliver_' + k] = v;
     });
+
+    if (cache.memo) hasData = true;
 
     if (!hasData) continue;
 
