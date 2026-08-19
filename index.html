@@ -2127,6 +2127,7 @@ history.pushState(null, '', location.href);
     try {
       window.currentUser = JSON.parse(session);
       await startApp();
+      for (var i = 0; i < 5; i++) history.pushState(null, '', location.href);
     } catch(e) {
       localStorage.removeItem('envitec_session');
     }
