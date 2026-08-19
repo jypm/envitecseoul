@@ -64,6 +64,10 @@ td.col-client .client-seq { font-size:10px; color:var(--text3); margin-right:4px
 /* 입력 셀 */
 td { border-bottom:1px solid var(--border); padding:4px 2px; text-align:center; vertical-align:middle; }
 td input[type=number] { width:36px; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:5px 2px; font-size:13px; text-align:center; outline:none; -moz-appearance:textfield; }
+td input.c-box { color:#60A5FA !important; }
+td input.c-resin { color:#67E8F9 !important; }
+td input.d-box { color:#F87171 !important; }
+td input.d-resin { color:#FBBF24 !important; }
 td input[type=number]::-webkit-inner-spin-button,
 td input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 td input[type=number]:focus { border-color:var(--accent); background:var(--surface2); }
@@ -560,18 +564,18 @@ function renderTable() {
     // 수거 박스(0~4) 파란색, 합성(5~9) 하늘색
     SIZES.forEach((sz, i) => {
       const v = cache.collect[sz] || '';
-      const color = i < 5 ? '#60A5FA' : '#67E8F9';
+      const cls = i < 5 ? 'c-box' : 'c-resin';
       html += `<td${i===5?' class="sep"':''}>
-        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="collect" data-key="${sz}" min="0" value="${v}" style="color:${color}">
+        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="collect" data-key="${sz}" min="0" value="${v}" class="${cls}">
       </td>`;
     });
     // 납품 박스(0~4) 빨간색, 합성(5~9) 주황색
     html += `<td class="sep"></td>`;
     SIZES.forEach((sz, i) => {
       const v = cache.deliver[sz] || '';
-      const color = i < 5 ? '#F87171' : '#FBBF24';
+      const cls = i < 5 ? 'd-box' : 'd-resin';
       html += `<td>
-        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="deliver" data-key="${sz}" min="0" value="${v}" style="color:${color}">
+        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="deliver" data-key="${sz}" min="0" value="${v}" class="${cls}">
       </td>`;
     });
     html += '</tr>';
