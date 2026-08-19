@@ -293,7 +293,7 @@ document.getElementById('loginId').addEventListener('keydown', e => { if(e.key==
 document.getElementById('loginPw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 
 // ── 앱 시작 ──
-function startApp() {
+async function startApp() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
 
