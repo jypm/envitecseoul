@@ -2,6 +2,8 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
+<script>var vConsole = new VConsole();</script>
 <script>
   history.pushState(null, '', location.href);
   history.pushState(null, '', location.href);
@@ -785,6 +787,7 @@ window.closeExitModal = function() {
 }
 
 window.addEventListener('popstate', function() {
+  console.log('popstate 발생! currentUser:', !!window.currentUser, 'history.length:', history.length);
   if (!window.currentUser) return;
   if (_backBlocking) return;
   _backBlocking = true;
