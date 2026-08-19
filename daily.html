@@ -119,7 +119,8 @@ td input::placeholder { color:#333345; font-size:10px; }
     </div>
     <div class="header-right">
       <button class="btn-sm" onclick="openCourseModal()">코스 설정</button>
-      <button class="btn-save" onclick="saveAll()">저장</button>
+      <button class="btn-sm" onclick="saveTempAll()" style="color:#34D399;border-color:#34D399">임시저장</button>
+      <button class="btn-save" onclick="sendAll()">전체전송</button>
     </div>
   </div>
 
@@ -233,8 +234,8 @@ const db = getFirestore(app);
 
 // 상수
 const COLS = ['4L','12L','30L','50L','63L','1L합','2L합','5L합','10L합','20L합'];
+const SIZES = ['4L','12L','30L','50L','63L','1L','2L','5L','10L','20L'];
 const DAYS = ['월','화','수','목','금'];
-const DB_KEYS = ['box4','box12','box30','box50','box63','resin1','resin2','resin5','resin10','resin20'];
 
 let currentUser = null;
 let currentWeek = 'A';
@@ -369,6 +370,9 @@ async function loadCourse() {
   } catch(e) {
     courseClients = [];
   }
+  // 임시저장 불러오기
+  const date = document.getElementById('selectedDate')?.value || today();
+  loadTempStorage(date);
   await loadMemos();
   renderTable();
 }
@@ -395,16 +399,44 @@ async function loadMemos() {
 // 입력값 저장 캐시
 let inputCache = {}; // { idx: { collect: {key:val}, deliver: {key:val}, memo: '' } }
 
+function saveTempStorage() {
+  if (!currentUser) return;
+  const date = document.getElementById('selectedDate')?.value || today();
+  const key = `daily_temp_${currentUser.userId}_${date}`;
+  localStorage.setItem(key, JSON.stringify({ clients: courseClients, cache: inputCache }));
+}
+
+function loadTempStorage(date) {
+  if (!currentUser) return false;
+  const key = `daily_temp_${currentUser.userId}_${date}`;
+  const saved = localStorage.getItem(key);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      inputCache = data.cache || {};
+      return true;
+    } catch(e) {}
+  }
+  return false;
+}
+
+function clearTempStorage() {
+  if (!currentUser) return;
+  const date = document.getElementById('selectedDate')?.value || today();
+  const key = `daily_temp_${currentUser.userId}_${date}`;
+  localStorage.removeItem(key);
+}
+
 function saveInputCache() {
   courseClients.forEach((name, idx) => {
     const row = document.querySelector(`tr[data-idx="${idx}"]`);
     if (!row) return;
     if (!inputCache[idx]) inputCache[idx] = { collect:{}, deliver:{}, memo: inputCache[idx]?.memo || '' };
-    DB_KEYS.forEach(k => {
-      const c = row.querySelector(`[data-type="collect"][data-key="${k}"]`);
-      const d = row.querySelector(`[data-type="deliver"][data-key="${k}"]`);
-      if (c) inputCache[idx].collect[k] = c.value;
-      if (d) inputCache[idx].deliver[k] = d.value;
+    SIZES.forEach(sz => {
+      const c = row.querySelector(`[data-type="collect"][data-key="${sz}"]`);
+      const d = row.querySelector(`[data-type="deliver"][data-key="${sz}"]`);
+      if (c) inputCache[idx].collect[sz] = c.value;
+      if (d) inputCache[idx].deliver[sz] = d.value;
     });
   });
 }
@@ -427,18 +459,18 @@ function renderTable() {
       ${todayMemo ? `<div style="font-size:10px;color:#34D399;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">📝 ${todayMemo}</div>` : ''}
     </td>`;
     // 수거 10칸
-    DB_KEYS.forEach((k, i) => {
-      const v = cache.collect[k] || '';
+    SIZES.forEach((sz, i) => {
+      const v = cache.collect[sz] || '';
       html += `<td${i===5?' class="sep"':''}>
-        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="collect" data-key="${k}" min="0" value="${v}">
+        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="collect" data-key="${sz}" min="0" value="${v}">
       </td>`;
     });
     // 납품 10칸
     html += `<td class="sep"></td>`;
-    DB_KEYS.forEach((k, i) => {
-      const v = cache.deliver[k] || '';
+    SIZES.forEach((sz, i) => {
+      const v = cache.deliver[sz] || '';
       html += `<td>
-        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="deliver" data-key="${k}" min="0" value="${v}">
+        <input type="number" placeholder="${COLS[i]}" data-row="${idx}" data-type="deliver" data-key="${sz}" min="0" value="${v}">
       </td>`;
     });
     html += '</tr>';
@@ -526,7 +558,17 @@ window.selectAddRow = async function(name) {
 };
 
 // ── 전체 저장 ──
-window.saveAll = async function() {
+// ── 임시저장 ──
+window.saveTempAll = function() {
+  saveInputCache();
+  saveTempStorage();
+  toast('임시저장 완료!', 'success');
+};
+
+// ── 전체 전송 (DB 저장) ──
+window.sendAll = async function() {
+  if (!confirm('전체 전송하시겠습니까?\n전송 후 임시저장 데이터가 삭제됩니다.')) return;
+  saveInputCache();
   const todayStr = document.getElementById('selectedDate').value || today();
   const carNumber = currentUser.cars?.[0] || '';
   let count = 0;
@@ -544,21 +586,21 @@ window.saveAll = async function() {
 
     // 수거
     if (!inputCache[idx]) inputCache[idx] = { collect:{}, deliver:{}, memo:'' };
-    DB_KEYS.forEach(k => {
-      const el = row.querySelector(`[data-type="collect"][data-key="${k}"]`);
+    SIZES.forEach(sz => {
+      const el = row.querySelector(`[data-type="collect"][data-key="${sz}"]`);
       const v = parseInt(el?.value) || 0;
       if (v > 0) hasData = true;
-      inputCache[idx].collect[k] = v ? String(v) : '';
-      data['collect_' + k] = v;
+      inputCache[idx].collect[sz] = v ? String(v) : '';
+      data['collect' + sz] = v;
     });
 
     // 납품
-    DB_KEYS.forEach(k => {
-      const el = row.querySelector(`[data-type="deliver"][data-key="${k}"]`);
+    SIZES.forEach(sz => {
+      const el = row.querySelector(`[data-type="deliver"][data-key="${sz}"]`);
       const v = parseInt(el?.value) || 0;
       if (v > 0) hasData = true;
-      inputCache[idx].deliver[k] = v ? String(v) : '';
-      data['deliver_' + k] = v;
+      inputCache[idx].deliver[sz] = v ? String(v) : '';
+      data['deliver' + sz] = v;
     });
 
     if (cache.memo) hasData = true;
@@ -571,8 +613,10 @@ window.saveAll = async function() {
     } catch(e) { console.error(e); }
   }
 
-  if (count > 0) toast(`${count}건 저장 완료!`, 'success');
-  else toast('입력된 데이터가 없어요', 'error');
+  if (count > 0) {
+    clearTempStorage();
+    toast(`${count}건 전송 완료!`, 'success');
+  } else toast('입력된 데이터가 없어요', 'error');
 };
 
 window.onDateChange = function() {
