@@ -801,19 +801,6 @@ window.addEventListener('popstate', function() {
   setTimeout(function() { openExitModal(); }, 100);
 });
 
-// 세션 복원
-window.addEventListener('load', async function() {
-  var session = localStorage.getItem('envitec_session');
-  if (session) {
-    try {
-      window.currentUser = JSON.parse(session);
-      await startApp();
-    } catch(e) {
-      localStorage.removeItem('envitec_session');
-    }
-  }
-});
-
 async function startApp() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
@@ -2123,12 +2110,28 @@ document.addEventListener('click', e => {
 
 // ── Firestore 미초기화 시 안내 ──
 window.addEventListener('load', () => {
-  // 실제 apiKey가 설정되어 있는지 체크
   if (firebaseConfig.apiKey.includes('PLACEHOLDER')) {
     document.getElementById('loginErr').textContent = '⚠️ Firebase API Key를 설정해주세요.';
     document.getElementById('loginErr').style.display = 'block';
   }
 });
+
+// ── 초기 history 쌓기 + 세션 복원 ──
+history.pushState(null, '', location.href);
+history.pushState(null, '', location.href);
+history.pushState(null, '', location.href);
+
+(async function() {
+  var session = localStorage.getItem('envitec_session');
+  if (session) {
+    try {
+      window.currentUser = JSON.parse(session);
+      await startApp();
+    } catch(e) {
+      localStorage.removeItem('envitec_session');
+    }
+  }
+})();
 
 </script>
 </body>
