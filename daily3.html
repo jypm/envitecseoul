@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>수거 일지</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; background:#000; color:#f0f0f5; font-family:-apple-system,'Noto Sans KR',sans-serif; font-size:14px; overflow:hidden; }
+
+/* ── 화면 ── */
+.screen { display:none; flex-direction:column; height:100vh; }
+.screen.active { display:flex; }
+
+/* ── 헤더 ── */
+.hdr { background:#111; border-bottom:1px solid #222; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.hdr-left { display:flex; align-items:center; gap:10px; }
+.back-btn { background:none; border:none; color:#3D82F6; font-size:14px; cursor:pointer; padding:4px 0; }
+.hdr-title { font-size:15px; font-weight:700; }
+.hdr-sub { font-size:11px; color:#555; margin-top:2px; }
+
+/* ── 공통 버튼 ── */
+.btn { border:none; border-radius:8px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; }
+.btn-primary { background:#3D82F6; color:#fff; }
+.btn-secondary { background:#1e1e2a; color:#aaa; border:1px solid #333; }
+.btn-danger { background:#c0392b; color:#fff; }
+.btn-sm { padding:5px 10px; font-size:12px; border-radius:6px; }
+.btn-ghost { background:none; border:1px solid #333; color:#888; border-radius:8px; padding:6px 12px; font-size:12px; cursor:pointer; }
+
+/* ── 로그인 ── */
+#loginScreen { justify-content:center; align-items:center; }
+.login-box { width:90%; max-width:320px; background:#111; border:1px solid #222; border-radius:16px; padding:32px 24px; }
+.login-logo { font-size:32px; text-align:center; margin-bottom:8px; }
+.login-title { font-size:18px; font-weight:700; text-align:center; margin-bottom:4px; }
+.login-sub { font-size:12px; color:#555; text-align:center; margin-bottom:24px; }
+.inp { width:100%; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:10px; padding:12px 14px; color:#f0f0f5; font-size:15px; outline:none; margin-bottom:10px; }
+.inp:focus { border-color:#3D82F6; }
+.save-id-row { display:flex; align-items:center; gap:6px; font-size:12px; color:#555; margin-bottom:14px; cursor:pointer; }
+.save-id-row input { accent-color:#3D82F6; }
+.login-err { font-size:12px; color:#e74c3c; text-align:center; margin-top:8px; display:none; }
+
+/* ── 메인 ── */
+#mainScreen .scroll { flex:1; overflow-y:auto; padding:16px; }
+.main-card { background:#111; border:1px solid #222; border-radius:14px; padding:20px; margin-bottom:12px; display:flex; align-items:center; gap:16px; cursor:pointer; }
+.main-card:active { background:#1a1a1a; }
+.main-card-icon { font-size:28px; }
+.main-card-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+.main-card-desc { font-size:12px; color:#555; }
+
+/* ── 코스 관리 ── */
+#courseScreen .scroll { flex:1; overflow-y:auto; padding:12px; }
+.course-row { background:#111; border:1px solid #222; border-radius:10px; padding:14px; margin-bottom:8px; display:flex; align-items:center; gap:10px; cursor:pointer; }
+.course-row:active { background:#1a1a1a; }
+.course-row-name { flex:1; font-size:14px; font-weight:600; }
+.course-row-count { font-size:11px; color:#555; }
+.add-btn-row { background:none; border:1px dashed #333; border-radius:10px; padding:14px; display:flex; align-items:center; justify-content:center; gap:8px; color:#555; font-size:13px; cursor:pointer; margin-bottom:8px; width:100%; }
+
+/* ── 코스 편집 ── */
+#courseEditScreen .scroll { flex:1; overflow-y:auto; padding:12px; }
+.edit-client-row { background:#111; border:1px solid #1e1e1e; border-radius:8px; padding:12px; margin-bottom:6px; display:flex; align-items:center; gap:10px; user-select:none; -webkit-user-select:none; }
+.edit-client-row.dragging { opacity:0.3; }
+.edit-client-seq { font-size:11px; color:#444; min-width:20px; }
+.edit-client-name { flex:1; font-size:13px; color:#ddd; }
+.edit-client-del { background:none; border:none; color:#555; font-size:16px; cursor:pointer; padding:4px; }
+.drag-ghost { position:fixed; background:#3D82F6; color:#fff; padding:10px 16px; border-radius:10px; font-size:13px; z-index:9999; pointer-events:none; box-shadow:0 4px 20px rgba(0,0,0,0.5); left:10%; width:80%; }
+.ac-wrap { position:relative; margin-bottom:10px; }
+.ac-list { display:none; position:absolute; top:100%; left:0; right:0; background:#1e1e28; border:1px solid #333; border-radius:8px; z-index:50; max-height:180px; overflow-y:auto; margin-top:3px; }
+.ac-item { padding:10px 12px; font-size:13px; cursor:pointer; border-bottom:1px solid #252535; color:#ddd; }
+.ac-item:last-child { border-bottom:none; }
+
+/* ── 수거 입력 ── */
+#inputScreen .top-bar { background:#111; border-bottom:1px solid #222; padding:8px 12px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:wrap; }
+.date-inp { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:8px; padding:5px 10px; color:#f0f0f5; font-size:12px; outline:none; }
+#inputScreen .table-wrap { flex:1; overflow:auto; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; min-width:max-content; }
+thead th { position:sticky; top:0; background:#111; z-index:10; padding:6px 3px; font-size:11px; color:#555; border-bottom:1px solid #222; white-space:nowrap; text-align:center; }
+thead th.th-fix { position:sticky; background:#111; z-index:20; text-align:left; }
+thead th.th-seq { left:0; width:26px; min-width:26px; padding:6px 4px; }
+thead th.th-name { left:26px; min-width:90px; max-width:90px; padding:6px 8px; }
+td { border-bottom:1px solid #111; padding:2px; text-align:center; vertical-align:middle; }
+td.td-seq { position:sticky; left:0; background:#0a0a0a; z-index:5; width:26px; min-width:26px; font-size:10px; color:#444; padding:4px 2px; }
+td.td-name { position:sticky; left:26px; background:#0a0a0a; z-index:5; min-width:90px; max-width:90px; padding:6px 8px; text-align:left; vertical-align:top; cursor:pointer; border-right:1px solid #1e1e1e; }
+td.td-name:active { background:#111; }
+.cn { font-size:11px; color:#e0e0e0; font-weight:500; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.35; }
+.cn.has-memo { color:#90EE90; }
+.today-memo { font-size:10px; color:#27ae60; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+td input[type=number] { width:32px; border:none; border-radius:4px; padding:4px 1px; color:#f0f0f5; font-size:12px; text-align:center; outline:none; -moz-appearance:textfield; }
+td input[type=number]::-webkit-inner-spin-button,
+td input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
+td input[type=number]:focus { outline:1px solid #3D82F6; border-radius:4px; }
+/* 수거박스 */
+.cb { background:#1a1408; } td.cb { background:#1a1408; }
+.cb30 { background:#221c0a; } td.cb30 { background:#221c0a; }
+/* 수거합성 */
+.cr { background:#0e1a0e; } td.cr { background:#0e1a0e; }
+.cr5 { background:#142214; } td.cr5 { background:#142214; }
+/* 납품박스 */
+.db { background:#0a0e1a; } td.db { background:#0a0e1a; }
+.db30 { background:#0c1222; } td.db30 { background:#0c1222; }
+/* 납품합성 */
+.dr { background:#120a1a; } td.dr { background:#120a1a; }
+.dr5 { background:#1a0e22; } td.dr5 { background:#1a0e22; }
+.sep { border-left:2px solid #2a2a2a !important; }
+#inputScreen .action-bar { background:#111; border-top:1px solid #222; padding:8px 12px; display:flex; gap:8px; flex-shrink:0; }
+#inputScreen .action-bar .btn { flex:1; }
+
+/* ── 이전 데이터 ── */
+#historyScreen .scroll { flex:1; overflow-y:auto; padding:12px; }
+.hist-date-group { margin-bottom:16px; }
+.hist-date-label { font-size:11px; color:#555; padding:4px 0 8px; border-bottom:1px solid #1e1e1e; margin-bottom:8px; }
+.hist-item { background:#111; border:1px solid #222; border-radius:10px; padding:12px 14px; margin-bottom:6px; display:flex; align-items:center; gap:10px; cursor:pointer; }
+.hist-item:active { background:#1a1a1a; }
+.hist-item-icon { font-size:18px; }
+.hist-item-name { flex:1; font-size:13px; font-weight:600; }
+.hist-item-count { font-size:11px; color:#555; }
+
+/* ── 모달 ── */
+.modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; justify-content:center; align-items:center; }
+.modal-bg.show { display:flex; }
+.modal { background:#111; border:1px solid #222; border-radius:16px; padding:20px; width:90%; max-width:340px; position:relative; }
+.modal-close { position:absolute; top:12px; right:14px; background:none; border:none; color:#555; font-size:20px; cursor:pointer; }
+.modal h3 { font-size:15px; margin-bottom:14px; }
+.modal textarea { width:100%; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:8px; padding:10px; color:#f0f0f5; font-size:14px; resize:none; outline:none; }
+.modal textarea:focus { border-color:#3D82F6; }
+
+/* ── 토스트 ── */
+.toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1e1e2e; border:1px solid #333; border-radius:10px; padding:10px 20px; font-size:13px; z-index:200; display:none; white-space:nowrap; }
+.toast.show { display:block; }
+</style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div class="screen active" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🚛</div>
+    <div class="login-title">수거 일지</div>
+    <div class="login-sub">엔비텍코리아 서울지점</div>
+    <input id="loginId" class="inp" type="text" placeholder="아이디" autocomplete="off">
+    <input id="loginPw" class="inp" type="password" placeholder="비밀번호" inputmode="numeric" maxlength="4">
+    <label class="save-id-row"><input type="checkbox" id="saveIdChk"> 아이디 저장</label>
+    <button class="btn btn-primary" style="width:100%;padding:13px" onclick="doLogin()">로그인</button>
+    <div class="login-err" id="loginErr">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+  </div>
+</div>
+
+<!-- 메인 -->
+<div class="screen" id="mainScreen">
+  <div class="hdr">
+    <div>
+      <div class="hdr-title">🚛 수거 일지</div>
+      <div class="hdr-sub" id="mainSub"></div>
+    </div>
+    <button class="btn-ghost" onclick="openExitModal()">로그아웃</button>
+  </div>
+  <div class="scroll">
+    <div class="main-card" onclick="showScreen('courseScreen');loadCourseList()">
+      <div class="main-card-icon">📋</div>
+      <div>
+        <div class="main-card-title">코스 관리</div>
+        <div class="main-card-desc">코스 추가/편집/삭제</div>
+      </div>
+    </div>
+    <div class="main-card" onclick="showScreen('inputScreen');initInputScreen()">
+      <div class="main-card-icon">✏️</div>
+      <div>
+        <div class="main-card-title">수거 입력</div>
+        <div class="main-card-desc">코스 불러오기 후 입력</div>
+      </div>
+    </div>
+    <div class="main-card" onclick="showScreen('historyScreen');loadHistoryList()">
+      <div class="main-card-icon">📅</div>
+      <div>
+        <div class="main-card-title">이전 데이터</div>
+        <div class="main-card-desc">날짜별 입력 기록 조회/편집</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 코스 관리 -->
+<div class="screen" id="courseScreen">
+  <div class="hdr">
+    <div class="hdr-left">
+      <button class="back-btn" onclick="showScreen('mainScreen')">← 뒤로</button>
+      <div class="hdr-title">코스 관리</div>
+    </div>
+  </div>
+  <div class="scroll" id="courseListWrap">
+    <button class="add-btn-row" onclick="openAddCourseModal()">+ 코스 추가</button>
+  </div>
+</div>
+
+<!-- 코스 편집 -->
+<div class="screen" id="courseEditScreen">
+  <div class="hdr">
+    <div class="hdr-left">
+      <button class="back-btn" onclick="showScreen('courseScreen');loadCourseList()">← 뒤로</button>
+      <div class="hdr-title" id="courseEditTitle">코스 편집</div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="saveCourseEdit()">저장</button>
+  </div>
+  <div style="padding:10px 12px;border-bottom:1px solid #222;flex-shrink:0">
+    <div class="ac-wrap">
+      <input id="ceSearch" class="inp" type="text" placeholder="거래처 검색 (초성 가능)" autocomplete="off" oninput="ceAcFilter()" style="margin-bottom:0">
+      <div class="ac-list" id="ceAcList"></div>
+    </div>
+    <div style="font-size:11px;color:#444;margin-top:4px">꾹 눌러서 순서 변경</div>
+  </div>
+  <div class="scroll" id="ceClientList" style="padding:8px 12px"></div>
+</div>
+
+<!-- 수거 입력 -->
+<div class="screen" id="inputScreen">
+  <div class="hdr">
+    <div class="hdr-left">
+      <button class="back-btn" onclick="showScreen('mainScreen')">← 뒤로</button>
+      <div>
+        <div class="hdr-title" id="inputTitle">수거 입력</div>
+        <div class="hdr-sub" id="inputSub"></div>
+      </div>
+    </div>
+    <button class="btn-ghost" onclick="openLoadCourseModal()">코스 불러오기</button>
+  </div>
+  <div class="top-bar">
+    <input type="date" id="inputDate" class="date-inp" onchange="onDateChange()">
+    <button class="btn-ghost" onclick="addExtraClient()">+ 거래처 추가</button>
+  </div>
+  <div class="table-wrap">
+    <table id="inputTable">
+      <thead>
+        <tr>
+          <th class="th-fix th-seq" rowspan="2">#</th>
+          <th class="th-fix th-name" rowspan="2">거래처</th>
+          <th colspan="5" style="border-left:2px solid #2a2a2a">수거 박스</th>
+          <th colspan="5" style="border-left:2px solid #2a2a2a">수거 합성</th>
+          <th colspan="5" style="border-left:2px solid #2a2a2a">납품 박스</th>
+          <th colspan="5" style="border-left:2px solid #2a2a2a">납품 합성</th>
+        </tr>
+        <tr id="subHdr"></tr>
+      </thead>
+      <tbody id="inputBody"></tbody>
+    </table>
+  </div>
+  <div class="action-bar">
+    <button class="btn btn-secondary" onclick="saveTmp()">임시저장</button>
+    <button class="btn btn-primary" onclick="sendData()">전송</button>
+  </div>
+</div>
+
+<!-- 이전 데이터 -->
+<div class="screen" id="historyScreen">
+  <div class="hdr">
+    <div class="hdr-left">
+      <button class="back-btn" onclick="showScreen('mainScreen')">← 뒤로</button>
+      <div class="hdr-title">이전 데이터</div>
+    </div>
+  </div>
+  <div class="scroll" id="historyWrap" style="padding:12px">
+    <div style="text-align:center;color:#444;padding:20px">불러오는 중...</div>
+  </div>
+</div>
+
+<!-- 이전 데이터 상세 -->
+<div class="screen" id="histDetailScreen">
+  <div class="hdr">
+    <div class="hdr-left">
+      <button class="back-btn" onclick="showScreen('historyScreen')">← 뒤로</button>
+      <div class="hdr-title" id="histDetailTitle">상세 보기</div>
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="editHistDetail()">편집</button>
+  </div>
+  <div class="scroll" id="histDetailWrap" style="padding:12px"></div>
+</div>
+
+<!-- 모달들 -->
+<!-- 코스 추가 -->
+<div class="modal-bg" id="addCourseModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addCourseModal')">✕</button>
+    <h3>코스 추가</h3>
+    <input id="newCourseName" class="inp" type="text" placeholder="코스 이름">
+    <button class="btn btn-primary" style="width:100%" onclick="addCourse()">추가</button>
+  </div>
+</div>
+
+<!-- 코스 불러오기 -->
+<div class="modal-bg" id="loadCourseModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('loadCourseModal')">✕</button>
+    <h3>코스 불러오기</h3>
+    <div id="loadCourseList" style="max-height:50vh;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- 거래처 추가 (수거입력) -->
+<div class="modal-bg" id="addClientModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addClientModal')">✕</button>
+    <h3>거래처 추가</h3>
+    <div class="ac-wrap">
+      <input id="acSearch" class="inp" type="text" placeholder="거래처 검색 (초성 가능)" autocomplete="off" oninput="acFilter()" style="margin-bottom:0">
+      <div class="ac-list" id="acList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 메모 -->
+<div class="modal-bg" id="memoModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('memoModal')">✕</button>
+    <h3 id="memoTitle" style="font-size:13px;margin-bottom:6px"></h3>
+    <div id="memoPrev" style="font-size:11px;color:#a87a20;margin-bottom:10px"></div>
+    <textarea id="memoInput" rows="3" placeholder="오늘 메모..."></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-danger btn-sm" onclick="deleteMemo()">삭제</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveMemo()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 전송 완료 -->
+<div class="modal-bg" id="doneModal">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:36px;margin-bottom:10px">✅</div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:6px">전송 완료!</div>
+    <div id="doneCount" style="font-size:13px;color:#555;margin-bottom:12px"></div>
+    <div id="doneList" style="text-align:left;font-size:12px;color:#888;max-height:200px;overflow-y:auto;border:1px solid #222;border-radius:8px;padding:10px;margin-bottom:16px"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="closeDone()">확인</button>
+  </div>
+</div>
+
+<!-- 로그아웃 확인 -->
+<div class="modal-bg" id="exitModal">
+  <div class="modal" style="text-align:center;max-width:260px">
+    <div style="font-size:24px;margin-bottom:10px">👋</div>
+    <div style="margin-bottom:20px">로그아웃 하시겠어요?</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('exitModal')">아니요</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confirmLogout()">네</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, doc, getDocs, query, where, getDoc, setDoc, deleteDoc, Timestamp, orderBy }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCka6GbEUJBUf-5BFxvD0O-Hv9dS-T3Big",
+  authDomain: "jypenvitec.firebaseapp.com",
+  projectId: "jypenvitec",
+  storageBucket: "jypenvitec.appspot.com",
+  messagingSenderId: "760975820830",
+  appId: "1:760975820830:web:8b20d40a3d1cf3a1f8e9de"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ── 상수 ──
+const BOX = ['4L','12L','30L','50L','63L'];
+const RESIN = ['1L','2L','5L','10L','20L'];
+const SIZES = [...BOX, ...RESIN];
+const DEFAULT_COURSES = [
+  {id:'A월',name:'A월요일'},{id:'A화',name:'A화요일'},{id:'A수',name:'A수요일'},{id:'A목',name:'A목요일'},{id:'A금',name:'A금요일'},
+  {id:'B월',name:'B월요일'},{id:'B화',name:'B화요일'},{id:'B수',name:'B수요일'},{id:'B목',name:'B목요일'},{id:'B금',name:'B금요일'},
+];
+
+// ── 상태 ──
+let currentUser = null;
+let allClients = [];
+let courseList = [];
+let ceClients = []; // 코스 편집 임시
+let ceCourseId = null;
+let inputClients = []; // 수거 입력 거래처
+let inputCache = {}; // {idx: {collect:{}, deliver:{}, memo:''}}
+let memoCache = {}; // {clientName: lastMemo}
+let memoIdx = -1;
+let tmpKey = null; // 현재 임시저장 키
+let histData = []; // 이전 데이터 목록
+let histDetailData = null;
+
+// ── 유틸 ──
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function toast(msg, ok=true) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.borderColor = ok ? '#27ae60' : '#e74c3c';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+window.showScreen = function(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+};
+window.closeModal = function(id) {
+  document.getElementById(id).classList.remove('show');
+};
+window.openExitModal = function() {
+  document.getElementById('exitModal').classList.add('show');
+};
+
+// ── 초성 ──
+const CS = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+function getCS(str) {
+  return [...str].map(c => {
+    const n = c.charCodeAt(0);
+    return (n >= 0xAC00 && n <= 0xD7A3) ? CS[Math.floor((n-0xAC00)/(21*28))] : c;
+  }).join('');
+}
+function acSearch(list, val) {
+  if (!val) return [];
+  const isCS = [...val].every(c => c >= 'ㄱ' && c <= 'ㅎ');
+  return list.filter(item => isCS ? getCS(item).includes(val) : item.includes(val) || getCS(item).includes(val)).slice(0,10);
+}
+
+// ── 로그인 ──
+window.doLogin = async function() {
+  const id = document.getElementById('loginId').value.trim();
+  const pw = document.getElementById('loginPw').value.trim();
+  document.getElementById('loginErr').style.display = 'none';
+  try {
+    const adminSnap = await getDoc(doc(db,'adminConfig','auth'));
+    if (id==='admin' && adminSnap.exists() && adminSnap.data().password===pw) {
+      currentUser = { type:'admin', name:'관리자', userId:'admin', cars:[] };
+      afterLogin();
+      return;
+    }
+    const snap = await getDocs(query(collection(db,'users'), where('userId','==',id)));
+    for (const ud of snap.docs) {
+      if (ud.data().password === pw) {
+        currentUser = { type:'vehicle', userId:id, name:ud.data().name||'', docId:ud.id, cars:ud.data().cars||[] };
+        afterLogin();
+        return;
+      }
+    }
+  } catch(e) { console.error(e); }
+  document.getElementById('loginErr').style.display = 'block';
+};
+
+async function afterLogin() {
+  if (document.getElementById('saveIdChk').checked)
+    localStorage.setItem('d3_savedId', currentUser.userId);
+  else localStorage.removeItem('d3_savedId');
+  localStorage.setItem('d3_session', JSON.stringify(currentUser));
+  document.getElementById('mainSub').textContent = currentUser.name || currentUser.userId;
+  // 거래처 목록 로드
+  try {
+    const snap = await getDocs(collection(db,'clients'));
+    allClients = snap.docs.map(d=>d.data().name).filter(Boolean).sort();
+  } catch(e) { allClients = []; }
+  showScreen('mainScreen');
+  for (let i=0;i<5;i++) history.pushState(null,'',location.href);
+}
+
+document.getElementById('loginId').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('loginPw').focus(); });
+document.getElementById('loginPw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ── 로그아웃 ──
+window.confirmLogout = function() {
+  currentUser = null;
+  localStorage.removeItem('d3_session');
+  closeModal('exitModal');
+  showScreen('loginScreen');
+  history.go(-(history.length-1));
+};
+
+// ══════════════════════════════
+// 코스 관리
+// ══════════════════════════════
+async function loadCourseList() {
+  courseList = [];
+  // 기본 코스
+  for (const dc of DEFAULT_COURSES) {
+    const key = currentUser.userId + '_' + dc.id;
+    try {
+      const snap = await getDoc(doc(db,'courses3', key));
+      const clients = snap.exists() ? (snap.data().clients||[]) : [];
+      courseList.push({ id:key, name:dc.name, type:'default', clients });
+    } catch(e) {
+      courseList.push({ id:key, name:dc.name, type:'default', clients:[] });
+    }
+  }
+  // 추가 코스
+  try {
+    const snap = await getDocs(query(collection(db,'courses3'), where('userId','==',currentUser.userId), where('type','==','custom')));
+    snap.docs.forEach(d => courseList.push({ id:d.id, name:d.data().name, type:'custom', clients:d.data().clients||[] }));
+  } catch(e) {}
+  renderCourseList();
+}
+
+function renderCourseList() {
+  const wrap = document.getElementById('courseListWrap');
+  let html = '<button class="add-btn-row" onclick="openAddCourseModal()">+ 코스 추가</button>';
+  html += '<div style="font-size:11px;color:#444;padding:4px 0 8px">A주차</div>';
+  courseList.filter(c=>c.type==='default'&&c.id.includes('_A')).forEach(c => {
+    html += courseRowHTML(c);
+  });
+  html += '<div style="font-size:11px;color:#444;padding:12px 0 8px">B주차</div>';
+  courseList.filter(c=>c.type==='default'&&c.id.includes('_B')).forEach(c => {
+    html += courseRowHTML(c);
+  });
+  const custom = courseList.filter(c=>c.type==='custom');
+  if (custom.length) {
+    html += '<div style="font-size:11px;color:#444;padding:12px 0 8px">추가 코스</div>';
+    custom.forEach(c => {
+      html += courseRowHTML(c, true);
+    });
+  }
+  wrap.innerHTML = html;
+}
+
+function courseRowHTML(c, deletable=false) {
+  return `<div class="course-row" onclick="openCourseEdit('${c.id}')">
+    <div style="flex:1">
+      <div class="course-row-name">${c.name}</div>
+      <div class="course-row-count">${c.clients.length}개 거래처</div>
+    </div>
+    ${deletable ? `<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteCourse('${c.id}')">삭제</button>` : ''}
+  </div>`;
+}
+
+window.openAddCourseModal = function() {
+  document.getElementById('newCourseName').value = '';
+  document.getElementById('addCourseModal').classList.add('show');
+  setTimeout(() => document.getElementById('newCourseName').focus(), 100);
+};
+
+window.addCourse = async function() {
+  const name = document.getElementById('newCourseName').value.trim();
+  if (!name) return;
+  try {
+    await addDoc(collection(db,'courses3'), { name, userId:currentUser.userId, type:'custom', clients:[] });
+    closeModal('addCourseModal');
+    await loadCourseList();
+    toast('코스 추가됐어요!');
+  } catch(e) { toast('실패', false); }
+};
+
+window.deleteCourse = async function(id) {
+  if (!confirm('코스를 삭제하시겠습니까?')) return;
+  try {
+    await deleteDoc(doc(db,'courses3',id));
+    await loadCourseList();
+    toast('삭제됐어요!');
+  } catch(e) { toast('실패', false); }
+};
+
+// ── 코스 편집 ──
+window.openCourseEdit = function(id) {
+  const c = courseList.find(c=>c.id===id);
+  if (!c) return;
+  ceCourseId = id;
+  ceClients = [...c.clients];
+  document.getElementById('courseEditTitle').textContent = c.name;
+  document.getElementById('ceSearch').value = '';
+  document.getElementById('ceAcList').style.display = 'none';
+  renderCeList();
+  showScreen('courseEditScreen');
+};
+
+function renderCeList() {
+  const el = document.getElementById('ceClientList');
+  if (!ceClients.length) {
+    el.innerHTML = '<div style="padding:10px;color:#444;font-size:12px">거래처를 검색해서 추가하세요</div>';
+    initCeDrag();
+    return;
+  }
+  el.innerHTML = ceClients.map((name,i) => `
+    <div class="edit-client-row" data-idx="${i}">
+      <span class="edit-client-seq">${i+1}</span>
+      <span class="edit-client-name">${name}</span>
+      <button class="edit-client-del" onclick="ceDel(${i})">✕</button>
+    </div>
+  `).join('');
+  initCeDrag();
+}
+
+window.ceDel = function(idx) {
+  ceClients.splice(idx,1);
+  renderCeList();
+};
+
+window.ceAcFilter = function() {
+  const val = document.getElementById('ceSearch').value.trim();
+  const list = document.getElementById('ceAcList');
+  const filtered = acSearch(allClients, val);
+  if (!filtered.length) { list.style.display='none'; return; }
+  list.innerHTML = filtered.map(name => `<div class="ac-item" onclick="ceAdd('${name.replace(/'/g,"\\'")}')">${name}</div>`).join('');
+  list.style.display = 'block';
+};
+
+window.ceAdd = function(name) {
+  if (!ceClients.includes(name)) ceClients.push(name);
+  document.getElementById('ceSearch').value = '';
+  document.getElementById('ceAcList').style.display = 'none';
+  renderCeList();
+};
+
+window.saveCourseEdit = async function() {
+  try {
+    const c = courseList.find(c=>c.id===ceCourseId);
+    await setDoc(doc(db,'courses3',ceCourseId), {
+      clients: ceClients,
+      userId: currentUser.userId,
+      type: c?.type||'default',
+      name: c?.name||''
+    });
+    showScreen('courseScreen');
+    await loadCourseList();
+    toast('저장됐어요!');
+  } catch(e) { toast('실패', false); }
+};
+
+// ── 드래그 ──
+function initCeDrag() {
+  const items = document.querySelectorAll('#ceClientList .edit-client-row');
+  let dragIdx=null, startY=0, curY=0, itemH=50, timer=null, dragging=false, ghost=null;
+
+  items.forEach(item => {
+    item.addEventListener('touchstart', e => {
+      if (e.target.classList.contains('edit-client-del')) return;
+      const idx = parseInt(item.dataset.idx);
+      timer = setTimeout(() => {
+        dragIdx=idx; dragging=true; startY=e.touches[0].clientY; curY=startY;
+        item.classList.add('dragging');
+        if(navigator.vibrate) navigator.vibrate(40);
+        ghost = document.createElement('div');
+        ghost.className = 'drag-ghost';
+        ghost.textContent = ceClients[idx];
+        ghost.style.top = (startY-20)+'px';
+        document.body.appendChild(ghost);
+        const list = document.getElementById('ceClientList');
+        list._startScroll = list.scrollTop;
+      }, 400);
+    }, {passive:true});
+
+    item.addEventListener('touchmove', e => {
+      if (!dragging) { clearTimeout(timer); return; }
+      e.preventDefault();
+      curY = e.touches[0].clientY;
+      if (ghost) ghost.style.top = (curY-20)+'px';
+      const list = document.getElementById('ceClientList');
+      const rect = list.getBoundingClientRect();
+      if (curY > rect.bottom-50) list.scrollTop += 3;
+      else if (curY < rect.top+50) list.scrollTop -= 3;
+      const scrollDiff = list.scrollTop - (list._startScroll||0);
+      const steps = Math.round((curY - startY + scrollDiff) / itemH);
+      const newIdx = Math.max(0, Math.min(ceClients.length-1, dragIdx+steps));
+      [...document.querySelectorAll('#ceClientList .edit-client-row')].forEach((el,i) => {
+        el.style.transition = 'transform 0.15s';
+        if (i===dragIdx) { el.style.transform=''; return; }
+        if (dragIdx<newIdx && i>dragIdx && i<=newIdx) el.style.transform='translateY(-50px)';
+        else if (dragIdx>newIdx && i>=newIdx && i<dragIdx) el.style.transform='translateY(50px)';
+        else el.style.transform='';
+      });
+    }, {passive:false});
+
+    item.addEventListener('touchend', e => {
+      clearTimeout(timer);
+      if (ghost) { ghost.remove(); ghost=null; }
+      if (!dragging) { dragging=false; return; }
+      const list = document.getElementById('ceClientList');
+      const scrollDiff = list.scrollTop - (list._startScroll||0);
+      const steps = Math.round((curY - startY + scrollDiff) / itemH);
+      const newIdx = Math.max(0, Math.min(ceClients.length-1, dragIdx+steps));
+      if (newIdx!==dragIdx) {
+        const moved = ceClients.splice(dragIdx,1)[0];
+        ceClients.splice(newIdx,0,moved);
+      }
+      dragIdx=null; dragging=false;
+      renderCeList();
+    });
+  });
+}
+
+// ══════════════════════════════
+// 수거 입력
+// ══════════════════════════════
+function initInputScreen() {
+  document.getElementById('inputDate').value = today();
+  document.getElementById('inputTitle').textContent = '수거 입력';
+  document.getElementById('inputSub').textContent = '';
+  inputClients = [];
+  inputCache = {};
+  memoCache = {};
+  tmpKey = null;
+  renderSubHdr();
+  renderInputTable();
+}
+
+window.onDateChange = function() {};
+
+// 서브 헤더
+function renderSubHdr() {
+  const tr = document.getElementById('subHdr');
+  const s = 'position:sticky;top:28px;background:#111;font-size:10px;padding:3px 2px;border-bottom:1px solid #222;';
+  let h = '';
+  BOX.forEach((sz,i) => { h += `<th style="${s}${i===0?'border-left:2px solid #2a2a2a;':''}">${sz.replace('L','')}</th>`; });
+  RESIN.forEach((sz,i) => { h += `<th style="${s}${i===0?'border-left:2px solid #2a2a2a;':''}">${sz.replace('L','')}</th>`; });
+  BOX.forEach((sz,i) => { h += `<th style="${s}${i===0?'border-left:2px solid #2a2a2a;':''}">${sz.replace('L','')}</th>`; });
+  RESIN.forEach((sz,i) => { h += `<th style="${s}${i===0?'border-left:2px solid #2a2a2a;':''}">${sz.replace('L','')}</th>`; });
+  tr.innerHTML = h;
+}
+
+// 코스 불러오기
+window.openLoadCourseModal = async function() {
+  if (!courseList.length) await loadCourseList();
+  const el = document.getElementById('loadCourseList');
+  el.innerHTML = courseList.map(c => `
+    <div style="padding:12px;border-bottom:1px solid #1e1e1e;cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="loadCourse('${c.id}')">
+      <span style="font-size:13px">${c.name}</span>
+      <span style="font-size:11px;color:#555">${c.clients.length}개</span>
+    </div>
+  `).join('');
+  document.getElementById('loadCourseModal').classList.add('show');
+};
+
+window.loadCourse = async function(id) {
+  closeModal('loadCourseModal');
+  const c = courseList.find(c=>c.id===id);
+  if (!c) return;
+  inputClients = [...c.clients];
+  inputCache = {};
+  // 임시저장 확인
+  const date = document.getElementById('inputDate').value || today();
+  tmpKey = currentUser.userId + '_' + date + '_' + id;
+  try {
+    const snap = await getDoc(doc(db,'dailyTemp3',tmpKey));
+    if (snap.exists() && snap.data().clients?.length) {
+      inputClients = snap.data().clients;
+      inputCache = snap.data().cache || {};
+      toast('임시저장 불러왔어요!');
+    }
+  } catch(e) {}
+  document.getElementById('inputTitle').textContent = c.name;
+  document.getElementById('inputSub').textContent = (currentUser.name||currentUser.userId) + ' · ' + date;
+  await loadMemoCache();
+  renderInputTable();
+};
+
+// 거래처 추가 (수거입력)
+window.addExtraClient = function() {
+  document.getElementById('acSearch').value = '';
+  document.getElementById('acList').style.display = 'none';
+  document.getElementById('addClientModal').classList.add('show');
+};
+
+window.acFilter = function() {
+  const val = document.getElementById('acSearch').value.trim();
+  const list = document.getElementById('acList');
+  const filtered = acSearch(allClients, val);
+  if (!filtered.length) { list.style.display='none'; return; }
+  list.innerHTML = filtered.map(name => `<div class="ac-item" onclick="acSelect('${name.replace(/'/g,"\\'")}')">${name}</div>`).join('');
+  list.style.display = 'block';
+};
+
+window.acSelect = async function(name) {
+  closeModal('addClientModal');
+  inputClients.push(name);
+  if (!memoCache[name]) {
+    try {
+      const snap = await getDocs(query(collection(db,'일지db'), where('clientName','==',name)));
+      if (!snap.empty) {
+        const docs = snap.docs.map(d=>d.data()).filter(d=>d.memo).sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+        if (docs.length) memoCache[name] = docs[0].memo;
+      }
+    } catch(e) {}
+  }
+  renderInputTable();
+};
+
+// 메모 캐시 로드
+async function loadMemoCache() {
+  memoCache = {};
+  for (const name of inputClients) {
+    try {
+      const snap = await getDocs(query(collection(db,'일지db'), where('clientName','==',name)));
+      if (!snap.empty) {
+        const docs = snap.docs.map(d=>d.data()).filter(d=>d.memo).sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+        if (docs.length) memoCache[name] = docs[0].memo;
+      }
+    } catch(e) {}
+  }
+}
+
+// 입력 테이블
+function saveInputs() {
+  inputClients.forEach((name,idx) => {
+    const row = document.querySelector(`tr[data-idx="${idx}"]`);
+    if (!row) return;
+    if (!inputCache[idx]) inputCache[idx] = {collect:{},deliver:{},memo:''};
+    SIZES.forEach(sz => {
+      const c = row.querySelector(`[data-t="c"][data-k="${sz}"]`);
+      const d = row.querySelector(`[data-t="d"][data-k="${sz}"]`);
+      if (c) inputCache[idx].collect[sz] = c.value;
+      if (d) inputCache[idx].deliver[sz] = d.value;
+    });
+  });
+}
+
+function renderInputTable() {
+  const body = document.getElementById('inputBody');
+  if (!inputClients.length) {
+    body.innerHTML = `<tr><td colspan="22" style="padding:20px;text-align:center;color:#444">코스를 불러오거나 거래처를 추가하세요</td></tr>`;
+    return;
+  }
+  let h = '';
+  inputClients.forEach((name,idx) => {
+    const cache = inputCache[idx] || {collect:{},deliver:{},memo:''};
+    const hasMemo = !!memoCache[name];
+    h += `<tr data-idx="${idx}">`;
+    h += `<td class="td-seq">${idx+1}</td>`;
+    h += `<td class="td-name" onclick="openMemo(${idx})">
+      <div class="cn${hasMemo?' has-memo':''}">${name}</div>
+      ${cache.memo ? `<div class="today-memo">📝 ${cache.memo}</div>` : ''}
+    </td>`;
+    // 수거 박스
+    BOX.forEach((sz,i) => {
+      const v = cache.collect[sz]||'';
+      const cls = sz==='30L'?'cb30':'cb';
+      h += `<td class="${cls}${i===0?' sep':''}"><input type="number" class="${cls}" data-t="c" data-k="${sz}" value="${v}" min="0"></td>`;
+    });
+    // 수거 합성
+    RESIN.forEach((sz,i) => {
+      const v = cache.collect[sz]||'';
+      const cls = sz==='5L'?'cr5':'cr';
+      h += `<td class="${cls}${i===0?' sep':''}"><input type="number" class="${cls}" data-t="c" data-k="${sz}" value="${v}" min="0"></td>`;
+    });
+    // 납품 박스
+    BOX.forEach((sz,i) => {
+      const v = cache.deliver[sz]||'';
+      const cls = sz==='30L'?'db30':'db';
+      h += `<td class="${cls}${i===0?' sep':''}"><input type="number" class="${cls}" data-t="d" data-k="${sz}" value="${v}" min="0"></td>`;
+    });
+    // 납품 합성
+    RESIN.forEach((sz,i) => {
+      const v = cache.deliver[sz]||'';
+      const cls = sz==='5L'?'dr5':'dr';
+      h += `<td class="${cls}${i===0?' sep':''}"><input type="number" class="${cls}" data-t="d" data-k="${sz}" value="${v}" min="0"></td>`;
+    });
+    h += '</tr>';
+  });
+  body.innerHTML = h;
+}
+
+// ── 메모 ──
+window.openMemo = function(idx) {
+  memoIdx = idx;
+  const name = inputClients[idx];
+  document.getElementById('memoTitle').textContent = name;
+  document.getElementById('memoPrev').textContent = memoCache[name] ? '이전: '+memoCache[name] : '이전 메모 없음';
+  document.getElementById('memoInput').value = inputCache[idx]?.memo || '';
+  document.getElementById('memoModal').classList.add('show');
+};
+window.saveMemo = function() {
+  if (!inputCache[memoIdx]) inputCache[memoIdx] = {collect:{},deliver:{},memo:''};
+  inputCache[memoIdx].memo = document.getElementById('memoInput').value.trim();
+  closeModal('memoModal');
+  renderInputTable();
+};
+window.deleteMemo = function() {
+  if (inputCache[memoIdx]) inputCache[memoIdx].memo = '';
+  closeModal('memoModal');
+  renderInputTable();
+};
+
+// ── 임시저장 ──
+window.saveTmp = async function() {
+  saveInputs();
+  if (!tmpKey) {
+    const date = document.getElementById('inputDate').value || today();
+    tmpKey = currentUser.userId + '_' + date + '_manual_' + Date.now();
+  }
+  try {
+    await setDoc(doc(db,'dailyTemp3',tmpKey), {
+      clients: inputClients,
+      cache: inputCache,
+      date: document.getElementById('inputDate').value || today(),
+      userId: currentUser.userId,
+      updatedAt: Timestamp.now()
+    });
+    toast('임시저장 완료!');
+  } catch(e) { toast('임시저장 실패', false); }
+};
+
+// ── 전송 ──
+window.sendData = async function() {
+  saveInputs();
+  const date = document.getElementById('inputDate').value || today();
+  const carNumber = currentUser.cars?.[0] || '';
+  let count = 0;
+  const sent = [];
+  const base = Date.now();
+
+  for (let idx=0; idx<inputClients.length; idx++) {
+    const name = inputClients[idx];
+    const cache = inputCache[idx] || {collect:{},deliver:{},memo:''};
+    const data = { clientName:name, date, carNumber, seq:idx+1, memo:cache.memo||'', timestamp:Timestamp.fromMillis(base+idx*1000) };
+    let hasData = false;
+    SIZES.forEach(sz => {
+      const cv = parseInt(cache.collect[sz])||0;
+      const dv = parseInt(cache.deliver[sz])||0;
+      if (cv||dv) hasData = true;
+      data['collect'+sz] = cv;
+      data['deliver'+sz] = dv;
+    });
+    if (cache.memo) hasData = true;
+    if (!hasData) continue;
+    try { await addDoc(collection(db,'일지db'),data); sent.push(name); count++; } catch(e) {}
+  }
+
+  if (!count) { toast('입력된 데이터가 없어요', false); return; }
+
+  // 임시저장 삭제
+  if (tmpKey) try { await deleteDoc(doc(db,'dailyTemp3',tmpKey)); } catch(e) {}
+
+  document.getElementById('doneCount').textContent = `${count}건 전송됐어요`;
+  document.getElementById('doneList').innerHTML = sent.map((n,i)=>`<div style="padding:3px 0;border-bottom:1px solid #1e1e1e">${i+1}. ${n}</div>`).join('');
+  document.getElementById('doneModal').classList.add('show');
+  inputClients = []; inputCache = {}; tmpKey = null;
+  renderInputTable();
+};
+
+window.closeDone = function() {
+  closeModal('doneModal');
+  showScreen('mainScreen');
+};
+
+// ══════════════════════════════
+// 이전 데이터
+// ══════════════════════════════
+async function loadHistoryList() {
+  const wrap = document.getElementById('historyWrap');
+  wrap.innerHTML = '<div style="text-align:center;color:#444;padding:20px">불러오는 중...</div>';
+  try {
+    const carNumber = currentUser.cars?.[0] || '';
+    const q = carNumber
+      ? query(collection(db,'일지db'), where('carNumber','==',carNumber), where('seq','>=',1))
+      : query(collection(db,'일지db'), where('seq','>=',1));
+    const snap = await getDocs(q);
+    // 날짜별 그룹
+    const groups = {};
+    snap.docs.forEach(d => {
+      const data = d.data();
+      if (!groups[data.date]) groups[data.date] = [];
+      groups[data.date].push({...data, docId:d.id});
+    });
+    const dates = Object.keys(groups).sort((a,b)=>b.localeCompare(a));
+    if (!dates.length) { wrap.innerHTML='<div style="text-align:center;color:#444;padding:20px">데이터가 없어요</div>'; return; }
+    histData = groups;
+    let html = '';
+    dates.forEach(date => {
+      const items = groups[date].sort((a,b)=>(a.seq||0)-(b.seq||0));
+      html += `<div class="hist-date-group">
+        <div class="hist-date-label">${date}</div>
+        <div class="hist-item" onclick="openHistDetail('${date}')">
+          <div class="hist-item-icon">📋</div>
+          <div style="flex:1">
+            <div class="hist-item-name">${items[0].clientName} 외 ${items.length-1}건</div>
+            <div class="hist-item-count">${items.length}개 거래처</div>
+          </div>
+        </div>
+      </div>`;
+    });
+    wrap.innerHTML = html;
+  } catch(e) { wrap.innerHTML='<div style="text-align:center;color:#e74c3c;padding:20px">불러오기 실패</div>'; }
+}
+
+window.openHistDetail = function(date) {
+  const items = (histData[date]||[]).sort((a,b)=>(a.seq||0)-(b.seq||0));
+  histDetailData = {date, items};
+  document.getElementById('histDetailTitle').textContent = date;
+  let html = '';
+  items.forEach((d,i) => {
+    const cols = SIZES.map(sz => {
+      const cv = d['collect'+sz]||0, dv = d['deliver'+sz]||0;
+      if (!cv&&!dv) return null;
+      return `${sz} 수${cv}/납${dv}`;
+    }).filter(Boolean).join(', ');
+    html += `<div style="background:#111;border:1px solid #222;border-radius:10px;padding:12px;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${i+1}. ${d.clientName}</div>
+      <div style="font-size:12px;color:#888">${cols||'내용 없음'}</div>
+      ${d.memo?`<div style="font-size:11px;color:#a87a20;margin-top:4px">📝 ${d.memo}</div>`:''}
+    </div>`;
+  });
+  document.getElementById('histDetailWrap').innerHTML = html;
+  showScreen('histDetailScreen');
+};
+
+window.editHistDetail = function() {
+  if (!histDetailData) return;
+  const {date, items} = histDetailData;
+  inputClients = items.map(d=>d.clientName);
+  inputCache = {};
+  items.forEach((d,idx) => {
+    inputCache[idx] = {collect:{}, deliver:{}, memo:d.memo||''};
+    SIZES.forEach(sz => {
+      inputCache[idx].collect[sz] = d['collect'+sz] ? String(d['collect'+sz]) : '';
+      inputCache[idx].deliver[sz] = d['deliver'+sz] ? String(d['deliver'+sz']) : '';
+    });
+  });
+  document.getElementById('inputDate').value = date;
+  document.getElementById('inputTitle').textContent = date + ' 수정';
+  document.getElementById('inputSub').textContent = currentUser.name||currentUser.userId;
+  tmpKey = null;
+  memoCache = {};
+  renderSubHdr();
+  renderInputTable();
+  showScreen('inputScreen');
+};
+
+// ── 뒤로가기 ──
+let _bl=false, _exitOpen=false;
+history.pushState(null,'',location.href);
+history.pushState(null,'',location.href);
+history.pushState(null,'',location.href);
+
+window.addEventListener('popstate', () => {
+  if (!currentUser) return;
+  if (_bl) return;
+  _bl=true; history.go(1);
+  setTimeout(()=>{ _bl=false; }, 100);
+  if (_exitOpen) { closeModal('exitModal'); _exitOpen=false; return; }
+  _exitOpen=true;
+  document.getElementById('exitModal').classList.add('show');
+});
+document.getElementById('exitModal').querySelector('.btn-secondary').addEventListener('click', ()=>{ _exitOpen=false; });
+
+// ── 세션 복원 ──
+(async function() {
+  const savedId = localStorage.getItem('d3_savedId');
+  if (savedId) { document.getElementById('loginId').value=savedId; document.getElementById('saveIdChk').checked=true; }
+  const session = localStorage.getItem('d3_session');
+  if (session) {
+    try {
+      currentUser = JSON.parse(session);
+      await afterLogin();
+      for(let i=0;i<5;i++) history.pushState(null,'',location.href);
+    } catch(e) { localStorage.removeItem('d3_session'); }
+  }
+})();
+
+</script>
+</body>
+</html>
