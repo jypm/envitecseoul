@@ -215,7 +215,7 @@ td input[type=number]::placeholder { color:#2a2a2a; }
       <input id="courseSearch" class="inp" type="text" placeholder="거래처 검색 (초성 가능)" autocomplete="off" oninput="courseAcFilter()" style="margin-bottom:0">
       <div class="ac-list" id="courseAcList"></div>
     </div>
-    <div id="editCourseList" style="max-height:300px;overflow-y:auto;margin-bottom:12px"></div>
+    <div id="editCourseList" style="max-height:50vh;overflow-y:auto;margin-bottom:12px"></div>
     <button class="btn btn-primary" style="width:100%" onclick="saveEditCourse()">저장</button>
   </div>
 </div>
@@ -723,10 +723,9 @@ function renderEditList() {
     return;
   }
   el.innerHTML = editTempClients.map((name, i) => `
-    <div class="edit-item" data-idx="${i}">
-      <span class="drag-handle">☰</span>
+    <div class="edit-item" data-idx="${i}" style="user-select:none;-webkit-user-select:none">
       <span class="edit-item-name">${i+1}. ${name}</span>
-      <button onclick="removeEditClient(${i})" style="background:none;border:none;color:#555;font-size:15px;cursor:pointer;padding:4px">✕</button>
+      <button onclick="removeEditClient(${i})" style="background:none;border:none;color:#555;font-size:15px;cursor:pointer;padding:4px;flex-shrink:0">✕</button>
     </div>
   `).join('');
   initEditDrag();
@@ -734,19 +733,23 @@ function renderEditList() {
 
 function initEditDrag() {
   const items = document.querySelectorAll('#editCourseList .edit-item');
-  let dragIdx = null, startY = 0, itemH = 44;
+  let dragIdx = null, startY = 0, itemH = 44, longPressTimer = null, dragging = false;
 
   items.forEach(item => {
-    const handle = item.querySelector('.drag-handle');
-    handle.addEventListener('touchstart', e => {
-      dragIdx = parseInt(item.dataset.idx);
-      startY = e.touches[0].clientY;
-      item.style.opacity = '0.5';
-      e.preventDefault();
-    }, { passive:false });
+    item.addEventListener('touchstart', e => {
+      const idx = parseInt(item.dataset.idx);
+      longPressTimer = setTimeout(() => {
+        dragIdx = idx;
+        dragging = true;
+        startY = e.touches[0].clientY;
+        item.style.opacity = '0.4';
+        item.style.background = '#1a1a2a';
+        if(navigator.vibrate) navigator.vibrate(30);
+      }, 400);
+    }, { passive:true });
 
-    handle.addEventListener('touchmove', e => {
-      if (dragIdx === null) return;
+    item.addEventListener('touchmove', e => {
+      if (!dragging || dragIdx === null) { clearTimeout(longPressTimer); return; }
       e.preventDefault();
       const y = e.touches[0].clientY;
       const diff = y - startY;
@@ -755,22 +758,25 @@ function initEditDrag() {
       const allItems = [...document.querySelectorAll('#editCourseList .edit-item')];
       allItems.forEach((el, i) => {
         el.style.transform = '';
+        el.style.transition = 'transform 0.15s';
         if (dragIdx < newIdx && i > dragIdx && i <= newIdx) el.style.transform = 'translateY(-44px)';
         if (dragIdx > newIdx && i >= newIdx && i < dragIdx) el.style.transform = 'translateY(44px)';
       });
     }, { passive:false });
 
-    handle.addEventListener('touchend', e => {
-      if (dragIdx === null) return;
+    item.addEventListener('touchend', e => {
+      clearTimeout(longPressTimer);
+      if (!dragging || dragIdx === null) { dragging = false; return; }
       const y = e.changedTouches[0].clientY;
       const diff = y - startY;
       const steps = Math.round(diff / itemH);
       const newIdx = Math.max(0, Math.min(editTempClients.length-1, dragIdx + steps));
       if (newIdx !== dragIdx) {
-        const item = editTempClients.splice(dragIdx, 1)[0];
-        editTempClients.splice(newIdx, 0, item);
+        const moved = editTempClients.splice(dragIdx, 1)[0];
+        editTempClients.splice(newIdx, 0, moved);
       }
       dragIdx = null;
+      dragging = false;
       renderEditList();
     });
   });
