@@ -162,11 +162,12 @@ td input[type=number]::placeholder { color:#2a2a2a; }
     <table id="inputTable">
       <thead>
         <tr>
-          <th class="th-seq">#</th><th class="th-client">거래처</th>
-          <th colspan="5">수거 박스</th>
-          <th colspan="5" class="sep-col">수거 합성</th>
-          <th colspan="5" class="sep-col">납품 박스</th>
-          <th colspan="5" class="sep-col">납품 합성</th>
+          <th class="th-seq" rowspan="2">#</th>
+          <th class="th-client" rowspan="2">거래처</th>
+          <th colspan="5" style="border-left:2px solid #2a2a2a">수거 박스</th>
+          <th colspan="5" style="border-left:2px solid #2a2a2a">수거 합성</th>
+          <th colspan="5" style="border-left:2px solid #2a2a2a">납품 박스</th>
+          <th colspan="5" style="border-left:2px solid #2a2a2a">납품 합성</th>
         </tr>
         <tr id="subHeaderRow"></tr>
       </thead>
@@ -492,9 +493,17 @@ async function loadMemos() {
 // ── 서브 헤더 ──
 function renderSubHeader() {
   const tr = document.getElementById('subHeaderRow');
-  const sizes = ['4','12','30','50','63','1','2','5','10','20'];
-  let html = '<td></td><td></td>';
-  sizes.forEach((s,i) => { html += `<td style="font-size:10px;color:#333;padding:4px 2px${i===5?' border-left:2px solid #2a2a2a':''}">${s}</td>`; });
+  const box = ['4','12','30','50','63'];
+  const resin = ['1','2','5','10','20'];
+  const s2 = 'font-size:10px;color:#333;padding:3px 2px;border-bottom:1px solid #222;';
+  const sep = 'border-left:2px solid #2a2a2a;';
+  let html = '';
+  box.forEach((s,i) => { html += '<th style="top:28px;position:sticky;background:#111;' + s2 + (i===0?sep:'') + '">' + s + '</th>'; });
+  resin.forEach((s,i) => { html += '<th style="top:28px;position:sticky;background:#111;' + s2 + (i===0?sep:'') + '">' + s + '</th>'; });
+  box.forEach((s,i) => { html += '<th style="top:28px;position:sticky;background:#111;' + s2 + (i===0?sep:'') + '">' + s + '</th>'; });
+  resin.forEach((s,i) => { html += '<th style="top:28px;position:sticky;background:#111;' + s2 + (i===0?sep:'') + '">' + s + '</th>'; });
+  tr.innerHTML = html;
+}">${s}</td>`; });
   sizes.forEach((s,i) => { html += `<td style="font-size:10px;color:#333;padding:4px 2px${i===0?' border-left:2px solid #2a2a2a':''}">${s}</td>`; });
   sizes.forEach((s,i) => { html += `<td style="font-size:10px;color:#333;padding:4px 2px${i===0?' border-left:2px solid #2a2a2a':''}">${s}</td>`; });
   sizes.forEach((s,i) => { html += `<td style="font-size:10px;color:#333;padding:4px 2px${i===0?' border-left:2px solid #2a2a2a':''}">${s}</td>`; });
