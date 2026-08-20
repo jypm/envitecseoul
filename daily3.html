@@ -221,11 +221,12 @@ td input[type=number]:focus { outline:1px solid #3D82F6; border-radius:4px; }
         <div class="hdr-sub" id="inputSub"></div>
       </div>
     </div>
-    <button class="btn-ghost" onclick="openLoadCourseModal()">코스 불러오기</button>
   </div>
-  <div class="top-bar">
-    <input type="date" id="inputDate" class="date-inp" onchange="onDateChange()">
-    <button class="btn-ghost" onclick="addExtraClient()">+ 거래처 추가</button>
+  <div class="top-bar" style="gap:6px;flex-wrap:nowrap">
+    <input type="date" id="inputDate" class="date-inp" style="flex-shrink:0">
+    <button class="btn-ghost" style="font-size:11px;padding:5px 8px;white-space:nowrap" onclick="openLoadCourseModal()">코스</button>
+    <button class="btn-ghost" style="font-size:11px;padding:5px 8px;white-space:nowrap" onclick="addExtraClient()">+ 추가</button>
+    <button class="btn btn-secondary btn-sm" style="white-space:nowrap;flex-shrink:0" onclick="saveTmp()">임시저장</button>
   </div>
   <div class="table-wrap">
     <table id="inputTable">
@@ -244,8 +245,7 @@ td input[type=number]:focus { outline:1px solid #3D82F6; border-radius:4px; }
     </table>
   </div>
   <div class="action-bar">
-    <button class="btn btn-secondary" onclick="saveTmp()">임시저장</button>
-    <button class="btn btn-primary" onclick="sendData()">전송</button>
+    <button class="btn btn-primary" style="width:100%" onclick="sendData()">전송</button>
   </div>
 </div>
 
@@ -701,12 +701,13 @@ window.onDateChange = function() {};
 // 서브 헤더
 function renderSubHdr() {
   const tr = document.getElementById('subHdr');
-  const s = 'position:sticky;top:28px;background:#111;font-size:10px;padding:3px 2px;border-bottom:1px solid #222;';
+  const s = 'position:sticky;top:32px;background:#0d0d0d;font-size:10px;padding:3px 2px;border-bottom:1px solid #222;color:#333;';
+  const sep = 'border-left:2px solid #2a2a2a;';
   let h = '';
-  BOX.forEach((sz,i) => { h += `<th style="${s}${i===0?'border-left:2px solid #2a2a2a;':''}">${sz.replace('L','')}</th>`; });
-  RESIN.forEach((sz,i) => { h += `<th style="${s}${i===0?'border-left:2px solid #2a2a2a;':''}">${sz.replace('L','')}</th>`; });
-  BOX.forEach((sz,i) => { h += `<th style="${s}${i===0?'border-left:2px solid #2a2a2a;':''}">${sz.replace('L','')}</th>`; });
-  RESIN.forEach((sz,i) => { h += `<th style="${s}${i===0?'border-left:2px solid #2a2a2a;':''}">${sz.replace('L','')}</th>`; });
+  BOX.forEach((sz,i) => { h += '<th style="' + s + (i===0?sep:'') + '">' + sz.replace('L','') + '</th>'; });
+  RESIN.forEach((sz,i) => { h += '<th style="' + s + (i===0?sep:'') + '">' + sz.replace('L','') + '</th>'; });
+  BOX.forEach((sz,i) => { h += '<th style="' + s + (i===0?sep:'') + '">' + sz.replace('L','') + '</th>'; });
+  RESIN.forEach((sz,i) => { h += '<th style="' + s + (i===0?sep:'') + '">' + sz.replace('L','') + '</th>'; });
   tr.innerHTML = h;
 }
 
