@@ -503,12 +503,9 @@ function renderSubHeader() {
   box.forEach((s,i) => { html += '<th style="top:28px;position:sticky;background:#111;' + s2 + (i===0?sep:'') + '">' + s + '</th>'; });
   resin.forEach((s,i) => { html += '<th style="top:28px;position:sticky;background:#111;' + s2 + (i===0?sep:'') + '">' + s + '</th>'; });
   tr.innerHTML = html;
-}">${s}</td>`; });
-  sizes.forEach((s,i) => { html += `<td style="font-size:10px;color:#333;padding:4px 2px${i===0?' border-left:2px solid #2a2a2a':''}">${s}</td>`; });
-  sizes.forEach((s,i) => { html += `<td style="font-size:10px;color:#333;padding:4px 2px${i===0?' border-left:2px solid #2a2a2a':''}">${s}</td>`; });
-  sizes.forEach((s,i) => { html += `<td style="font-size:10px;color:#333;padding:4px 2px${i===0?' border-left:2px solid #2a2a2a':''}">${s}</td>`; });
-  tr.innerHTML = html;
 }
+
+
 
 // ── 입력 테이블 렌더 ──
 function saveCurrentInputs() {
