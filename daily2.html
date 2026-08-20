@@ -274,7 +274,10 @@ const db = getFirestore(app);
 
 // ── 상수 ──
 const SIZES = ['4L','12L','30L','50L','63L','1L','2L','5L','10L','20L'];
-const DEFAULT_COURSES = ['월','화','수','목','금'];
+const DEFAULT_COURSES = [
+  {key:'A월', name:'A월요일'}, {key:'A화', name:'A화요일'}, {key:'A수', name:'A수요일'}, {key:'A목', name:'A목요일'}, {key:'A금', name:'A금요일'},
+  {key:'B월', name:'B월요일'}, {key:'B화', name:'B화요일'}, {key:'B수', name:'B수요일'}, {key:'B목', name:'B목요일'}, {key:'B금', name:'B금요일'},
+];
 
 // ── 상태 ──
 let currentUser = null;
@@ -372,15 +375,15 @@ async function startApp() {
 // ── 코스 목록 로드 ──
 async function loadCourseList() {
   courseList = [];
-  // 기본 코스 (요일)
-  for (const day of DEFAULT_COURSES) {
-    const key = (currentUser.userId) + '_day_' + day;
+  // 기본 코스 (A/B 주차 각 5일)
+  for (const dc of DEFAULT_COURSES) {
+    const key = currentUser.userId + '_day_' + dc.key;
     try {
       const snap = await getDoc(doc(db,'courses2', key));
       const clients = snap.exists() ? (snap.data().clients||[]) : [];
-      courseList.push({ id:key, name:day+'요일', type:'default', day, clients });
+      courseList.push({ id:key, name:dc.name, type:'default', day:dc.key, clients });
     } catch(e) {
-      courseList.push({ id:key, name:day+'요일', type:'default', day, clients:[] });
+      courseList.push({ id:key, name:dc.name, type:'default', day:dc.key, clients:[] });
     }
   }
   // 추가 코스
@@ -397,9 +400,21 @@ function renderCourseList() {
   const wrap = document.getElementById('courseListWrap');
   let html = '';
 
-  // 기본 코스
-  html += '<div class="section-label">기본 코스</div>';
-  courseList.filter(c=>c.type==='default').forEach(c => {
+  // 기본 코스 A주차
+  html += '<div class="section-label">A주차</div>';
+  courseList.filter(c=>c.type==='default' && c.day.startsWith('A')).forEach(c => {
+    html += `<div class="course-item" onclick="selectCourse('${c.id}')">
+      <div class="course-icon">📅</div>
+      <div class="course-info">
+        <div class="course-name">${c.name}</div>
+        <div class="course-count">${c.clients.length}개 거래처</div>
+      </div>
+    </div>`;
+  });
+
+  // 기본 코스 B주차
+  html += '<div class="section-label">B주차</div>';
+  courseList.filter(c=>c.type==='default' && c.day.startsWith('B')).forEach(c => {
     html += `<div class="course-item" onclick="selectCourse('${c.id}')">
       <div class="course-icon">📅</div>
       <div class="course-info">
