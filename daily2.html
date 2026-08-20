@@ -546,7 +546,7 @@ function renderInputTable() {
       const bg = sz==='30L' ? '#2a2218' : '#221e14';
       const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
       html += `<td style="${border}background:${bg}">
-        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" style="background:${bg}">
+        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" inputmode="numeric" style="background:${bg}">
       </td>`;
     });
     // 수거 합성
@@ -555,7 +555,7 @@ function renderInputTable() {
       const bg = sz==='5L' ? '#1e2a18' : '#182014';
       const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
       html += `<td style="${border}background:${bg}">
-        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" style="background:${bg}">
+        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" inputmode="numeric" style="background:${bg}">
       </td>`;
     });
     // 납품 박스
@@ -564,7 +564,7 @@ function renderInputTable() {
       const bg = sz==='30L' ? '#18202a' : '#141820';
       const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
       html += `<td style="${border}background:${bg}">
-        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" style="background:${bg}">
+        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" inputmode="numeric" style="background:${bg}">
       </td>`;
     });
     // 납품 합성
@@ -573,7 +573,7 @@ function renderInputTable() {
       const bg = sz==='5L' ? '#1e1828' : '#181420';
       const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
       html += `<td style="${border}background:${bg}">
-        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" style="background:${bg}">
+        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" inputmode="numeric" style="background:${bg}">
       </td>`;
     });
     html += '</tr>';
@@ -915,22 +915,6 @@ window.addEventListener('popstate', () => {
 });
 
 document.getElementById('exitModal').querySelector('.btn-secondary').addEventListener('click', () => { _exitOpen = false; });
-
-// ── 입력 테이블 좌우 스크롤 ──
-document.querySelector('#inputScreen .table-wrap')?.addEventListener('touchstart', () => {}, { passive:true });
-document.addEventListener('touchstart', e => {
-  const input = e.target.closest('#inputScreen td input');
-  if (input) {
-    const wrap = document.querySelector('#inputScreen .table-wrap');
-    if (wrap) wrap.scrollLeft = wrap.scrollLeft; // 스크롤 활성화
-  }
-}, { passive:true });
-document.addEventListener('touchmove', e => {
-  if (e.touches.length === 1) {
-    const inScrollable = e.target.closest('.scroll, .table-wrap, .modal, #editCourseList, #inputScreen');
-    if (!inScrollable) e.preventDefault();
-  }
-}, { passive:false });
 
 // ── 세션 복원 ──
 history.pushState(null,'',location.href);
