@@ -733,7 +733,18 @@ function renderEditList() {
 
 function initEditDrag() {
   const items = document.querySelectorAll('#editCourseList .edit-item');
-  let dragIdx = null, startY = 0, itemH = 44, longPressTimer = null, dragging = false;
+  let dragIdx = null, startY = 0, currentY = 0, itemH = 44, longPressTimer = null, dragging = false, ghost = null;
+
+  function createGhost(name, y) {
+    ghost = document.createElement('div');
+    ghost.textContent = name;
+    ghost.style.cssText = `position:fixed;left:10%;width:80%;background:#3D82F6;color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;z-index:9999;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,0.5);top:${y-20}px;`;
+    document.body.appendChild(ghost);
+  }
+
+  function removeGhost() {
+    if (ghost) { ghost.remove(); ghost = null; }
+  }
 
   items.forEach(item => {
     item.addEventListener('touchstart', e => {
@@ -742,33 +753,37 @@ function initEditDrag() {
         dragIdx = idx;
         dragging = true;
         startY = e.touches[0].clientY;
-        item.style.opacity = '0.4';
-        item.style.background = '#1a1a2a';
-        if(navigator.vibrate) navigator.vibrate(30);
+        currentY = startY;
+        item.style.opacity = '0.3';
+        if(navigator.vibrate) navigator.vibrate(40);
+        createGhost(editTempClients[idx], startY);
       }, 400);
     }, { passive:true });
 
     item.addEventListener('touchmove', e => {
       if (!dragging || dragIdx === null) { clearTimeout(longPressTimer); return; }
       e.preventDefault();
-      const y = e.touches[0].clientY;
-      const diff = y - startY;
+      currentY = e.touches[0].clientY;
+      // ghost 이동
+      if (ghost) ghost.style.top = (currentY - 20) + 'px';
+      const diff = currentY - startY;
       const steps = Math.round(diff / itemH);
       const newIdx = Math.max(0, Math.min(editTempClients.length-1, dragIdx + steps));
       const allItems = [...document.querySelectorAll('#editCourseList .edit-item')];
       allItems.forEach((el, i) => {
-        el.style.transform = '';
         el.style.transition = 'transform 0.15s';
+        if (i === dragIdx) { el.style.transform = ''; return; }
         if (dragIdx < newIdx && i > dragIdx && i <= newIdx) el.style.transform = 'translateY(-44px)';
-        if (dragIdx > newIdx && i >= newIdx && i < dragIdx) el.style.transform = 'translateY(44px)';
+        else if (dragIdx > newIdx && i >= newIdx && i < dragIdx) el.style.transform = 'translateY(44px)';
+        else el.style.transform = '';
       });
     }, { passive:false });
 
     item.addEventListener('touchend', e => {
       clearTimeout(longPressTimer);
+      removeGhost();
       if (!dragging || dragIdx === null) { dragging = false; return; }
-      const y = e.changedTouches[0].clientY;
-      const diff = y - startY;
+      const diff = currentY - startY;
       const steps = Math.round(diff / itemH);
       const newIdx = Math.max(0, Math.min(editTempClients.length-1, dragIdx + steps));
       if (newIdx !== dragIdx) {
