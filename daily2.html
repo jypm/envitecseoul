@@ -546,7 +546,7 @@ function renderInputTable() {
       const bg = sz==='30L' ? '#2a2218' : '#221e14';
       const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
       html += `<td style="${border}background:${bg}">
-        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" inputmode="numeric" style="background:${bg}">
+        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" inputmode="numeric">
       </td>`;
     });
     // 수거 합성
@@ -555,7 +555,7 @@ function renderInputTable() {
       const bg = sz==='5L' ? '#1e2a18' : '#182014';
       const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
       html += `<td style="${border}background:${bg}">
-        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" inputmode="numeric" style="background:${bg}">
+        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" inputmode="numeric">
       </td>`;
     });
     // 납품 박스
@@ -564,7 +564,7 @@ function renderInputTable() {
       const bg = sz==='30L' ? '#18202a' : '#141820';
       const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
       html += `<td style="${border}background:${bg}">
-        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" inputmode="numeric" style="background:${bg}">
+        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" inputmode="numeric">
       </td>`;
     });
     // 납품 합성
@@ -573,7 +573,7 @@ function renderInputTable() {
       const bg = sz==='5L' ? '#1e1828' : '#181420';
       const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
       html += `<td style="${border}background:${bg}">
-        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" inputmode="numeric" style="background:${bg}">
+        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" inputmode="numeric">
       </td>`;
     });
     html += '</tr>';
