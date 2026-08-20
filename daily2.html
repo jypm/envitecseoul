@@ -57,12 +57,12 @@ html, body { height:100%; overflow:hidden; background:#000; color:#f0f0f5; font-
 #inputScreen .table-wrap { flex:1; overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:none; }
 table { border-collapse:collapse; min-width:max-content; }
 thead th { position:sticky; top:0; background:#111; z-index:10; padding:7px 3px; font-size:11px; color:#444; border-bottom:1px solid #222; white-space:nowrap; text-align:center; }
-thead th.th-client { position:sticky; top:0; left:0; z-index:20; background:#111; padding:7px 10px; text-align:left; min-width:110px; }
+thead th.th-client { position:sticky; top:0; left:0; z-index:20; background:#111; padding:7px 10px; text-align:left; min-width:100px; max-width:100px; width:100px; }
 td { border-bottom:1px solid #1a1a1a; padding:3px 2px; text-align:center; vertical-align:middle; }
-td.td-client { position:sticky; left:0; background:#0d0d0d; z-index:5; padding:6px 8px; border-right:1px solid #1e1e1e; min-width:110px; text-align:left; vertical-align:top; cursor:pointer; }
+td.td-client { position:sticky; left:0; background:#0d0d0d; z-index:5; padding:6px 8px; border-right:1px solid #1e1e1e; min-width:100px; max-width:100px; width:100px; text-align:left; vertical-align:top; cursor:pointer; }
 td.td-client:active { background:#151515; }
 .client-seq { font-size:10px; color:#444; margin-right:3px; }
-.client-name { font-size:13px; color:#e0e0e0; font-weight:500; }
+.client-name { font-size:11px; color:#e0e0e0; font-weight:500; word-break:break-all; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .client-prev-memo { font-size:10px; color:#a87a20; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100px; }
 .client-today-memo { font-size:10px; color:#27ae60; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100px; }
 td input[type=number] { width:34px; background:#1a1a1a; border:1px solid #222; border-radius:5px; padding:4px 2px; color:#f0f0f5; font-size:13px; text-align:center; outline:none; -moz-appearance:textfield; }
