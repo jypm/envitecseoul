@@ -92,7 +92,7 @@ td input[type=number]::placeholder { color:#2a2a2a; }
 .modal textarea:focus { border-color:#3D82F6; }
 
 /* 코스 편집 모달 리스트 */
-.edit-item { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #1e1e1e; touch-action:none; }
+.edit-item { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #1e1e1e; }
 .drag-handle { font-size:18px; color:#333; cursor:grab; padding:0 4px; flex-shrink:0; }
 .edit-item-name { flex:1; font-size:13px; color:#ddd; }
 
@@ -208,14 +208,14 @@ td input[type=number]::placeholder { color:#2a2a2a; }
 
 <!-- 코스 편집 (거래처 추가/순서변경) -->
 <div class="modal-bg" id="editCourseModal">
-  <div class="modal" style="display:flex;flex-direction:column;max-height:85vh;padding:16px;overflow:hidden">
+  <div class="modal" style="display:flex;flex-direction:column;padding:16px;">
     <button class="modal-close" onclick="closeModal('editCourseModal')">✕</button>
     <h3 id="editCourseTitle" style="margin-bottom:10px">코스 편집</h3>
     <div class="ac-wrap" style="flex-shrink:0">
       <input id="courseSearch" class="inp" type="text" placeholder="거래처 검색 (초성 가능)" autocomplete="off" oninput="courseAcFilter()" style="margin-bottom:0">
       <div class="ac-list" id="courseAcList"></div>
     </div>
-    <div id="editCourseList" style="flex:1;overflow-y:auto;margin:10px 0;min-height:100px"></div>
+    <div id="editCourseList" style="overflow-y:auto;margin:10px 0;max-height:45vh;min-height:80px"></div>
     <button class="btn btn-primary" style="width:100%;flex-shrink:0" onclick="saveEditCourse()">저장</button>
   </div>
 </div>
