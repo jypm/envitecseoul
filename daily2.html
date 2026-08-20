@@ -589,7 +589,6 @@ window.openMemoModal = function(idx) {
   document.getElementById('memoPrevText').textContent = memoCache[name] ? '이전: ' + memoCache[name] : '이전 메모 없음';
   document.getElementById('memoInput').value = inputCache[idx]?.memo || '';
   document.getElementById('memoModal').classList.add('show');
-  setTimeout(() => document.getElementById('memoInput').focus(), 100);
 };
 
 window.saveMemo = function() {
@@ -921,7 +920,7 @@ document.getElementById('exitModal').querySelector('.btn-secondary').addEventLis
 document.addEventListener('touchmove', e => {
   if (e.touches.length === 1) {
     const el = e.target.closest('.scroll, .table-wrap, .modal, #editCourseList');
-    if (!el) e.preventDefault();
+    if (!el && !e.target.closest('#inputScreen')) e.preventDefault();
   }
 }, { passive:false });
 
