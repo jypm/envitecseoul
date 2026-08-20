@@ -771,7 +771,13 @@ window.addEditClient = function(name) {
 window.saveEditCourse = async function() {
   if (!currentCourse) return;
   try {
-    await setDoc(doc(db,'courses2', currentCourse.id), { clients:editTempClients }, { merge:true });
+    await setDoc(doc(db,'courses2', currentCourse.id), {
+      clients: editTempClients,
+      userId: currentUser.userId,
+      type: currentCourse.type,
+      name: currentCourse.name,
+      day: currentCourse.day || ''
+    });
     currentCourse.clients = [...editTempClients];
     inputCache = {};
     await loadMemos();
