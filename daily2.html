@@ -543,37 +543,37 @@ function renderInputTable() {
     // 수거 박스
     BOX_SIZES.forEach((sz, i) => {
       const v = cache.collect[sz] || '';
-      const bg = sz==='30L' ? '#2a2218' : '#221e14';
+      const bg = sz==='30L' ? '#2a2010' : '#1a1408';
       const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
       html += `<td style="${border}background:${bg}">
-        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" inputmode="numeric">
+        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" inputmode="numeric" style="background:transparent">
       </td>`;
     });
     // 수거 합성
     RESIN_SIZES.forEach((sz, i) => {
       const v = cache.collect[sz] || '';
-      const bg = sz==='5L' ? '#1e2a18' : '#182014';
+      const bg = sz==='5L' ? '#2a2010' : '#1a1408';
       const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
       html += `<td style="${border}background:${bg}">
-        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" inputmode="numeric">
+        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" inputmode="numeric" style="background:transparent">
       </td>`;
     });
     // 납품 박스
     BOX_SIZES.forEach((sz, i) => {
       const v = cache.deliver[sz] || '';
-      const bg = sz==='30L' ? '#18202a' : '#141820';
+      const bg = sz==='30L' ? '#101828' : '#0a1020';
       const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
       html += `<td style="${border}background:${bg}">
-        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" inputmode="numeric">
+        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" inputmode="numeric" style="background:transparent">
       </td>`;
     });
     // 납품 합성
     RESIN_SIZES.forEach((sz, i) => {
       const v = cache.deliver[sz] || '';
-      const bg = sz==='5L' ? '#1e1828' : '#181420';
+      const bg = sz==='5L' ? '#101828' : '#0a1020';
       const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
       html += `<td style="${border}background:${bg}">
-        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" inputmode="numeric">
+        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" inputmode="numeric" style="background:transparent">
       </td>`;
     });
     html += '</tr>';
