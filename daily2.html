@@ -754,6 +754,8 @@ function initEditDrag() {
         dragging = true;
         startY = e.touches[0].clientY;
         currentY = startY;
+        const list = document.getElementById('editCourseList');
+        list._startScroll = list.scrollTop;
         item.style.opacity = '0.3';
         if(navigator.vibrate) navigator.vibrate(40);
         createGhost(editTempClients[idx], startY);
@@ -766,7 +768,12 @@ function initEditDrag() {
       currentY = e.touches[0].clientY;
       // ghost 이동
       if (ghost) ghost.style.top = (currentY - 20) + 'px';
-      const diff = currentY - startY;
+      // 자동 스크롤
+      const list = document.getElementById('editCourseList');
+      const rect = list.getBoundingClientRect();
+      if (currentY > rect.bottom - 40) list.scrollTop += 8;
+      else if (currentY < rect.top + 40) list.scrollTop -= 8;
+      const diff = currentY - startY + list.scrollTop - (list._startScroll || 0);
       const steps = Math.round(diff / itemH);
       const newIdx = Math.max(0, Math.min(editTempClients.length-1, dragIdx + steps));
       const allItems = [...document.querySelectorAll('#editCourseList .edit-item')];
