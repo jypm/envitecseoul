@@ -277,6 +277,8 @@ const db = getFirestore(app);
 
 // ── 상수 ──
 const SIZES = ['4L','12L','30L','50L','63L','1L','2L','5L','10L','20L'];
+const BOX_SIZES = ['4L','12L','30L','50L','63L'];
+const RESIN_SIZES = ['1L','2L','5L','10L','20L'];
 const DEFAULT_COURSES = [
   {key:'A월', name:'A월요일'}, {key:'A화', name:'A화요일'}, {key:'A수', name:'A수요일'}, {key:'A목', name:'A목요일'}, {key:'A금', name:'A금요일'},
   {key:'B월', name:'B월요일'}, {key:'B화', name:'B화요일'}, {key:'B수', name:'B수요일'}, {key:'B목', name:'B목요일'}, {key:'B금', name:'B금요일'},
@@ -534,23 +536,46 @@ function renderInputTable() {
     const cache = inputCache[idx] || { collect:{}, deliver:{}, memo:'' };
     html += `<tr data-idx="${idx}">`;
     html += `<td class="td-seq">${idx+1}</td><td class="td-client" onclick="openMemoModal(${idx})">
-      <div><span class="client-name">${name}</span></div>
-      ${memoCache[name] ? `<div class="client-prev-memo">${memoCache[name]}</div>` : ''}
+      <div><span class="client-name" style="${memoCache[name] ? 'color:#90EE90' : ''}">${name}</span></div>
       ${cache.memo ? `<div class="client-today-memo">📝 ${cache.memo}</div>` : ''}
     </td>`;
-    SIZES.forEach((sz, i) => {
+    // 수거 박스 (4,12,30,50,63) - 연한 베이지
+    // 수거 박스
+    BOX_SIZES.forEach((sz, i) => {
       const v = cache.collect[sz] || '';
-      html += `<td${i===5?' class="sep-col"':i===0?' style="border-left:none"':''}>
-        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}">
+      const bg = sz==='30L' ? '#2a2218' : '#221e14';
+      const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
+      html += `<td style="${border}background:${bg}">
+        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" style="background:${bg}">
       </td>`;
     });
-    SIZES.forEach((sz, i) => {
+    // 수거 합성
+    RESIN_SIZES.forEach((sz, i) => {
+      const v = cache.collect[sz] || '';
+      const bg = sz==='5L' ? '#1e2a18' : '#182014';
+      const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
+      html += `<td style="${border}background:${bg}">
+        <input type="number" placeholder="" data-type="c" data-key="${sz}" min="0" value="${v}" style="background:${bg}">
+      </td>`;
+    });
+    // 납품 박스
+    BOX_SIZES.forEach((sz, i) => {
       const v = cache.deliver[sz] || '';
-      html += `<td${i===0?' class="sep-col"':''}>
-        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}">
+      const bg = sz==='30L' ? '#18202a' : '#141820';
+      const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
+      html += `<td style="${border}background:${bg}">
+        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" style="background:${bg}">
       </td>`;
     });
-    // 납품 박스/합성 분리
+    // 납품 합성
+    RESIN_SIZES.forEach((sz, i) => {
+      const v = cache.deliver[sz] || '';
+      const bg = sz==='5L' ? '#1e1828' : '#181420';
+      const border = i===0 ? 'border-left:2px solid #2a2a2a;' : '';
+      html += `<td style="${border}background:${bg}">
+        <input type="number" placeholder="" data-type="d" data-key="${sz}" min="0" value="${v}" style="background:${bg}">
+      </td>`;
+    });
     html += '</tr>';
   });
   tbody.innerHTML = html;
