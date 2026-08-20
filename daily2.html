@@ -771,8 +771,8 @@ function initEditDrag() {
       // 자동 스크롤
       const list = document.getElementById('editCourseList');
       const rect = list.getBoundingClientRect();
-      if (currentY > rect.bottom - 40) list.scrollTop += 8;
-      else if (currentY < rect.top + 40) list.scrollTop -= 8;
+      if (currentY > rect.bottom - 40) list.scrollTop += 3;
+      else if (currentY < rect.top + 40) list.scrollTop -= 3;
       const diff = currentY - startY + list.scrollTop - (list._startScroll || 0);
       const steps = Math.round(diff / itemH);
       const newIdx = Math.max(0, Math.min(editTempClients.length-1, dragIdx + steps));
