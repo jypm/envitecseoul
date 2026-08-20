@@ -85,7 +85,7 @@ td.td-name:active { background:#111; }
 .cn { font-size:11px; color:#e0e0e0; font-weight:500; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.35; }
 .cn.has-memo { color:#90EE90; }
 .today-memo { font-size:10px; color:#27ae60; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-td input[type=number] { width:32px; border:1px solid #222; border-radius:4px; padding:4px 1px; color:#f0f0f5; font-size:12px; text-align:center; outline:none; -moz-appearance:textfield; }
+td input[type=number] { width:32px; border:1px solid #333; border-radius:4px; padding:4px 1px; color:#f0f0f5; font-size:12px; text-align:center; outline:none; -moz-appearance:textfield; background:#1a1a1a; }
 td input[type=number]::-webkit-inner-spin-button,
 td input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 td input[type=number]:focus { outline:1px solid #3D82F6; border-radius:4px; }
@@ -701,10 +701,7 @@ window.onDateChange = function() {};
 // 서브 헤더
 function renderSubHdr() {
   const tr = document.getElementById('subHdr');
-  // 첫번째 tr 높이 계산해서 top 설정
-  const firstTr = document.querySelector('#inputTable thead tr');
-  const topPx = firstTr ? firstTr.getBoundingClientRect().height : 32;
-  const s = `position:sticky;top:${topPx}px;background:#111;font-size:10px;padding:3px 2px;border-bottom:1px solid #222;color:#666;`;
+  const s = 'position:sticky;top:28px;background:#111;font-size:10px;padding:3px 2px;border-bottom:1px solid #222;color:#666;';
   const sep = 'border-left:2px solid #2a2a2a;';
   let h = '';
   BOX.forEach((sz,i) => { h += '<th style="' + s + (i===0?sep:'') + '">' + sz.replace('L','') + '</th>'; });
