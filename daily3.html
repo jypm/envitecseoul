@@ -746,6 +746,7 @@ window.loadCourse = async function(id) {
   document.getElementById('inputTitle').textContent = c.name;
   document.getElementById('inputSub').textContent = (currentUser.name||currentUser.userId) + ' · ' + date;
   await loadMemoCache();
+  renderSubHeader();
   renderInputTable();
 };
 
