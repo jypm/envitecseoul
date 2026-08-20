@@ -1004,7 +1004,7 @@ window.editHistDetail = function() {
     inputCache[idx] = {collect:{}, deliver:{}, memo:d.memo||''};
     SIZES.forEach(sz => {
       inputCache[idx].collect[sz] = d['collect'+sz] ? String(d['collect'+sz]) : '';
-      inputCache[idx].deliver[sz] = d['deliver'+sz] ? String(d['deliver'+sz']) : '';
+      inputCache[idx].deliver[sz] = d['deliver'+sz] ? String(d['deliver'+sz]) : '';
     });
   });
   document.getElementById('inputDate').value = date;
