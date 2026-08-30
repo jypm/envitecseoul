@@ -241,7 +241,7 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
         <div class="main-card-desc">코스 불러오기 후 입력</div>
       </div>
     </div>
-    <div class="main-card" onclick="showScreen('historyScreen'); initHistoryFilter(); loadHistoryList()">
+    <div class="main-card" onclick="showScreen('historyScreen'); initHistoryFilter()">
       <div class="main-card-icon">📅</div>
       <div>
         <div class="main-card-title">이전 데이터</div>
@@ -1211,7 +1211,9 @@ async function initHistoryFilter(){
           }
           carEl.innerHTML = `<option value="${myCars[0]}">${myCars[0]}</option>`;
           carEl.value = myCars[0];
-          carEl.style.display = 'none';
+          carEl.disabled = true;
+          carEl.style.display = '';
+          carEl.style.opacity = '0.6';
         }else{
           carEl.innerHTML = '<option value="">전체 차량</option>' + myCars.map(c=>`<option value="${c}">${c}</option>`).join('');
           carEl.style.display = '';
