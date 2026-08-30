@@ -1655,8 +1655,10 @@ window.sendData = async function(skipCheck){
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw_daily3.js').then(reg=>{
+    navigator.serviceWorker.register('sw_daily3.js', {scope: '/envitecseoul/'}).then(reg=>{
       console.log('SW registered', reg.scope);
+      // 강제 업데이트 체크
+      reg.update();
     }).catch(err=>console.log('SW fail', err));
   });
 }
