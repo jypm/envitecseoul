@@ -241,7 +241,7 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
         <div class="main-card-desc">코스 불러오기 후 입력</div>
       </div>
     </div>
-    <div class="main-card" onclick="(async()=>{showScreen('historyScreen'); await initHistoryFilter(); await loadHistoryList();})()">
+    <div class="main-card" onclick="showScreen('historyScreen'); initHistoryFilter(); loadHistoryList()">
       <div class="main-card-icon">📅</div>
       <div>
         <div class="main-card-title">이전 데이터</div>
@@ -322,7 +322,7 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
 </div>
 
 <!-- 이전 데이터 -->
-<div class="screen" id="historyScreen" style="display:none;flex-direction:column;height:100vh">
+<div class="screen" id="historyScreen">
   <div class="hdr">
     <div class="hdr-left">
       <button class="back-btn" onclick="showScreen('mainScreen')">← 뒤로</button>
@@ -336,13 +336,16 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
       <input type="date" id="histTo" class="date-inp" style="flex:1">
     </div>
     <div style="display:flex;gap:6px;align-items:center">
-      <div id="histCarBadge" style="display:none;flex:1;background:#1e1e2a;border:1px solid #333;border-radius:8px;padding:8px 12px;font-size:13px;color:#60A5FA;font-weight:600">🚛 </div>
+      <div id="histCarBadge" style="display:none;flex:1;background:#1e1e2a;border:1px solid #333;border-radius:8px;padding:8px 12px;font-size:13px;color:#60A5FA;font-weight:600"></div>
       <select id="histCar" class="date-inp" style="flex:1;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px;color:#f0f0f5;outline:none"></select>
       <button class="btn btn-primary btn-sm" style="padding:8px 16px" onclick="loadHistoryList()">조회</button>
     </div>
     <div id="histSummary" style="font-size:11px;color:#888"></div>
   </div>
-  <div class="scroll" id="historyWrap" style="padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1"></div>
+  <div class="scroll" id="historyWrap" style="padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1">
+    <div style="text-align:center;color:#888;padding:20px">조회 버튼을 눌러주세요</div>
+  </div>
+</div>
 </div>
 
 <!-- 이전 데이터 상세 -->
@@ -354,7 +357,7 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
     </div>
     <button class="btn btn-secondary btn-sm" onclick="editHistDetail()">편집</button>
   </div>
-  <div class="scroll" id="histDetailWrap" style="padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1"></div>
+  <div class="scroll" id="histDetailWrap" style="padding:12px"></div>
 </div>
 
 <!-- 모달들 -->
@@ -1136,68 +1139,69 @@ window.loadHistoryList = loadHistoryList;
 window.loadCourseList = loadCourseList;
 
 async function initHistoryFilter(){
-  const todayStr = today();
-  const firstDay = todayStr.substring(0,7)+'-01';
-  const fromEl = document.getElementById('histFrom');
-  const toEl = document.getElementById('histTo');
-  const carEl = document.getElementById('histCar');
-  const badgeEl = document.getElementById('histCarBadge');
-  if(fromEl && !fromEl.value) fromEl.value = firstDay;
-  if(toEl && !toEl.value) toEl.value = todayStr;
-  if(!carEl) return;
-  
-  let myCars = currentUser?.cars || [];
-  const perms = currentUser?.permissions || currentUser?.raw?.permissions || {};
-  const lockQuery = perms.lockCollectQuery !== false;
-
-  if(myCars.length===0 && currentUser?.userId){
-    try{
-      const snap = await getDocs(query(collection(db,'일지db'), where('userId','==',currentUser.userId)));
-      const set = new Set();
-      snap.docs.forEach(d=>{ const cn=d.data().carNumber; if(cn) set.add(String(cn)); });
-      if(set.size>0){ myCars = Array.from(set); currentUser.cars = myCars; }
-    }catch(e){}
-  }
-
-  let allCars = [];
   try{
-    const vSnap = await getDocs(collection(db,'vehicles'));
-    allCars = vSnap.docs.map(d=>d.data().carNumber).filter(Boolean).sort();
-    window.activeCarList = vSnap.docs.filter(d=>d.data().active!==false).map(d=>d.data().carNumber).filter(Boolean).sort();
-  }catch(e){ allCars = myCars; }
+    const todayStr = today();
+    const firstDay = todayStr.substring(0,7)+'-01';
+    const fromEl = document.getElementById('histFrom');
+    const toEl = document.getElementById('histTo');
+    const carEl = document.getElementById('histCar');
+    const badgeEl = document.getElementById('histCarBadge');
+    if(fromEl && !fromEl.value) fromEl.value = firstDay;
+    if(toEl && !toEl.value) toEl.value = todayStr;
+    if(!carEl) return;
+    
+    let myCars = currentUser?.cars || [];
+    const perms = currentUser?.permissions || currentUser?.raw?.permissions || {};
+    const lockQuery = perms.lockCollectQuery !== false;
 
-  if(currentUser?.type==='admin'){
-    carEl.innerHTML = '<option value="">전체 차량</option>' + allCars.map(c=>`<option value="${c}">${c}</option>`).join('');
-    carEl.style.display = '';
-    if(badgeEl) badgeEl.style.display='none';
-    carEl.disabled = false;
-  }else{
-    if(lockQuery){
-      if(myCars.length===0){
-        carEl.innerHTML = '<option value="">전체 차량 (차량정보 없음)</option>';
-        carEl.style.display = '';
-        if(badgeEl) badgeEl.style.display='none';
-      }else if(myCars.length===1){
-        // 1대면 배지로 표시, select는 숨기고 값은 유지
-        if(badgeEl){
-          badgeEl.textContent = '🚛 ' + myCars[0] + ' (내 차량)';
-          badgeEl.style.display = '';
-        }
-        carEl.innerHTML = `<option value="${myCars[0]}">${myCars[0]}</option>`;
-        carEl.value = myCars[0];
-        carEl.style.display = 'none'; // 숨겨서 안보이는 문제 해결
-      }else{
-        carEl.innerHTML = '<option value="">전체 차량</option>' + myCars.map(c=>`<option value="${c}">${c}</option>`).join('');
-        carEl.style.display = '';
-        if(badgeEl) badgeEl.style.display='none';
-        carEl.disabled = false;
-      }
-    }else{
+    if(myCars.length===0 && currentUser?.userId){
+      try{
+        const snap = await getDocs(query(collection(db,'일지db'), where('userId','==',currentUser.userId)));
+        const set = new Set();
+        snap.docs.forEach(d=>{ const cn=d.data().carNumber; if(cn) set.add(String(cn)); });
+        if(set.size>0){ myCars = Array.from(set); currentUser.cars = myCars; }
+      }catch(e){}
+    }
+
+    let allCars = [];
+    try{
+      const vSnap = await getDocs(collection(db,'vehicles'));
+      allCars = vSnap.docs.map(d=>d.data().carNumber).filter(Boolean).sort();
+      window.activeCarList = vSnap.docs.filter(d=>d.data().active!==false).map(d=>d.data().carNumber).filter(Boolean).sort();
+    }catch(e){ allCars = myCars; }
+
+    if(currentUser?.type==='admin'){
       carEl.innerHTML = '<option value="">전체 차량</option>' + allCars.map(c=>`<option value="${c}">${c}</option>`).join('');
       carEl.style.display = '';
       if(badgeEl) badgeEl.style.display='none';
-      if(myCars.length===1) carEl.value = myCars[0];
+    }else{
+      if(lockQuery){
+        if(myCars.length===0){
+          carEl.innerHTML = '<option value="">전체 차량</option>';
+          carEl.style.display = '';
+          if(badgeEl) badgeEl.style.display='none';
+        }else if(myCars.length===1){
+          if(badgeEl){
+            badgeEl.textContent = '🚛 ' + myCars[0] + ' (내 차량)';
+            badgeEl.style.display = '';
+          }
+          carEl.innerHTML = `<option value="${myCars[0]}">${myCars[0]}</option>`;
+          carEl.value = myCars[0];
+          carEl.style.display = 'none';
+        }else{
+          carEl.innerHTML = '<option value="">전체 차량</option>' + myCars.map(c=>`<option value="${c}">${c}</option>`).join('');
+          carEl.style.display = '';
+          if(badgeEl) badgeEl.style.display='none';
+        }
+      }else{
+        carEl.innerHTML = '<option value="">전체 차량</option>' + allCars.map(c=>`<option value="${c}">${c}</option>`).join('');
+        carEl.style.display = '';
+        if(badgeEl) badgeEl.style.display='none';
+        if(myCars.length===1) carEl.value = myCars[0];
+      }
     }
+  }catch(e){
+    console.error('initHistoryFilter error', e);
   }
 }
 
