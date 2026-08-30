@@ -28,7 +28,7 @@ html, body { height:100%; background:#0e0e0e; color:#f0f0f5; font-family:-apple-
 .btn-secondary { background:#1e1e2a; color:#aaa; border:1px solid #333; }
 .btn-danger { background:#c0392b; color:#fff; }
 .btn-sm { padding:5px 10px; font-size:12px; border-radius:6px; }
-.btn-ghost { background:none; border:1px solid #333; color:#888; border-radius:8px; padding:6px 12px; font-size:12px; cursor:pointer; }
+.btn-ghost { background:none; border:1px solid #555; color:#dddddd; border-radius:8px; padding:6px 12px; font-size:12px; cursor:pointer; font-weight:600; }
 
 /* ── 로그인 ── */
 #loginScreen { justify-content:center; align-items:center; }
@@ -836,7 +836,7 @@ function saveInputs() {
 function renderInputTable() {
   const body = document.getElementById('inputBody');
   if (!inputClients.length) {
-    body.innerHTML = `<tr><td colspan="22" style="padding:20px;text-align:center;color:#444">코스를 불러오거나 거래처를 추가하세요</td></tr>`;
+    body.innerHTML = `<tr><td colspan="22" style="padding:20px;text-align:center;color:#aaaaaa">코스를 불러오거나 거래처를 추가하세요</td></tr>`;
     return;
   }
   let h = '';
