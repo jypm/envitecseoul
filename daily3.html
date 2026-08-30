@@ -1031,6 +1031,7 @@ window.closeDone = function() {
   showScreen('mainScreen');
 };
 
+
 async function loadHistoryList() {
   const wrap = document.getElementById('historyWrap');
   const from = document.getElementById('histFrom').value;
@@ -1045,18 +1046,28 @@ async function loadHistoryList() {
   try {
     const snap = await getDocs(query(collection(db,'일지db')));
     const groups = {};
-    let totalDays=0;
     snap.docs.forEach(d => {
       const data = d.data();
       if(!data.date) return;
       if(data.date < from || data.date > to) return;
-      // 차량 필터
-      if(selCar && data.carNumber && data.carNumber!==selCar) return;
-      if(!selCar && currentUser.type!=='admin'){
-        // 전체 차량 선택이지만 내 차량 외 제외 (carNumber 없는 옛데이터는 포함)
-        const myCars = currentUser.cars||[];
-        if(myCars.length && data.carNumber && !myCars.includes(data.carNumber)) return;
+      
+      // 차량 필터 로직
+      const myCars = currentUser?.cars || [];
+      if(currentUser?.type !== 'admin'){
+        if(selCar){
+          // 특정 차량 선택: 그 차량만 + carNumber 없는 옛데이터는? 선택된 차량 조회시 옛데이터는 제외 (정확한 조회)
+          if(data.carNumber && data.carNumber!==selCar) return;
+          if(!data.carNumber && myCars.length===1 && myCars[0]!==selCar) return; // 옛데이터지만 내 차가 아니면? 일단 포함
+        }else{
+          // 전체 차량 선택 (여러대 권한)
+          if(myCars.length && data.carNumber && !myCars.includes(data.carNumber)) return;
+          // carNumber 없는 옛데이터는 포함
+        }
+      }else{
+        // admin은 selCar 있으면 그 차량만
+        if(selCar && data.carNumber && data.carNumber!==selCar) return;
       }
+      
       if (!groups[data.date]) groups[data.date] = [];
       groups[data.date].push({...data, docId:d.id});
     });
@@ -1065,7 +1076,7 @@ async function loadHistoryList() {
     histData = groups;
     
     if (!dates.length) { 
-      wrap.innerHTML='<div style="text-align:center;color:#888;padding:20px">해당 기간 데이터가 없어요</div>'; 
+      wrap.innerHTML='<div style="text-align:center;color:#888;padding:20px">해당 기간 데이터가 없어요<br><span style="font-size:11px;color:#666">필터: '+(selCar||'전체')+' / '+from+'~'+to+'</span></div>'; 
       summary.textContent = from+' ~ '+to+' : 0건';
       return; 
     }
@@ -1093,14 +1104,14 @@ async function loadHistoryList() {
       const cnt = items.length;
       const dObj = new Date(date);
       const yo = isNaN(dObj) ? '' : ['일','월','화','수','목','금','토'][dObj.getDay()];
-      const carLabel = items[0]?.carNumber ? items[0].carNumber : (cnt>0&&items[0].carNumber===undefined ? '미지정' : '');
+      const carLabel = items[0]?.carNumber || (items.some(i=>i.carNumber) ? (selCar||'혼합') : '미지정');
       html += `<div class="hist-date-group">
         <div class="hist-item" onclick="openHistDetail('${date}')" style="padding:14px">
           <div style="flex:1">
             <div style="display:flex;align-items:center;gap:6px">
               <span style="font-size:13px;font-weight:700">${date}</span>
               <span style="font-size:11px;color:#888">(${yo})</span>
-              ${carLabel?'<span style="font-size:10px;background:#1e1e2a;border:1px solid #333;border-radius:4px;padding:2px 5px;color:#aaa">'+carLabel+'</span>':''}
+              <span style="font-size:10px;background:#1e1e2a;border:1px solid #333;border-radius:4px;padding:2px 5px;color:#aaa">${carLabel}</span>
             </div>
             <div style="font-size:12px;color:#bbb;margin-top:4px">${firstName} 외 ${cnt-1}건 · ${cnt}개 거래처</div>
             <div style="font-size:11px;color:#f0a500;margin-top:2px">수거 ${dayCollect}개 / 납품 ${dayDeliver}개</div>
@@ -1126,11 +1137,27 @@ function initHistoryFilter(){
   if(toEl && !toEl.value) toEl.value = todayStr;
   if(carEl){
     const myCars = currentUser?.cars || [];
-    carEl.innerHTML = '<option value="">전체 차량</option>' + myCars.map(c=>`<option value="${c}">${c}</option>`).join('');
-    // 권한 부여로 여러차량 있으면 전체 차량 표시, 1대면 자동 선택
-    if(myCars.length===1) carEl.value = myCars[0];
+    console.log('myCars', myCars);
+    if(myCars.length===0){
+      // 차량 정보가 없으면 DB에서 내 userId로 저장된 carNumber 유추? 일단 전체로
+      carEl.innerHTML = '<option value="">전체 차량 (차량미지정)</option>';
+      carEl.disabled = false;
+    }else if(myCars.length===1){
+      // 1대면 자동선택 + 비활성화
+      carEl.innerHTML = `<option value="${myCars[0]}">${myCars[0]}</option>`;
+      carEl.value = myCars[0];
+      carEl.disabled = true;
+      carEl.style.opacity = '0.7';
+    }else{
+      // 여러대 권한이면 드롭다운 활성화 + 전체 포함
+      carEl.innerHTML = '<option value="">전체 차량</option>' + myCars.map(c=>`<option value="${c}">${c}</option>`).join('');
+      carEl.disabled = false;
+      carEl.style.opacity = '1';
+      if(!carEl.value) carEl.value = "";
+    }
   }
 }
+
 
 
 function openEmptyCheck(empties){
