@@ -2,6 +2,7 @@
   "name": "엔비텍코리아 서울지점",
   "short_name": "엔비텍",
   "description": "엔비텍코리아 서울지점 업무 시스템",
+  "id": "/envitecseoul/",
   "start_url": "/envitecseoul/",
   "scope": "/envitecseoul/index.html",
   "display": "standalone",
