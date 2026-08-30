@@ -94,19 +94,7 @@ td input[type=number]:focus { border-color:#3D82F6 !important; background:#111 !
 td input[type=number]::placeholder { color:#2a2a2a; }
 
 /* ── 컬러 패치 v3: 크롬 다크 필터 대응 초고채도 ── */
-/* v14 - 기존 20칸 구조 유지, 색상만 2색 테두리 + 가운데 밝기 */
-#inputTable { border-collapse:collapse; }
-td.cb, td.cb30, td.cr, td.cr5, td.db, td.db30, td.dr, td.dr5 { background:#0d0d0d !important; }
-#inputTable input { background:#0d0d0d !important; -webkit-appearance:none; appearance:none; outline:none; border-radius:4px; text-align:center; color:#fff; }
-td.cb input, td.cr input { border:2px solid #8a5a1f !important; }
-td.cb30 input, td.cr5 input { border:2px solid #e6a02a !important; }
-td.db input, td.dr input { border:2px solid #2a5a8a !important; }
-td.db30 input, td.dr5 input { border:2px solid #5a9aff !important; }
-#inputTable tbody tr { height:42px !important; min-height:42px !important; max-height:42px !important; }
-#inputTable tbody td { height:42px !important; vertical-align:middle !important; }
-td.td-name { padding:3px 4px !important; height:42px !important; overflow:hidden; display:flex; flex-direction:column; justify-content:center; }
-td.td-name .cn { line-height:13px !important; max-height:26px !important; white-space:normal !important; overflow:hidden !important; display:-webkit-box !important; -webkit-line-clamp:2 !important; -webkit-box-orient:vertical !important; font-size:11px !important; word-break:break-all !important; }
-.today-memo { font-size:8px !important; line-height:9px !important; max-height:9px !important; margin-top:1px !important; white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:85px !important; }
+
 /* fallback */
 td.cb, td.cb30, td.cr, td.cr5, td.db, td.db30, td.dr, td.dr5 { background:#1a1a1a !important; }
 
@@ -174,6 +162,40 @@ td input[type=number] {
 /* ── 토스트 ── */
 .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1e1e2e; border:1px solid #333; border-radius:10px; padding:10px 20px; font-size:13px; z-index:200; display:none; white-space:nowrap; }
 .toast.show { display:block; }
+
+/* v17 - 진짜 2색만: 수거 주황 / 납품 파랑, 가운데 구분 없음, DB 20칸 유지 */
+html, body { color-scheme: dark only !important; }
+#inputTable { border-collapse: collapse !important; table-layout: fixed !important; }
+#inputTable th { background:#0d0d0d !important; color:#aaa !important; }
+#inputTable td { background:#0d0d0d !important; background-color:#0d0d0d !important; }
+td.cb, td.cb30, td.cr, td.cr5, td.db, td.db30, td.dr, td.dr5 { background:#0d0d0d !important; background-color:#0d0d0d !important; }
+#inputTable input {
+  background:#0d0d0d !important;
+  background-color:#0d0d0d !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  outline: none !important;
+  border-radius: 4px !important;
+  text-align: center !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  border-width: 2px !important;
+  border-style: solid !important;
+}
+/* 2색만 */
+td.cb input, td.cb30 input, td.cr input, td.cr5 input { 
+  border-color: #8a5a1f !important; /* 수거 10칸 전부 주황 */
+}
+td.db input, td.db30 input, td.dr input, td.dr5 input { 
+  border-color: #2a5a8a !important; /* 납품 10칸 전부 파랑 */
+}
+#inputTable tbody tr { height:42px !important; }
+#inputTable tbody td { height:42px !important; vertical-align:middle !important; }
+td.td-name { padding:3px 4px !important; height:42px !important; display:flex; flex-direction:column; justify-content:center; }
+td.td-name .cn { line-height:13px !important; max-height:26px !important; white-space:normal !important; overflow:hidden !important; display:-webkit-box !important; -webkit-line-clamp:2 !important; -webkit-box-orient:vertical !important; font-size:11px !important; word-break:break-all !important; }
+.today-memo { font-size:8px !important; line-height:9px !important; max-height:9px !important; margin-top:1px !important; white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:85px !important; }
+
 </style>
 
 <script>
