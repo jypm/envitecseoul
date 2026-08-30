@@ -1,7 +1,15 @@
-const CACHE='sugeo-daily-v4';
-const FILES=['./','./index.html','./manifest.json','./icon_daily3-192.png','./icon_daily3-512.png'];
+const CACHE='sugeo-daily-v2';
+const FILES=[
+  './',
+  './index.html',
+  './manifest.json',
+  './icon_daily3-192.png',
+  './icon_daily3-512.png'
+];
 self.addEventListener('install',e=>{
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES).catch(()=>{})));
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES).catch(async ()=>{
+    for(const f of FILES){ try{ await c.add(f); }catch(e){} }
+  })));
   self.skipWaiting();
 });
 self.addEventListener('activate',e=>{

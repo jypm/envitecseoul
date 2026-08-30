@@ -6,8 +6,12 @@
   "start_url": "/envitecseoul/daily/",
   "scope": "/envitecseoul/daily/",
   "display": "standalone",
+  "display_override": [
+    "standalone"
+  ],
   "background_color": "#0e0e0e",
   "theme_color": "#0e0e0e",
+  "orientation": "any",
   "icons": [
     {
       "src": "icon_daily3-192.png",
