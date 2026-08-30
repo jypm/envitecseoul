@@ -322,7 +322,7 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
 </div>
 
 <!-- 이전 데이터 -->
-<div class="screen" id="historyScreen">
+<div class="screen" id="historyScreen" style="display:none;flex-direction:column;height:100vh">
   <div class="hdr">
     <div class="hdr-left">
       <button class="back-btn" onclick="showScreen('mainScreen')">← 뒤로</button>
@@ -335,15 +335,14 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
       <span style="color:#666">~</span>
       <input type="date" id="histTo" class="date-inp" style="flex:1">
     </div>
-    <div style="display:flex;gap:6px">
+    <div style="display:flex;gap:6px;align-items:center">
+      <div id="histCarBadge" style="display:none;flex:1;background:#1e1e2a;border:1px solid #333;border-radius:8px;padding:8px 12px;font-size:13px;color:#60A5FA;font-weight:600">🚛 </div>
       <select id="histCar" class="date-inp" style="flex:1;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px;color:#f0f0f5;outline:none"></select>
       <button class="btn btn-primary btn-sm" style="padding:8px 16px" onclick="loadHistoryList()">조회</button>
     </div>
     <div id="histSummary" style="font-size:11px;color:#888"></div>
   </div>
-  <div class="scroll" id="historyWrap" style="padding:12px">
-    <div style="text-align:center;color:#888;padding:20px">조회 버튼을 눌러주세요</div>
-  </div>
+  <div class="scroll" id="historyWrap" style="padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1"></div>
 </div>
 
 <!-- 이전 데이터 상세 -->
@@ -355,7 +354,7 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
     </div>
     <button class="btn btn-secondary btn-sm" onclick="editHistDetail()">편집</button>
   </div>
-  <div class="scroll" id="histDetailWrap" style="padding:12px"></div>
+  <div class="scroll" id="histDetailWrap" style="padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1"></div>
 </div>
 
 <!-- 모달들 -->
@@ -1091,7 +1090,7 @@ async function loadHistoryList() {
       totalClients+=items.length;
       items.forEach(it=>{
         SIZES.forEach(sz=>{
-          totalCollect += (it['collect'+sz]||0);
+          totalCollect += parseInt(it['collect'+sz]||0) || 0;
         });
       });
     });
@@ -1102,7 +1101,10 @@ async function loadHistoryList() {
       const items = groups[date].sort((a,b)=>(a.seq||0)-(b.seq||0));
       let dayCollect=0, dayDeliver=0;
       items.forEach(it=>{
-        SIZES.forEach(sz=>{ dayCollect+=(it['collect'+sz]||0); dayDeliver+=(it['deliver'+sz]||0); });
+        SIZES.forEach(sz=>{ 
+          dayCollect += parseInt(it['collect'+sz]||0) || 0; 
+          dayDeliver += parseInt(it['deliver'+sz]||0) || 0; 
+        });
       });
       const firstName = items[0]?.clientName || '거래처';
       const cnt = items.length;
@@ -1118,7 +1120,7 @@ async function loadHistoryList() {
               <span style="font-size:10px;background:#1e1e2a;border:1px solid #333;border-radius:4px;padding:2px 5px;color:#aaa">${carLabel}</span>
             </div>
             <div style="font-size:12px;color:#bbb;margin-top:4px">${firstName} 외 ${cnt-1}건 · ${cnt}개 거래처</div>
-            <div style="font-size:11px;color:#f0a500;margin-top:2px">수거 ${dayCollect}개 / 납품 ${dayDeliver}개</div>
+            <div style="font-size:11px;color:#f0a500;margin-top:2px">수거 ${dayCollect}개</div>
           </div>
           <div style="color:#555;font-size:18px">›</div>
         </div>
@@ -1139,15 +1141,15 @@ async function initHistoryFilter(){
   const fromEl = document.getElementById('histFrom');
   const toEl = document.getElementById('histTo');
   const carEl = document.getElementById('histCar');
+  const badgeEl = document.getElementById('histCarBadge');
   if(fromEl && !fromEl.value) fromEl.value = firstDay;
   if(toEl && !toEl.value) toEl.value = todayStr;
   if(!carEl) return;
   
   let myCars = currentUser?.cars || [];
   const perms = currentUser?.permissions || currentUser?.raw?.permissions || {};
-  const lockQuery = perms.lockCollectQuery !== false; // default true = 잠금
+  const lockQuery = perms.lockCollectQuery !== false;
 
-  // fallback: cars 비어있으면 일지db에서 유추
   if(myCars.length===0 && currentUser?.userId){
     try{
       const snap = await getDocs(query(collection(db,'일지db'), where('userId','==',currentUser.userId)));
@@ -1157,7 +1159,6 @@ async function initHistoryFilter(){
     }catch(e){}
   }
 
-  // 전체 차량 목록 로드 (잠금 해제된 사용자용)
   let allCars = [];
   try{
     const vSnap = await getDocs(collection(db,'vehicles'));
@@ -1165,45 +1166,41 @@ async function initHistoryFilter(){
     window.activeCarList = vSnap.docs.filter(d=>d.data().active!==false).map(d=>d.data().carNumber).filter(Boolean).sort();
   }catch(e){ allCars = myCars; }
 
-  console.log('initHistoryFilter', {myCars, allCars, lockQuery, perms});
-
   if(currentUser?.type==='admin'){
-    // 관리자: 전체 차량 + 모든 활성 차량
     carEl.innerHTML = '<option value="">전체 차량</option>' + allCars.map(c=>`<option value="${c}">${c}</option>`).join('');
+    carEl.style.display = '';
+    if(badgeEl) badgeEl.style.display='none';
     carEl.disabled = false;
-    carEl.style.opacity = '1';
-    carEl.style.background = '#1a1a1a';
   }else{
     if(lockQuery){
-      // 잠금: 담당 차량만
       if(myCars.length===0){
         carEl.innerHTML = '<option value="">전체 차량 (차량정보 없음)</option>';
-        carEl.disabled = false;
+        carEl.style.display = '';
+        if(badgeEl) badgeEl.style.display='none';
       }else if(myCars.length===1){
-        carEl.innerHTML = `<option value="${myCars[0]}">${myCars[0]} (내 차량)</option>`;
+        // 1대면 배지로 표시, select는 숨기고 값은 유지
+        if(badgeEl){
+          badgeEl.textContent = '🚛 ' + myCars[0] + ' (내 차량)';
+          badgeEl.style.display = '';
+        }
+        carEl.innerHTML = `<option value="${myCars[0]}">${myCars[0]}</option>`;
         carEl.value = myCars[0];
-        carEl.disabled = true;
-        carEl.style.opacity = '0.6';
-        carEl.style.background = '#222';
+        carEl.style.display = 'none'; // 숨겨서 안보이는 문제 해결
       }else{
         carEl.innerHTML = '<option value="">전체 차량</option>' + myCars.map(c=>`<option value="${c}">${c}</option>`).join('');
+        carEl.style.display = '';
+        if(badgeEl) badgeEl.style.display='none';
         carEl.disabled = false;
-        carEl.style.opacity = '1';
-        carEl.style.background = '#1a1a1a';
       }
     }else{
-      // 잠금 해제: 전체 선택 가능
       carEl.innerHTML = '<option value="">전체 차량</option>' + allCars.map(c=>`<option value="${c}">${c}</option>`).join('');
-      carEl.disabled = false;
-      carEl.style.opacity = '1';
-      carEl.style.background = '#1a1a1a';
-      // 내 차량이 있으면 기본으로 내 차량 중 첫번째 선택? 아니면 전체 유지
-      if(myCars.length===1){
-        carEl.value = myCars[0];
-      }
+      carEl.style.display = '';
+      if(badgeEl) badgeEl.style.display='none';
+      if(myCars.length===1) carEl.value = myCars[0];
     }
   }
 }
+
 
 
 
