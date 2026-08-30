@@ -95,9 +95,9 @@ td input[type=number]::placeholder { color:#2a2a2a; }
 /* ── 컬러 패치 v3: 크롬 다크 필터 대응 초고채도 ── */
 #inputTable tbody tr { height:42px; min-height:42px; max-height:42px; }
 #inputTable tbody td { height:42px; vertical-align:middle; }
-td.td-name { padding:2px 4px !important; height:42px !important; overflow:hidden; }
-td.td-name .cn { line-height:14px; max-height:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.today-memo { font-size:9px !important; color:#27ae60; margin-top:1px !important; line-height:11px !important; max-height:11px !important; white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:85px; }
+td.td-name { padding:3px 4px !important; height:42px !important; overflow:hidden; display:flex; flex-direction:column; justify-content:center; }
+td.td-name .cn { line-height:13px; max-height:26px; white-space:normal; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; font-size:11px; word-break:break-all; }
+.today-memo { font-size:8px !important; color:#27ae60; margin-top:1px !important; line-height:9px !important; max-height:9px !important; white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:85px; }
 td.cb, td.cb30, td.cr, td.cr5, td.db, td.db30, td.dr, td.dr5 { background:#1a1a1a !important; }
 
 td input[type=number] {
@@ -110,20 +110,17 @@ td input[type=number] {
 }
 
 /* 수거박스 - 골드 브라운 */
-td.cb input  { background:#6b4f22 !important; border:2px solid #c99a3f !important; }
-td.cb30 input{ background:#8a6a2f !important; border:2px solid #e0b65a !important; }
+/* 2색 구분 - 바탕 검정, 테두리만 컬러, 가운데는 밝기로 구분 */
+td.cb input, td.cb30 input, td.cr input, td.cr5 input,
+td.db input, td.db30 input, td.dr input, td.dr5 input { background:#0d0d0d !important; }
 
-/* 수거합성 - 네온 그린 */
-td.cr input  { background:#1e4d1e !important; border:2px solid #4caf4c !important; }
-td.cr5 input { background:#2e6b2e !important; border:2px solid #6bde6b !important; }
+/* 수거 = 주황 계열 */
+td.cb input, td.cr input { border:1.5px solid #8a5a1f !important; }
+td.cb30 input, td.cr5 input { border:1.5px solid #e6a02a !important; box-shadow:0 0 4px rgba(230,160,42,0.25); }
 
-/* 납품박스 - 브라이트 블루 */
-td.db input  { background:#1e355a !important; border:2px solid #4a8ad4 !important; }
-td.db30 input{ background:#2a4a7a !important; border:2px solid #6aa8ff !important; }
-
-/* 납품합성 - 브라이트 퍼플 */
-td.dr input  { background:#3a2a5a !important; border:2px solid #7a5ad4 !important; }
-td.dr5 input { background:#4d3a7a !important; border:2px solid #9a7aff !important; }
+/* 납품 = 파랑 계열 */
+td.db input, td.dr input { border:1.5px solid #2a5a8a !important; }
+td.db30 input, td.dr5 input { border:1.5px solid #5a9aff !important; box-shadow:0 0 4px rgba(90,154,255,0.25); }
 
 td input[type=number]:focus {
   filter: brightness(1.5) saturate(1.6) !important;
