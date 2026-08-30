@@ -2,7 +2,9 @@
   "name": "엔비텍 운행보고서",
   "short_name": "운행보고서",
   "description": "엔비텍코리아 서울지점 운행보고서 대시보드",
+  "id": "/envitecseoul/dashboard.html",
   "start_url": "/envitecseoul/dashboard.html",
+  "scope": "/envitecseoul/dashboard.html"
   "display": "standalone",
   "background_color": "#0f1923",
   "theme_color": "#0f1923",
