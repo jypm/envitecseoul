@@ -20,7 +20,7 @@ html, body { height:100%; background:#0e0e0e; color:#f0f0f5; font-family:-apple-
 .hdr-left { display:flex; align-items:center; gap:10px; }
 .back-btn { background:none; border:none; color:#3D82F6; font-size:14px; cursor:pointer; padding:4px 0; }
 .hdr-title { font-size:15px; font-weight:700; }
-.hdr-sub { font-size:11px; color:#555; margin-top:2px; }
+.hdr-sub { font-size:11px; color:#aaaaaa; margin-top:2px; }
 
 /* ── 공통 버튼 ── */
 .btn { border:none; border-radius:8px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; }
@@ -35,10 +35,10 @@ html, body { height:100%; background:#0e0e0e; color:#f0f0f5; font-family:-apple-
 .login-box { width:90%; max-width:320px; background:#111; border:1px solid #222; border-radius:16px; padding:32px 24px; }
 .login-logo { font-size:32px; text-align:center; margin-bottom:8px; }
 .login-title { font-size:18px; font-weight:700; text-align:center; margin-bottom:4px; }
-.login-sub { font-size:12px; color:#555; text-align:center; margin-bottom:24px; }
+.login-sub { font-size:12px; color:#aaaaaa; text-align:center; margin-bottom:24px; }
 .inp { width:100%; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:10px; padding:12px 14px; color:#f0f0f5; font-size:15px; outline:none; margin-bottom:10px; }
 .inp:focus { border-color:#3D82F6; }
-.save-id-row { display:flex; align-items:center; gap:6px; font-size:12px; color:#555; margin-bottom:14px; cursor:pointer; }
+.save-id-row { display:flex; align-items:center; gap:6px; font-size:12px; color:#aaaaaa; margin-bottom:14px; cursor:pointer; }
 .save-id-row input { accent-color:#3D82F6; }
 .login-err { font-size:12px; color:#e74c3c; text-align:center; margin-top:8px; display:none; }
 
@@ -48,21 +48,21 @@ html, body { height:100%; background:#0e0e0e; color:#f0f0f5; font-family:-apple-
 .main-card:active { background:#1a1a1a; }
 .main-card-icon { font-size:28px; }
 .main-card-title { font-size:15px; font-weight:700; margin-bottom:4px; }
-.main-card-desc { font-size:12px; color:#555; }
+.main-card-desc { font-size:12px; color:#aaaaaa; }
 
 /* ── 코스 관리 ── */
 #courseScreen .scroll { flex:1; overflow-y:auto; padding:12px; }
 .course-row { background:#111; border:1px solid #222; border-radius:10px; padding:14px; margin-bottom:8px; display:flex; align-items:center; gap:10px; cursor:pointer; }
 .course-row:active { background:#1a1a1a; }
 .course-row-name { flex:1; font-size:14px; font-weight:600; }
-.course-row-count { font-size:11px; color:#555; }
+.course-row-count { font-size:11px; color:#aaaaaa; }
 .add-btn-row { background:none; border:1px dashed #333; border-radius:10px; padding:14px; display:flex; align-items:center; justify-content:center; gap:8px; color:#555; font-size:13px; cursor:pointer; margin-bottom:8px; width:100%; }
 
 /* ── 코스 편집 ── */
 #courseEditScreen .scroll { flex:1; overflow-y:auto; padding:12px; }
 .edit-client-row { background:#111; border:1px solid #1e1e1e; border-radius:8px; padding:12px; margin-bottom:6px; display:flex; align-items:center; gap:10px; user-select:none; -webkit-user-select:none; }
 .edit-client-row.dragging { opacity:0.3; }
-.edit-client-seq { font-size:11px; color:#444; min-width:20px; }
+.edit-client-seq { font-size:11px; color:#999999; min-width:20px; }
 .edit-client-name { flex:1; font-size:13px; color:#ddd; }
 .edit-client-del { background:none; border:none; color:#555; font-size:16px; cursor:pointer; padding:4px; }
 .drag-ghost { position:fixed; background:#3D82F6; color:#fff; padding:10px 16px; border-radius:10px; font-size:13px; z-index:9999; pointer-events:none; box-shadow:0 4px 20px rgba(0,0,0,0.5); left:10%; width:80%; }
@@ -76,14 +76,14 @@ html, body { height:100%; background:#0e0e0e; color:#f0f0f5; font-family:-apple-
 .date-inp { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:8px; padding:5px 10px; color:#f0f0f5; font-size:12px; outline:none; color-scheme: dark; }
 #inputScreen .table-wrap { flex:1; overflow:auto; -webkit-overflow-scrolling:touch; padding-bottom:60px; }
 table { border-collapse:collapse; min-width:max-content; }
-thead th { position:sticky; top:0; background:#111; z-index:10; padding:7px 3px; font-size:11px; color:#444; border-bottom:1px solid #222; white-space:nowrap; text-align:center; }
-thead th.th-seq { position:sticky; top:0; left:0; z-index:21; background:#111; padding:7px 4px; text-align:center; width:26px; min-width:26px; max-width:26px; color:#444; font-size:10px; }
+thead th { position:sticky; top:0; background:#111; z-index:10; padding:7px 3px; font-size:11px; color:#aaaaaa; border-bottom:1px solid #222; white-space:nowrap; text-align:center; }
+thead th.th-seq { position:sticky; top:0; left:0; z-index:21; background:#111; padding:7px 4px; text-align:center; width:26px; min-width:26px; max-width:26px; color:#cccccc; font-size:10px; }
 thead th.th-name { position:sticky; top:0; left:26px; z-index:20; background:#111; padding:7px 8px; text-align:left; min-width:90px; max-width:90px; width:90px; }
 td { border-bottom:1px solid #1a1a1a; padding:3px 2px; text-align:center; vertical-align:middle; }
-td.td-seq { position:sticky; left:0; background:#0d0d0d; z-index:6; padding:6px 2px; width:26px; min-width:26px; max-width:26px; text-align:center; vertical-align:middle; font-size:10px; color:#444; border-right:none; }
+td.td-seq { position:sticky; left:0; background:#0d0d0d; z-index:6; padding:6px 2px; width:26px; min-width:26px; max-width:26px; text-align:center; vertical-align:middle; font-size:10px; color:#bbbbbb; border-right:none; }
 td.td-name { position:sticky; left:26px; background:#0d0d0d; z-index:5; padding:6px 8px; border-right:1px solid #1e1e1e; min-width:90px; max-width:90px; width:90px; text-align:left; vertical-align:top; cursor:pointer; }
 td.td-name:active { background:#151515; }
-.cn { font-size:11px; color:#e0e0e0; font-weight:500; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.35; max-height:30px; }
+.cn { font-size:11px; color:#f5f5f5; font-weight:500; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.35; max-height:30px; }
 .cn.has-memo { color:#90EE90; }
 .today-memo { font-size:10px; color:#27ae60; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 td input[type=number] { width:38px; background:#1a1a1a !important; border:1px solid #333; border-radius:5px; padding:4px 2px; color:#f0f0f5 !important; font-size:13px; text-align:center; outline:none; -moz-appearance:textfield; touch-action:manipulation; }
@@ -238,7 +238,7 @@ td input[type=number] {
       <input id="ceSearch" class="inp" type="text" placeholder="거래처 검색 (초성 가능)" autocomplete="off" oninput="ceAcFilter()" style="margin-bottom:0">
       <div class="ac-list" id="ceAcList"></div>
     </div>
-    <div style="font-size:11px;color:#444;margin-top:4px">꾹 눌러서 순서 변경</div>
+    <div style="font-size:11px;color:#999;margin-top:4px">꾹 눌러서 순서 변경</div>
   </div>
   <div class="scroll" id="ceClientList" style="padding:8px 12px"></div>
 </div>
@@ -290,7 +290,7 @@ td input[type=number] {
     </div>
   </div>
   <div class="scroll" id="historyWrap" style="padding:12px">
-    <div style="text-align:center;color:#444;padding:20px">불러오는 중...</div>
+    <div style="text-align:center;color:#888;padding:20px">불러오는 중...</div>
   </div>
 </div>
 
@@ -534,17 +534,17 @@ async function loadCourseList() {
 function renderCourseList() {
   const wrap = document.getElementById('courseListWrap');
   let html = '<button class="add-btn-row" onclick="openAddCourseModal()">+ 코스 추가</button>';
-  html += '<div style="font-size:11px;color:#444;padding:4px 0 8px">A주차</div>';
+  html += '<div style="font-size:11px;color:#999;padding:4px 0 8px">A주차</div>';
   courseList.filter(c=>c.type==='default'&&c.id.includes('_A')).forEach(c => {
     html += courseRowHTML(c);
   });
-  html += '<div style="font-size:11px;color:#444;padding:12px 0 8px">B주차</div>';
+  html += '<div style="font-size:11px;color:#999;padding:12px 0 8px">B주차</div>';
   courseList.filter(c=>c.type==='default'&&c.id.includes('_B')).forEach(c => {
     html += courseRowHTML(c);
   });
   const custom = courseList.filter(c=>c.type==='custom');
   if (custom.length) {
-    html += '<div style="font-size:11px;color:#444;padding:12px 0 8px">추가 코스</div>';
+    html += '<div style="font-size:11px;color:#999;padding:12px 0 8px">추가 코스</div>';
     custom.forEach(c => {
       html += courseRowHTML(c, true);
     });
@@ -955,7 +955,7 @@ window.closeDone = function() {
 
 async function loadHistoryList() {
   const wrap = document.getElementById('historyWrap');
-  wrap.innerHTML = '<div style="text-align:center;color:#444;padding:20px">불러오는 중...</div>';
+  wrap.innerHTML = '<div style="text-align:center;color:#888;padding:20px">불러오는 중...</div>';
   try {
     const carNumber = currentUser.cars?.[0] || '';
     const q = carNumber
@@ -969,7 +969,7 @@ async function loadHistoryList() {
       groups[data.date].push({...data, docId:d.id});
     });
     const dates = Object.keys(groups).sort((a,b)=>b.localeCompare(a));
-    if (!dates.length) { wrap.innerHTML='<div style="text-align:center;color:#444;padding:20px">데이터가 없어요</div>'; return; }
+    if (!dates.length) { wrap.innerHTML='<div style="text-align:center;color:#888;padding:20px">데이터가 없어요</div>'; return; }
     histData = groups;
     let html = '';
     dates.forEach(date => {
