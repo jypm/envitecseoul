@@ -93,6 +93,11 @@ td input[type=number]:focus { border-color:#3D82F6 !important; background:#111 !
 td input[type=number]::placeholder { color:#2a2a2a; }
 
 /* ── 컬러 패치 v3: 크롬 다크 필터 대응 초고채도 ── */
+#inputTable tbody tr { height:42px; min-height:42px; max-height:42px; }
+#inputTable tbody td { height:42px; vertical-align:middle; }
+td.td-name { padding:2px 4px !important; height:42px !important; overflow:hidden; }
+td.td-name .cn { line-height:14px; max-height:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.today-memo { font-size:9px !important; color:#27ae60; margin-top:1px !important; line-height:11px !important; max-height:11px !important; white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:85px; }
 td.cb, td.cb30, td.cr, td.cr5, td.db, td.db30, td.dr, td.dr5 { background:#1a1a1a !important; }
 
 td input[type=number] {
