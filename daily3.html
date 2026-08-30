@@ -9,7 +9,7 @@
 <style>
 :root { color-scheme: dark; }
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html, body { height:100%; background:#000; color:#f0f0f5; font-family:-apple-system,'Noto Sans KR',sans-serif; font-size:14px; overflow:hidden; color-scheme: dark; }
+html, body { height:100%; background:#0e0e0e; color:#f0f0f5; font-family:-apple-system,'Noto Sans KR',sans-serif; font-size:14px; overflow:hidden; color-scheme: dark; }
 
 /* ── 화면 ── */
 .screen { display:none; flex-direction:column; height:100vh; }
@@ -92,21 +92,40 @@ td input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 td input[type=number]:focus { border-color:#3D82F6 !important; background:#111 !important; }
 td input[type=number]::placeholder { color:#2a2a2a; }
 
-/* ── 컬러 패치 v2: 크롬 강제 밝기 보정 ── */
-td.cb, td.cb30, td.cr, td.cr5, td.db, td.db30, td.dr, td.dr5 { background:#111 !important; }
+/* ── 컬러 패치 v3: 크롬 다크 필터 대응 초고채도 ── */
+td.cb, td.cb30, td.cr, td.cr5, td.db, td.db30, td.dr, td.dr5 { background:#1a1a1a !important; }
 
-/* input 자체에 훨씬 밝고 채도 높게 */
-td.cb input  { background:#4d3d23 !important; border-color:#8a6d3b !important; }
-td.cb30 input{ background:#6b542f !important; border-color:#c49a4a !important; } /* 30L 제일 밝게 */
+td input[type=number] {
+  width:38px;
+  color:#fff !important;
+  font-weight:700 !important;
+  -webkit-appearance: none !important;
+  filter: brightness(1.35) saturate(1.5) !important;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.08) !important;
+}
 
-td.cr input  { background:#1e3a1e !important; border-color:#3a6b3a !important; }
-td.cr5 input { background:#2a5a2a !important; border-color:#5aaa5a !important; } /* 5L 제일 밝게 */
+/* 수거박스 - 골드 브라운 */
+td.cb input  { background:#6b4f22 !important; border:2px solid #c99a3f !important; }
+td.cb30 input{ background:#8a6a2f !important; border:2px solid #e0b65a !important; }
 
-td.db input  { background:#1e304f !important; border-color:#3a5a8a !important; }
-td.db30 input{ background:#2a456b !important; border-color:#5a8ac4 !important; }
+/* 수거합성 - 네온 그린 */
+td.cr input  { background:#1e4d1e !important; border:2px solid #4caf4c !important; }
+td.cr5 input { background:#2e6b2e !important; border:2px solid #6bde6b !important; }
 
-td.dr input  { background:#2e214d !important; border-color:#5a408a !important; }
-td.dr5 input { background:#3d2e6b !important; border-color:#7a5ac4 !important; }
+/* 납품박스 - 브라이트 블루 */
+td.db input  { background:#1e355a !important; border:2px solid #4a8ad4 !important; }
+td.db30 input{ background:#2a4a7a !important; border:2px solid #6aa8ff !important; }
+
+/* 납품합성 - 브라이트 퍼플 */
+td.dr input  { background:#3a2a5a !important; border:2px solid #7a5ad4 !important; }
+td.dr5 input { background:#4d3a7a !important; border:2px solid #9a7aff !important; }
+
+td input[type=number]:focus {
+  filter: brightness(1.5) saturate(1.6) !important;
+  border-color:#3D82F6 !important;
+  box-shadow: 0 0 8px rgba(61,130,246,0.6) !important;
+}
+
 
 /* 크롬이 색을 눌러버리는 것 방지 */
 td input[type=number] {
