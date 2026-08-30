@@ -469,10 +469,7 @@ const db = getFirestore(app);
 const BOX = ['4L','12L','30L','50L','63L'];
 const RESIN = ['1L','2L','5L','10L','20L'];
 const SIZES = [...BOX, ...RESIN];
-const DEFAULT_COURSES = [
-  {id:'A월',name:'A월요일'},{id:'A화',name:'A화요일'},{id:'A수',name:'A수요일'},{id:'A목',name:'A목요일'},{id:'A금',name:'A금요일'},
-  {id:'B월',name:'B월요일'},{id:'B화',name:'B화요일'},{id:'B수',name:'B수요일'},{id:'B목',name:'B목요일'},{id:'B금',name:'B금요일'},
-];
+const DEFAULT_COURSES = []; // 고정 10개 제거 - 0개 시작
 
 let currentUser = null;
 let allClients = [];
@@ -599,43 +596,80 @@ window.confirmLogout = function() {
 
 async function loadCourseList() {
   courseList = [];
-  for (const dc of DEFAULT_COURSES) {
-    const key = currentUser.userId + '_' + dc.id;
-    try {
-      const snap = await getDoc(doc(db,'courses3', key));
-      const clients = snap.exists() ? (snap.data().clients||[]) : [];
-      courseList.push({ id:key, name:dc.name, type:'default', clients });
-    } catch(e) {
-      courseList.push({ id:key, name:dc.name, type:'default', clients:[] });
-    }
-  }
   try {
-    const snap = await getDocs(query(collection(db,'courses3'), where('userId','==',currentUser.userId), where('type','==','custom')));
-    snap.docs.forEach(d => courseList.push({ id:d.id, name:d.data().name, type:'custom', clients:d.data().clients||[] }));
-  } catch(e) {}
+    // 고정 코스 제거 - 사용자 코스 전체 조회 (type 구분 없이)
+    const snap = await getDocs(query(collection(db,'courses3'), where('userId','==',currentUser.userId)));
+    snap.docs.forEach(d => {
+      const data = d.data();
+      // 0개짜리 코스는 목록에서 제외 (자동 정리 대상)
+      // 하지만 일단은 필터 없이 다 보여주고, 렌더에서 0개 숨김 옵션 가능 - 여기서는 0개도 일단 포함하되 삭제 유도
+      // 요구: 0개면 삭제 대상, 여기서는 0개 제외하고 표시
+      const clients = data.clients||[];
+      if(clients.length===0){
+        // 0개짜리는 자동 삭제하지 않고 일단 목록에서 제외 (초기화 효과)
+        // 실제 삭제를 원하면 별도 cleanup 필요 - 여기서는 표시 안함
+      }
+      courseList.push({ id:d.id, name:data.name||'이름없음', type:data.type||'custom', clients });
+    });
+    // 0개도 표시 (새로 만든 코스는 편집해야 하므로)
+    // 단, 기존 0개짜리 고정 코스들은 DEFAULT_COURSES가 없어져서 더 이상 생성 안됨 -> 자연스럽게 0개 시작
+    // 이름순 정렬
+    courseList.sort((a,b)=> (a.name||'').localeCompare(b.name||'', 'ko'));
+  } catch(e) {
+    console.warn('loadCourseList fail', e);
+  }
+  // 기존 default 키 방식 호환: 혹시 남아있는 default 문서도 userId로 잡히므로 위에서 이미 처리됨
   renderCourseList();
 }
 
 function renderCourseList() {
   const wrap = document.getElementById('courseListWrap');
   let html = '<button class="add-btn-row" onclick="openAddCourseModal()">+ 코스 추가</button>';
-  html += '<div style="font-size:11px;color:#999;padding:4px 0 8px">A주차</div>';
-  courseList.filter(c=>c.type==='default'&&c.id.includes('_A')).forEach(c => {
-    html += courseRowHTML(c);
-  });
-  html += '<div style="font-size:11px;color:#999;padding:12px 0 8px">B주차</div>';
-  courseList.filter(c=>c.type==='default'&&c.id.includes('_B')).forEach(c => {
-    html += courseRowHTML(c);
-  });
-  const custom = courseList.filter(c=>c.type==='custom');
-  if (custom.length) {
-    html += '<div style="font-size:11px;color:#999;padding:12px 0 8px">추가 코스</div>';
-    custom.forEach(c => {
+  
+  if(courseList.length===0){
+    html += '<div style="text-align:center;color:#888;padding:40px 20px"><div style="font-size:32px;margin-bottom:12px">📋</div><div style="font-size:13px">등록된 코스가 없어요</div><div style="font-size:11px;color:#666;margin-top:6px">+ 코스 추가로 시작해보세요</div></div>';
+    // 0개여도 DB에 숨은 빈 문서가 있을 수 있으므로 청소 버튼 표시
+    html += '<button style="margin-top:16px;width:100%;padding:10px;background:#111;border:1px solid #333;color:#f0a500;border-radius:8px;font-size:12px" onclick="cleanupZeroCourses()">🧹 0개 코스 DB 완전 정리</button>';
+  }else{
+    courseList.forEach(c => {
       html += courseRowHTML(c, true);
     });
+    html += '<button style="margin-top:20px;width:100%;padding:10px;background:#111;border:1px solid #333;color:#666;border-radius:8px;font-size:11px" onclick="cleanupZeroCourses()">🧹 0개 코스 DB 정리</button>';
   }
   wrap.innerHTML = html;
 }
+
+window.cleanupZeroCourses = async function(){
+  if(!confirm('거래처가 0개인 빈 코스를 DB에서 완전히 삭제할까요?\n(1개 이상 있는 코스는 그대로 유지)')) return;
+  try{
+    const snap = await getDocs(query(collection(db,'courses3'), where('userId','==',currentUser.userId)));
+    let delCount = 0;
+    for(const d of snap.docs){
+      const clients = d.data().clients || [];
+      if(clients.length===0){
+        await deleteDoc(doc(db,'courses3', d.id));
+        delCount++;
+      }
+    }
+    // 구형 키 방식 (userId_A월 등)도 정리 - 위 쿼리로 이미 잡히지만 혹시 type이 없는 경우 대비
+    for(const dc of [{id:'A월'},{id:'A화'},{id:'A수'},{id:'A목'},{id:'A금'},{id:'B월'},{id:'B화'},{id:'B수'},{id:'B목'},{id:'B금'}]){
+      const key = currentUser.userId + '_' + dc.id;
+      try{
+        const s = await getDoc(doc(db,'courses3', key));
+        if(s.exists() && (s.data().clients||[]).length===0){
+          await deleteDoc(doc(db,'courses3', key));
+          delCount++;
+        }
+      }catch(e){}
+    }
+    toast(delCount+'개 빈 코스 정리 완료!');
+    await loadCourseList();
+  }catch(e){
+    console.error(e);
+    toast('정리 실패: '+e.message, false);
+  }
+};
+
 
 function courseRowHTML(c, deletable=false) {
   return `<div class="course-row" onclick="openCourseEdit('${c.id}')">
