@@ -4,10 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="color-scheme" content="dark">
 <title>수거 일지</title>
 <style>
+:root { color-scheme: dark; }
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html, body { height:100%; background:#000; color:#f0f0f5; font-family:-apple-system,'Noto Sans KR',sans-serif; font-size:14px; overflow:hidden; }
+html, body { height:100%; background:#000; color:#f0f0f5; font-family:-apple-system,'Noto Sans KR',sans-serif; font-size:14px; overflow:hidden; color-scheme: dark; }
 
 /* ── 화면 ── */
 .screen { display:none; flex-direction:column; height:100vh; }
@@ -71,7 +73,7 @@ html, body { height:100%; background:#000; color:#f0f0f5; font-family:-apple-sys
 
 /* ── 수거 입력 ── */
 #inputScreen .top-bar { background:#111; border-bottom:1px solid #222; padding:8px 12px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:wrap; }
-.date-inp { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:8px; padding:5px 10px; color:#f0f0f5; font-size:12px; outline:none; }
+.date-inp { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:8px; padding:5px 10px; color:#f0f0f5; font-size:12px; outline:none; color-scheme: dark; }
 #inputScreen .table-wrap { flex:1; overflow:auto; -webkit-overflow-scrolling:touch; padding-bottom:60px; }
 table { border-collapse:collapse; min-width:max-content; }
 thead th { position:sticky; top:0; background:#111; z-index:10; padding:7px 3px; font-size:11px; color:#444; border-bottom:1px solid #222; white-space:nowrap; text-align:center; }
@@ -84,23 +86,23 @@ td.td-name:active { background:#151515; }
 .cn { font-size:11px; color:#e0e0e0; font-weight:500; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.35; max-height:30px; }
 .cn.has-memo { color:#90EE90; }
 .today-memo { font-size:10px; color:#27ae60; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-td input[type=number] { width:34px; background:#1a1a1a !important; border:1px solid #222; border-radius:5px; padding:4px 2px; color:#f0f0f5 !important; font-size:13px; text-align:center; outline:none; -moz-appearance:textfield; touch-action:manipulation; }
+td input[type=number] { width:38px; background:#1a1a1a !important; border:1px solid #333; border-radius:5px; padding:4px 2px; color:#f0f0f5 !important; font-size:13px; text-align:center; outline:none; -moz-appearance:textfield; touch-action:manipulation; }
 td input[type=number]::-webkit-inner-spin-button,
 td input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
-td input[type=number]:focus { border-color:#3D82F6; background:#111; }
+td input[type=number]:focus { border-color:#3D82F6 !important; background:#111 !important; }
 td input[type=number]::placeholder { color:#2a2a2a; }
-/* 수거박스 */
-.cb { background:#1a1408; } td.cb { background:#1a1408; }
-.cb30 { background:#221c0a; } td.cb30 { background:#221c0a; }
-/* 수거합성 */
-.cr { background:#0e1a0e; } td.cr { background:#0e1a0e; }
-.cr5 { background:#142214; } td.cr5 { background:#142214; }
-/* 납품박스 */
-.db { background:#0a0e1a; } td.db { background:#0a0e1a; }
-.db30 { background:#0c1222; } td.db30 { background:#0c1222; }
-/* 납품합성 */
-.dr { background:#120a1a; } td.dr { background:#120a1a; }
-.dr5 { background:#1a0e22; } td.dr5 { background:#1a0e22; }
+
+/* ── 컬러 패치: 크롬/삼성브라우저 통일 (input 자체에 색칠) ── */
+td.cb, td.cb30, td.cr, td.cr5, td.db, td.db30, td.dr, td.dr5 { background:#111 !important; }
+td.cb input  { background:#2e2615 !important; border-color:#5a4420 !important; }
+td.cb30 input{ background:#3d331a !important; border-color:#6b5428 !important; }
+td.cr input  { background:#162916 !important; border-color:#2a4d2a !important; }
+td.cr5 input { background:#1f3d1f !important; border-color:#355e35 !important; }
+td.db input  { background:#15213a !important; border-color:#243a5e !important; }
+td.db30 input{ background:#1c2e4f !important; border-color:#2e4d7a !important; }
+td.dr input  { background:#23183a !important; border-color:#3d2a5e !important; }
+td.dr5 input { background:#2f2150 !important; border-color:#4e3a7a !important; }
+
 .sep { border-left:2px solid #2a2a2a !important; }
 #inputScreen .action-bar { background:#111; border-top:1px solid #222; padding:8px 12px; display:flex; gap:8px; flex-shrink:0; }
 #inputScreen .action-bar .btn { flex:1; }
@@ -163,7 +165,7 @@ td input[type=number]::placeholder { color:#2a2a2a; }
       </div>
     </div>
     <div class="main-card" onclick="showScreen('inputScreen');initInputScreen()">
-      <div class="main-card-icon">✏️</div>
+      <div class="main-card-icon">✏</div>
       <div>
         <div class="main-card-title">수거 입력</div>
         <div class="main-card-desc">코스 불러오기 후 입력</div>
@@ -275,7 +277,6 @@ td input[type=number]::placeholder { color:#2a2a2a; }
 </div>
 
 <!-- 모달들 -->
-<!-- 코스 추가 -->
 <div class="modal-bg" id="addCourseModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('addCourseModal')">✕</button>
@@ -285,7 +286,6 @@ td input[type=number]::placeholder { color:#2a2a2a; }
   </div>
 </div>
 
-<!-- 코스 불러오기 -->
 <div class="modal-bg" id="loadCourseModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('loadCourseModal')">✕</button>
@@ -294,7 +294,6 @@ td input[type=number]::placeholder { color:#2a2a2a; }
   </div>
 </div>
 
-<!-- 거래처 추가 (수거입력) -->
 <div class="modal-bg" id="addClientModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('addClientModal')">✕</button>
@@ -306,7 +305,6 @@ td input[type=number]::placeholder { color:#2a2a2a; }
   </div>
 </div>
 
-<!-- 메모 -->
 <div class="modal-bg" id="memoModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('memoModal')">✕</button>
@@ -320,7 +318,6 @@ td input[type=number]::placeholder { color:#2a2a2a; }
   </div>
 </div>
 
-<!-- 전송 완료 -->
 <div class="modal-bg" id="doneModal">
   <div class="modal" style="text-align:center">
     <div style="font-size:36px;margin-bottom:10px">✅</div>
@@ -331,7 +328,6 @@ td input[type=number]::placeholder { color:#2a2a2a; }
   </div>
 </div>
 
-<!-- 로그아웃 확인 -->
 <div class="modal-bg" id="exitModal">
   <div class="modal" style="text-align:center;max-width:260px">
     <div style="font-size:24px;margin-bottom:10px">👋</div>
@@ -361,7 +357,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ── 상수 ──
 const BOX = ['4L','12L','30L','50L','63L'];
 const RESIN = ['1L','2L','5L','10L','20L'];
 const SIZES = [...BOX, ...RESIN];
@@ -370,21 +365,19 @@ const DEFAULT_COURSES = [
   {id:'B월',name:'B월요일'},{id:'B화',name:'B화요일'},{id:'B수',name:'B수요일'},{id:'B목',name:'B목요일'},{id:'B금',name:'B금요일'},
 ];
 
-// ── 상태 ──
 let currentUser = null;
 let allClients = [];
 let courseList = [];
-let ceClients = []; // 코스 편집 임시
+let ceClients = [];
 let ceCourseId = null;
-let inputClients = []; // 수거 입력 거래처
-let inputCache = {}; // {idx: {collect:{}, deliver:{}, memo:''}}
-let memoCache = {}; // {clientName: lastMemo}
+let inputClients = [];
+let inputCache = {};
+let memoCache = {};
 let memoIdx = -1;
-let tmpKey = null; // 현재 임시저장 키
-let histData = []; // 이전 데이터 목록
+let tmpKey = null;
+let histData = [];
 let histDetailData = null;
 
-// ── 유틸 ──
 function today() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -396,18 +389,35 @@ function toast(msg, ok=true) {
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2500);
 }
-window.showScreen = function(id) {
+
+// ── 뒤로가기 개선 패치 ──
+let isPopNav = false;
+function getActiveScreenId() {
+  const el = document.querySelector('.screen.active');
+  return el ? el.id : 'mainScreen';
+}
+
+window.showScreen = function(id, push = true) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const target = document.getElementById(id);
+  if(target) target.classList.add('active');
+  if (currentUser && push && !isPopNav) {
+    if (history.state?.screen !== id) {
+      history.pushState({ screen: id }, '', '#' + id);
+    }
+  }
 };
+
 window.closeModal = function(id) {
   document.getElementById(id).classList.remove('show');
 };
 window.openExitModal = function() {
   document.getElementById('exitModal').classList.add('show');
+  if(currentUser && history.state?.screen !== 'exitModal') {
+    history.pushState({ screen: 'mainScreen' }, '', '#mainScreen');
+  }
 };
 
-// ── 초성 ──
 const CS = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
 function getCS(str) {
   return [...str].map(c => {
@@ -421,7 +431,6 @@ function acSearch(list, val) {
   return list.filter(item => isCS ? getCS(item).includes(val) : item.includes(val) || getCS(item).includes(val)).slice(0,10);
 }
 
-// ── 로그인 ──
 window.doLogin = async function() {
   const id = document.getElementById('loginId').value.trim();
   const pw = document.getElementById('loginPw').value.trim();
@@ -451,33 +460,30 @@ async function afterLogin() {
   else localStorage.removeItem('d3_savedId');
   localStorage.setItem('d3_session', JSON.stringify(currentUser));
   document.getElementById('mainSub').textContent = currentUser.name || currentUser.userId;
-  // 거래처 목록 로드
   try {
     const snap = await getDocs(collection(db,'clients'));
     allClients = snap.docs.map(d=>d.data().name).filter(Boolean).sort();
   } catch(e) { allClients = []; }
-  showScreen('mainScreen');
-  for (let i=0;i<5;i++) history.pushState(null,'',location.href);
+  showScreen('mainScreen', false);
+  // 뒤로가기 트랩 설치: 로그인 상태에서 앱이 바로 꺼지지 않게
+  history.replaceState({ screen: 'mainScreen' }, '', '#mainScreen');
+  history.pushState({ screen: 'mainScreen' }, '', '#mainScreen');
 }
 
 document.getElementById('loginId').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('loginPw').focus(); });
 document.getElementById('loginPw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 
-// ── 로그아웃 ──
 window.confirmLogout = function() {
   currentUser = null;
   localStorage.removeItem('d3_session');
   closeModal('exitModal');
-  showScreen('loginScreen');
-  history.go(-(history.length-1));
+  history.replaceState(null, '', location.pathname);
+  window.showScreen('loginScreen', false);
+  history.replaceState({ screen: 'loginScreen' }, '', location.pathname);
 };
 
-// ══════════════════════════════
-// 코스 관리
-// ══════════════════════════════
 async function loadCourseList() {
   courseList = [];
-  // 기본 코스
   for (const dc of DEFAULT_COURSES) {
     const key = currentUser.userId + '_' + dc.id;
     try {
@@ -488,7 +494,6 @@ async function loadCourseList() {
       courseList.push({ id:key, name:dc.name, type:'default', clients:[] });
     }
   }
-  // 추가 코스
   try {
     const snap = await getDocs(query(collection(db,'courses3'), where('userId','==',currentUser.userId), where('type','==','custom')));
     snap.docs.forEach(d => courseList.push({ id:d.id, name:d.data().name, type:'custom', clients:d.data().clients||[] }));
@@ -553,7 +558,6 @@ window.deleteCourse = async function(id) {
   } catch(e) { toast('실패', false); }
 };
 
-// ── 코스 편집 ──
 window.openCourseEdit = function(id) {
   const c = courseList.find(c=>c.id===id);
   if (!c) return;
@@ -593,7 +597,7 @@ window.ceAcFilter = function() {
   const list = document.getElementById('ceAcList');
   const filtered = acSearch(allClients, val);
   if (!filtered.length) { list.style.display='none'; return; }
-  list.innerHTML = filtered.map(name => `<div class="ac-item" onclick="ceAdd('${name.replace(/'/g,"\\'")}')">${name}</div>`).join('');
+  list.innerHTML = filtered.map(name => `<div class="ac-item" onclick="ceAdd('${name.replace(/'/g,"\'")}')">${name}</div>`).join('');
   list.style.display = 'block';
 };
 
@@ -619,7 +623,6 @@ window.saveCourseEdit = async function() {
   } catch(e) { toast('실패', false); }
 };
 
-// ── 드래그 ──
 function initCeDrag() {
   const items = document.querySelectorAll('#ceClientList .edit-client-row');
   let dragIdx=null, startY=0, curY=0, itemH=50, timer=null, dragging=false, ghost=null;
@@ -681,9 +684,6 @@ function initCeDrag() {
   });
 }
 
-// ══════════════════════════════
-// 수거 입력
-// ══════════════════════════════
 function initInputScreen() {
   document.getElementById('inputDate').value = today();
   document.getElementById('inputTitle').textContent = '수거 입력';
@@ -695,10 +695,8 @@ function initInputScreen() {
   renderSubHeader();
   renderInputTable();
 }
+window.initInputScreen = initInputScreen;
 
-window.onDateChange = function() {};
-
-// 서브 헤더
 function renderSubHeader() {
   const tr = document.getElementById('subHeaderRow');
   const box = ['4','12','30','50','63'];
@@ -713,7 +711,6 @@ function renderSubHeader() {
   tr.innerHTML = html;
 }
 
-// 코스 불러오기
 window.openLoadCourseModal = async function() {
   if (!courseList.length) await loadCourseList();
   const el = document.getElementById('loadCourseList');
@@ -732,7 +729,6 @@ window.loadCourse = async function(id) {
   if (!c) return;
   inputClients = [...c.clients];
   inputCache = {};
-  // 임시저장 확인
   const date = document.getElementById('inputDate').value || today();
   tmpKey = currentUser.userId + '_' + date + '_' + id;
   try {
@@ -750,7 +746,6 @@ window.loadCourse = async function(id) {
   renderInputTable();
 };
 
-// 거래처 추가 (수거입력)
 window.addExtraClient = function() {
   document.getElementById('acSearch').value = '';
   document.getElementById('acList').style.display = 'none';
@@ -762,7 +757,7 @@ window.acFilter = function() {
   const list = document.getElementById('acList');
   const filtered = acSearch(allClients, val);
   if (!filtered.length) { list.style.display='none'; return; }
-  list.innerHTML = filtered.map(name => `<div class="ac-item" onclick="acSelect('${name.replace(/'/g,"\\'")}')">${name}</div>`).join('');
+  list.innerHTML = filtered.map(name => `<div class="ac-item" onclick="acSelect('${name.replace(/'/g,"\'")}')">${name}</div>`).join('');
   list.style.display = 'block';
 };
 
@@ -781,7 +776,6 @@ window.acSelect = async function(name) {
   renderInputTable();
 };
 
-// 메모 캐시 로드
 async function loadMemoCache() {
   memoCache = {};
   for (const name of inputClients) {
@@ -795,7 +789,6 @@ async function loadMemoCache() {
   }
 }
 
-// 입력 테이블
 function saveInputs() {
   inputClients.forEach((name,idx) => {
     const row = document.querySelector(`tr[data-idx="${idx}"]`);
@@ -826,25 +819,21 @@ function renderInputTable() {
       <div class="cn${hasMemo?' has-memo':''}">${name}</div>
       ${cache.memo ? `<div class="today-memo">📝 ${cache.memo}</div>` : ''}
     </td>`;
-    // 수거 박스
     BOX.forEach((sz,i) => {
       const v = cache.collect[sz]||'';
       const cls = sz==='30L'?'cb30':'cb';
       h += `<td class="${cls}${i===0?' sep':''}"><input type="number" data-t="c" data-k="${sz}" value="${v}" min="0"></td>`;
     });
-    // 수거 합성
     RESIN.forEach((sz,i) => {
       const v = cache.collect[sz]||'';
       const cls = sz==='5L'?'cr5':'cr';
       h += `<td class="${cls}${i===0?' sep':''}"><input type="number" data-t="c" data-k="${sz}" value="${v}" min="0"></td>`;
     });
-    // 납품 박스
     BOX.forEach((sz,i) => {
       const v = cache.deliver[sz]||'';
       const cls = sz==='30L'?'db30':'db';
       h += `<td class="${cls}${i===0?' sep':''}"><input type="number" data-t="d" data-k="${sz}" value="${v}" min="0"></td>`;
     });
-    // 납품 합성
     RESIN.forEach((sz,i) => {
       const v = cache.deliver[sz]||'';
       const cls = sz==='5L'?'dr5':'dr';
@@ -855,7 +844,6 @@ function renderInputTable() {
   body.innerHTML = h;
 }
 
-// ── 메모 ──
 window.openMemo = function(idx) {
   memoIdx = idx;
   const name = inputClients[idx];
@@ -876,7 +864,6 @@ window.deleteMemo = function() {
   renderInputTable();
 };
 
-// ── 임시저장 ──
 window.saveTmp = async function() {
   saveInputs();
   if (!tmpKey) {
@@ -895,7 +882,6 @@ window.saveTmp = async function() {
   } catch(e) { toast('임시저장 실패', false); }
 };
 
-// ── 전송 ──
 window.sendData = async function() {
   saveInputs();
   const date = document.getElementById('inputDate').value || today();
@@ -923,7 +909,6 @@ window.sendData = async function() {
 
   if (!count) { toast('입력된 데이터가 없어요', false); return; }
 
-  // 임시저장 삭제
   if (tmpKey) try { await deleteDoc(doc(db,'dailyTemp3',tmpKey)); } catch(e) {}
 
   document.getElementById('doneCount').textContent = `${count}건 전송됐어요`;
@@ -938,9 +923,6 @@ window.closeDone = function() {
   showScreen('mainScreen');
 };
 
-// ══════════════════════════════
-// 이전 데이터
-// ══════════════════════════════
 async function loadHistoryList() {
   const wrap = document.getElementById('historyWrap');
   wrap.innerHTML = '<div style="text-align:center;color:#444;padding:20px">불러오는 중...</div>';
@@ -950,7 +932,6 @@ async function loadHistoryList() {
       ? query(collection(db,'일지db'), where('carNumber','==',carNumber), where('seq','>=',1))
       : query(collection(db,'일지db'), where('seq','>=',1));
     const snap = await getDocs(q);
-    // 날짜별 그룹
     const groups = {};
     snap.docs.forEach(d => {
       const data = d.data();
@@ -977,6 +958,8 @@ async function loadHistoryList() {
     wrap.innerHTML = html;
   } catch(e) { wrap.innerHTML='<div style="text-align:center;color:#e74c3c;padding:20px">불러오기 실패</div>'; }
 }
+window.loadHistoryList = loadHistoryList;
+window.loadCourseList = loadCourseList;
 
 window.openHistDetail = function(date) {
   const items = (histData[date]||[]).sort((a,b)=>(a.seq||0)-(b.seq||0));
@@ -1021,22 +1004,31 @@ window.editHistDetail = function() {
   showScreen('inputScreen');
 };
 
-// ── 뒤로가기 ──
-let _bl=false, _exitOpen=false;
-history.pushState(null,'',location.href);
-history.pushState(null,'',location.href);
-history.pushState(null,'',location.href);
-
-window.addEventListener('popstate', () => {
-  if (!currentUser) return;
-  if (_bl) return;
-  _bl=true; history.go(1);
-  setTimeout(()=>{ _bl=false; }, 100);
-  if (_exitOpen) { closeModal('exitModal'); _exitOpen=false; return; }
-  _exitOpen=true;
-  document.getElementById('exitModal').classList.add('show');
+// ── 개선된 뒤로가기 처리 ──
+window.addEventListener('popstate', (e) => {
+  if (!currentUser) {
+    // 비로그인: 그냥 앱 종료되도록 허용
+    return;
+  }
+  const openedModal = document.querySelector('.modal-bg.show');
+  if (openedModal) {
+    openedModal.classList.remove('show');
+    history.pushState({ screen: getActiveScreenId() }, '', location.href);
+    return;
+  }
+  const state = e.state;
+  if (!state || !state.screen) {
+    // 스택 바닥: 다시 쌓고 로그아웃 모달
+    history.pushState({ screen: 'mainScreen' }, '', '#mainScreen');
+    document.getElementById('exitModal').classList.add('show');
+    return;
+  }
+  isPopNav = true;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(state.screen);
+  if(target) target.classList.add('active');
+  setTimeout(() => isPopNav = false, 100);
 });
-document.getElementById('exitModal').querySelector('.btn-secondary').addEventListener('click', ()=>{ _exitOpen=false; });
 
 // ── 세션 복원 ──
 (async function() {
@@ -1047,8 +1039,12 @@ document.getElementById('exitModal').querySelector('.btn-secondary').addEventLis
     try {
       currentUser = JSON.parse(session);
       await afterLogin();
-      for(let i=0;i<5;i++) history.pushState(null,'',location.href);
-    } catch(e) { localStorage.removeItem('d3_session'); }
+    } catch(e) { 
+      localStorage.removeItem('d3_session'); 
+      history.replaceState({ screen: 'loginScreen' }, '', location.pathname);
+    }
+  } else {
+    history.replaceState({ screen: 'loginScreen' }, '', location.pathname);
   }
 })();
 
