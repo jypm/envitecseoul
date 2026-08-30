@@ -241,7 +241,7 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
         <div class="main-card-desc">코스 불러오기 후 입력</div>
       </div>
     </div>
-    <div class="main-card" onclick="showScreen('historyScreen');initHistoryFilter();loadHistoryList()">
+    <div class="main-card" onclick="(async()=>{showScreen('historyScreen'); await initHistoryFilter(); await loadHistoryList();})()">
       <div class="main-card-icon">📅</div>
       <div>
         <div class="main-card-title">이전 데이터</div>
@@ -336,10 +336,8 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
       <input type="date" id="histTo" class="date-inp" style="flex:1">
     </div>
     <div style="display:flex;gap:6px">
-      <select id="histCar" class="date-inp" style="flex:1;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:6px 10px;color:#f0f0f5;outline:none">
-        <option value="">전체 차량</option>
-      </select>
-      <button class="btn btn-primary btn-sm" style="padding:6px 16px" onclick="loadHistoryList()">조회</button>
+      <select id="histCar" class="date-inp" style="flex:1;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px;color:#f0f0f5;outline:none"></select>
+      <button class="btn btn-primary btn-sm" style="padding:8px 16px" onclick="loadHistoryList()">조회</button>
     </div>
     <div id="histSummary" style="font-size:11px;color:#888"></div>
   </div>
@@ -347,7 +345,6 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
     <div style="text-align:center;color:#888;padding:20px">조회 버튼을 눌러주세요</div>
   </div>
 </div>
-
 
 <!-- 이전 데이터 상세 -->
 <div class="screen" id="histDetailScreen">
@@ -553,7 +550,13 @@ window.doLogin = async function() {
     const snap = await getDocs(query(collection(db,'users'), where('userId','==',id)));
     for (const ud of snap.docs) {
       if (ud.data().password === pw) {
-        currentUser = { type:'vehicle', userId:id, name:ud.data().name||'', docId:ud.id, cars:ud.data().cars||[] };
+        const udata = ud.data();
+        let carsRaw = udata.cars || udata.carNumbers || udata.carNumber || udata.vehicles || [];
+        if(typeof carsRaw === 'string') carsRaw = [carsRaw];
+        if(!Array.isArray(carsRaw)) carsRaw = [];
+        carsRaw = carsRaw.map(c=>String(c).trim()).filter(Boolean);
+        const perms = udata.permissions || { lockCollectInput:true, lockCollectQuery:true, lockLoadingInput:true, lockLoadingQuery:true };
+        currentUser = { type:'vehicle', userId:id, name:udata.name||'', docId:ud.id, cars:carsRaw, permissions:perms, raw:udata };
         afterLogin();
         return;
       }
@@ -566,7 +569,7 @@ async function afterLogin() {
   if (document.getElementById('saveIdChk').checked)
     localStorage.setItem('d3_savedId', currentUser.userId);
   else localStorage.removeItem('d3_savedId');
-  localStorage.setItem('d3_session', JSON.stringify(currentUser));
+  localStorage.setItem('d3_session', JSON.stringify(currentUser)); localStorage.setItem('envitec_session', JSON.stringify(currentUser));
   document.getElementById('mainSub').textContent = currentUser.name || currentUser.userId;
   try {
     const snap = await getDocs(collection(db,'clients'));
@@ -1031,40 +1034,41 @@ window.closeDone = function() {
   showScreen('mainScreen');
 };
 
-
 async function loadHistoryList() {
   const wrap = document.getElementById('historyWrap');
-  const from = document.getElementById('histFrom').value;
-  const to = document.getElementById('histTo').value;
-  const selCar = document.getElementById('histCar').value;
+  const from = document.getElementById('histFrom')?.value;
+  const to = document.getElementById('histTo')?.value;
+  const selCar = document.getElementById('histCar')?.value || "";
   const summary = document.getElementById('histSummary');
   
   if(!from || !to){ toast('날짜를 선택해주세요', false); return; }
   
   wrap.innerHTML = '<div style="text-align:center;color:#888;padding:20px">불러오는 중...</div>';
-  summary.textContent = '';
+  if(summary) summary.textContent = '';
   try {
     const snap = await getDocs(query(collection(db,'일지db')));
     const groups = {};
+    const myCars = currentUser?.cars || [];
+    const perms = currentUser?.permissions || currentUser?.raw?.permissions || {};
+    const lockQuery = perms.lockCollectQuery !== false;
     snap.docs.forEach(d => {
       const data = d.data();
       if(!data.date) return;
       if(data.date < from || data.date > to) return;
       
-      // 차량 필터 로직
-      const myCars = currentUser?.cars || [];
       if(currentUser?.type !== 'admin'){
         if(selCar){
-          // 특정 차량 선택: 그 차량만 + carNumber 없는 옛데이터는? 선택된 차량 조회시 옛데이터는 제외 (정확한 조회)
           if(data.carNumber && data.carNumber!==selCar) return;
-          if(!data.carNumber && myCars.length===1 && myCars[0]!==selCar) return; // 옛데이터지만 내 차가 아니면? 일단 포함
         }else{
-          // 전체 차량 선택 (여러대 권한)
-          if(myCars.length && data.carNumber && !myCars.includes(data.carNumber)) return;
-          // carNumber 없는 옛데이터는 포함
+          // 전체 선택
+          if(lockQuery){
+            // 잠금: 내 차량 + 옛 미지정만
+            if(myCars.length && data.carNumber && !myCars.includes(data.carNumber)) return;
+          }else{
+            // 잠금 해제: 전체 다 보여줌 (필터 없음)
+          }
         }
       }else{
-        // admin은 selCar 있으면 그 차량만
         if(selCar && data.carNumber && data.carNumber!==selCar) return;
       }
       
@@ -1077,7 +1081,7 @@ async function loadHistoryList() {
     
     if (!dates.length) { 
       wrap.innerHTML='<div style="text-align:center;color:#888;padding:20px">해당 기간 데이터가 없어요<br><span style="font-size:11px;color:#666">필터: '+(selCar||'전체')+' / '+from+'~'+to+'</span></div>'; 
-      summary.textContent = from+' ~ '+to+' : 0건';
+      if(summary) summary.textContent = from+' ~ '+to+' : 0건';
       return; 
     }
     
@@ -1091,9 +1095,9 @@ async function loadHistoryList() {
         });
       });
     });
-    summary.textContent = from+' ~ '+to+' : '+dates.length+'일 / '+totalClients+'거래처 / 수거 '+totalCollect+'개';
+    if(summary) summary.textContent = from+' ~ '+to+' : '+dates.length+'일 / '+totalClients+'거래처 / 수거 '+totalCollect+'개';
     
-    let html = '';
+    let h = '';
     dates.forEach(date => {
       const items = groups[date].sort((a,b)=>(a.seq||0)-(b.seq||0));
       let dayCollect=0, dayDeliver=0;
@@ -1105,7 +1109,7 @@ async function loadHistoryList() {
       const dObj = new Date(date);
       const yo = isNaN(dObj) ? '' : ['일','월','화','수','목','금','토'][dObj.getDay()];
       const carLabel = items[0]?.carNumber || (items.some(i=>i.carNumber) ? (selCar||'혼합') : '미지정');
-      html += `<div class="hist-date-group">
+      h += `<div class="hist-date-group">
         <div class="hist-item" onclick="openHistDetail('${date}')" style="padding:14px">
           <div style="flex:1">
             <div style="display:flex;align-items:center;gap:6px">
@@ -1120,14 +1124,16 @@ async function loadHistoryList() {
         </div>
       </div>`;
     });
-    wrap.innerHTML = html;
+    wrap.innerHTML = h;
   } catch(e) { 
     console.error(e);
     wrap.innerHTML='<div style="text-align:center;color:#e74c3c;padding:20px">불러오기 실패<br><span style="font-size:11px">'+e.message+'</span><br><button class="btn-ghost" style="margin-top:8px" onclick="loadHistoryList()">다시시도</button></div>'; 
   }
 }
+window.loadHistoryList = loadHistoryList;
+window.loadCourseList = loadCourseList;
 
-function initHistoryFilter(){
+async function initHistoryFilter(){
   const todayStr = today();
   const firstDay = todayStr.substring(0,7)+'-01';
   const fromEl = document.getElementById('histFrom');
@@ -1135,30 +1141,313 @@ function initHistoryFilter(){
   const carEl = document.getElementById('histCar');
   if(fromEl && !fromEl.value) fromEl.value = firstDay;
   if(toEl && !toEl.value) toEl.value = todayStr;
-  if(carEl){
-    const myCars = currentUser?.cars || [];
-    console.log('myCars', myCars);
-    if(myCars.length===0){
-      // 차량 정보가 없으면 DB에서 내 userId로 저장된 carNumber 유추? 일단 전체로
-      carEl.innerHTML = '<option value="">전체 차량 (차량미지정)</option>';
-      carEl.disabled = false;
-    }else if(myCars.length===1){
-      // 1대면 자동선택 + 비활성화
-      carEl.innerHTML = `<option value="${myCars[0]}">${myCars[0]}</option>`;
-      carEl.value = myCars[0];
-      carEl.disabled = true;
-      carEl.style.opacity = '0.7';
+  if(!carEl) return;
+  
+  let myCars = currentUser?.cars || [];
+  const perms = currentUser?.permissions || currentUser?.raw?.permissions || {};
+  const lockQuery = perms.lockCollectQuery !== false; // default true = 잠금
+
+  // fallback: cars 비어있으면 일지db에서 유추
+  if(myCars.length===0 && currentUser?.userId){
+    try{
+      const snap = await getDocs(query(collection(db,'일지db'), where('userId','==',currentUser.userId)));
+      const set = new Set();
+      snap.docs.forEach(d=>{ const cn=d.data().carNumber; if(cn) set.add(String(cn)); });
+      if(set.size>0){ myCars = Array.from(set); currentUser.cars = myCars; }
+    }catch(e){}
+  }
+
+  // 전체 차량 목록 로드 (잠금 해제된 사용자용)
+  let allCars = [];
+  try{
+    const vSnap = await getDocs(collection(db,'vehicles'));
+    allCars = vSnap.docs.map(d=>d.data().carNumber).filter(Boolean).sort();
+    window.activeCarList = vSnap.docs.filter(d=>d.data().active!==false).map(d=>d.data().carNumber).filter(Boolean).sort();
+  }catch(e){ allCars = myCars; }
+
+  console.log('initHistoryFilter', {myCars, allCars, lockQuery, perms});
+
+  if(currentUser?.type==='admin'){
+    // 관리자: 전체 차량 + 모든 활성 차량
+    carEl.innerHTML = '<option value="">전체 차량</option>' + allCars.map(c=>`<option value="${c}">${c}</option>`).join('');
+    carEl.disabled = false;
+    carEl.style.opacity = '1';
+    carEl.style.background = '#1a1a1a';
+  }else{
+    if(lockQuery){
+      // 잠금: 담당 차량만
+      if(myCars.length===0){
+        carEl.innerHTML = '<option value="">전체 차량 (차량정보 없음)</option>';
+        carEl.disabled = false;
+      }else if(myCars.length===1){
+        carEl.innerHTML = `<option value="${myCars[0]}">${myCars[0]} (내 차량)</option>`;
+        carEl.value = myCars[0];
+        carEl.disabled = true;
+        carEl.style.opacity = '0.6';
+        carEl.style.background = '#222';
+      }else{
+        carEl.innerHTML = '<option value="">전체 차량</option>' + myCars.map(c=>`<option value="${c}">${c}</option>`).join('');
+        carEl.disabled = false;
+        carEl.style.opacity = '1';
+        carEl.style.background = '#1a1a1a';
+      }
     }else{
-      // 여러대 권한이면 드롭다운 활성화 + 전체 포함
-      carEl.innerHTML = '<option value="">전체 차량</option>' + myCars.map(c=>`<option value="${c}">${c}</option>`).join('');
+      // 잠금 해제: 전체 선택 가능
+      carEl.innerHTML = '<option value="">전체 차량</option>' + allCars.map(c=>`<option value="${c}">${c}</option>`).join('');
       carEl.disabled = false;
       carEl.style.opacity = '1';
-      if(!carEl.value) carEl.value = "";
+      carEl.style.background = '#1a1a1a';
+      // 내 차량이 있으면 기본으로 내 차량 중 첫번째 선택? 아니면 전체 유지
+      if(myCars.length===1){
+        carEl.value = myCars[0];
+      }
     }
   }
 }
 
 
+
+window.loadCourseList = loadCourseList;
+
+window.openHistDetail = function(date) {
+  toast(date+' 여는중...');
+  const items = (histData[date]||[]).sort((a,b)=>(a.seq||0)-(b.seq||0));
+  histDetailData = {date, items};
+  document.getElementById('histDetailTitle').textContent = date;
+  let html = '';
+  items.forEach((d,i) => {
+    const cols = SIZES.map(sz => {
+      const cv = d['collect'+sz]||0, dv = d['deliver'+sz]||0;
+      if (!cv&&!dv) return null;
+      return `${sz} 수${cv}/납${dv}`;
+    }).filter(Boolean).join(', ');
+    html += `<div style="background:#111;border:1px solid #222;border-radius:10px;padding:12px;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${i+1}. ${d.clientName}</div>
+      <div style="font-size:12px;color:#888">${cols||'내용 없음'}</div>
+      ${d.memo?`<div style="font-size:11px;color:#a87a20;margin-top:4px">📝 ${d.memo}</div>`:''}
+    </div>`;
+  });
+  document.getElementById('histDetailWrap').innerHTML = html;
+  showScreen('histDetailScreen');
+};
+
+window.editHistDetail = function() {
+  if (!histDetailData) return;
+  const {date, items} = histDetailData;
+  inputClients = items.map(d=>d.clientName);
+  inputCache = {};
+  items.forEach((d,idx) => {
+    inputCache[idx] = {collect:{}, deliver:{}, memo:d.memo||''};
+    SIZES.forEach(sz => {
+      inputCache[idx].collect[sz] = d['collect'+sz] ? String(d['collect'+sz]) : '';
+      inputCache[idx].deliver[sz] = d['deliver'+sz] ? String(d['deliver'+sz]) : '';
+    });
+  });
+  document.getElementById('inputDate').value = date;
+  document.getElementById('inputTitle').textContent = date + ' 수정';
+  document.getElementById('inputSub').textContent = currentUser.name||currentUser.userId;
+  tmpKey = null;
+  memoCache = {};
+  renderSubHeader();
+  renderInputTable();
+  showScreen('inputScreen');
+};
+
+// ── 개선된 뒤로가기 처리 ──
+window.addEventListener('popstate', (e) => {
+  if (!currentUser) {
+    // 비로그인: 그냥 앱 종료되도록 허용
+    return;
+  }
+  const openedModal = document.querySelector('.modal-bg.show');
+  if (openedModal) {
+    openedModal.classList.remove('show');
+    history.pushState({ screen: getActiveScreenId() }, '', location.href);
+    return;
+  }
+  const state = e.state;
+  if (!state || !state.screen) {
+    // 스택 바닥: 다시 쌓고 로그아웃 모달
+    history.pushState({ screen: 'mainScreen' }, '', '#mainScreen');
+    document.getElementById('exitModal').classList.add('show');
+    return;
+  }
+  isPopNav = true;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(state.screen);
+  if(target) target.classList.add('active');
+  setTimeout(() => isPopNav = false, 100);
+});
+
+// ── 세션 복원 ──
+(async function() {
+  const savedId = localStorage.getItem('d3_savedId');
+  if (savedId) { document.getElementById('loginId').value=savedId; document.getElementById('saveIdChk').checked=true; }
+  const session = localStorage.getItem('d3_session');
+  if (session) {
+    try {
+      currentUser = JSON.parse(session);
+      await afterLogin();
+    } catch(e) { 
+      localStorage.removeItem('d3_session'); 
+      history.replaceState({ screen: 'loginScreen' }, '', location.pathname);
+    }
+  } else {
+    history.replaceState({ screen: 'loginScreen' }, '', location.pathname);
+  }
+})();
+
+
+function calcTotalCollect(){
+  let total=0;
+  // inputCache에서 합산
+  Object.values(inputCache).forEach(row=>{
+    if(!row || !row.collect) return;
+    Object.values(row.collect).forEach(v=>{
+      const n=parseInt(v)||0;
+      total+=n;
+    });
+  });
+  // 현재 화면에 입력중인데 아직 cache에 안 들어간 것도 포함 (실시간)
+  document.querySelectorAll('#inputBody input[data-t="c"]').forEach(inp=>{
+    // cache에 이미 있으면 중복 방지 위해 cache만 믿음, 여기서는 실시간 감지를 위해 이벤트에서 호출
+  });
+  return total;
+}
+function updateTotalBadge(){
+  const t = calcTotalCollect();
+  const el = document.getElementById('totalCollectBadge');
+  if(el) el.textContent = `수거 ${t}개`;
+}
+function calcTotalFromDOM(){
+  let total=0;
+  document.querySelectorAll('#inputBody input[data-t="c"]').forEach(inp=>{
+    total += parseInt(inp.value)||0;
+  });
+  return total;
+}
+function updateTotalBadgeFromDOM(){
+  const t = calcTotalFromDOM();
+  const el = document.getElementById('totalCollectBadge');
+  if(el) el.textContent = `수거 ${t}개`;
+}
+// 기존 renderInputTable 후 total 업데이트 되도록 래핑
+const _origRender = renderInputTable;
+renderInputTable = function(){
+  _origRender();
+  updateTotalBadgeFromDOM();
+  // input 이벤트 바인딩
+  document.querySelectorAll('#inputBody input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      updateTotalBadgeFromDOM();
+    });
+  });
+};
+// saveInputs 후에도 업데이트
+const _origSaveInputs = saveInputs;
+saveInputs = function(){
+  _origSaveInputs();
+  updateTotalBadge();
+};
+
+
+// 임시저장 복구 기능
+window.openTempRecover = async function(){
+  const wrap = document.getElementById('tempRecoverList');
+  wrap.innerHTML = '<div style="text-align:center;color:#888;padding:20px">불러오는 중...</div>';
+  document.getElementById('tempRecoverModal').classList.add('show');
+  try{
+    const q = query(collection(db,'dailyTemp3'), where('userId','==',currentUser.userId), orderBy('updatedAt','desc'));
+    const snap = await getDocs(q);
+    if(snap.empty){
+      wrap.innerHTML = '<div style="text-align:center;color:#888;padding:20px">임시저장 없음</div>';
+      return;
+    }
+    let h='';
+    snap.docs.forEach(d=>{
+      const data = d.data();
+      const date = data.date || d.id.split('_')[1] || '';
+      const course = d.id.split('_')[2] || '수동저장';
+      const cnt = (data.clients||[]).length;
+      const time = data.updatedAt ? new Date(data.updatedAt.seconds*1000).toLocaleString() : '';
+      h+= `<div style="padding:12px;border:1px solid #222;border-radius:8px;margin-bottom:6px;cursor:pointer;background:#111" onclick="recoverTemp('${d.id}')">
+        <div style="font-size:13px;font-weight:600">${date} · ${course}</div>
+        <div style="font-size:11px;color:#888">${cnt}개 거래처 · ${time}</div>
+      </div>`;
+    });
+    wrap.innerHTML = h;
+  }catch(e){
+    console.error(e);
+    wrap.innerHTML = '<div style="text-align:center;color:#e74c3c;padding:20px">불러오기 실패 (인덱스 필요할 수 있음)</div>';
+    // fallback without orderBy
+    try{
+      const snap2 = await getDocs(query(collection(db,'dailyTemp3'), where('userId','==',currentUser.userId)));
+      let h='';
+      snap2.docs.forEach(d=>{
+        const data = d.data();
+        const date = data.date || '';
+        const cnt = (data.clients||[]).length;
+        h+= `<div style="padding:12px;border:1px solid #222;border-radius:8px;margin-bottom:6px;cursor:pointer;background:#111" onclick="recoverTemp('${d.id}')">
+          <div style="font-size:13px;font-weight:600">${date}</div>
+          <div style="font-size:11px;color:#888">${cnt}개 거래처</div>
+        </div>`;
+      });
+      document.getElementById('tempRecoverList').innerHTML = h || '<div style="text-align:center;color:#888">없음</div>';
+    }catch(e2){}
+  }
+};
+
+window.recoverTemp = async function(docId){
+  try{
+    const snap = await getDoc(doc(db,'dailyTemp3',docId));
+    if(!snap.exists()){ toast('데이터 없음', false); return; }
+    const data = snap.data();
+    inputClients = data.clients || [];
+    inputCache = data.cache || {};
+    tmpKey = docId;
+    if(data.date) document.getElementById('inputDate').value = data.date;
+    closeModal('tempRecoverModal');
+    renderInputTable();
+    toast('임시저장 복구됐어요!');
+  }catch(e){ toast('복구 실패', false); }
+};
+
+// initInputScreen에 자동 복구 체크 추가
+const _origInit = initInputScreen;
+initInputScreen = async function(){
+  _origInit();
+  // 오늘 날짜의 임시저장이 있는지 자동 체크
+  try{
+    const date = document.getElementById('inputDate').value || today();
+    const q = query(collection(db,'dailyTemp3'), where('userId','==',currentUser.userId), where('date','==',date));
+    const snap = await getDocs(q);
+    if(!snap.empty){
+      // 가장 최근 것 하나 자동 복구 제안
+      const latest = snap.docs.sort((a,b)=>(b.data().updatedAt?.seconds||0)-(a.data().updatedAt?.seconds||0))[0];
+      if(confirm(`${date} 임시저장 ${snap.size}개가 있어요. 복구할까요?`)){
+        await recoverTemp(latest.id);
+      }
+    }
+  }catch(e){ console.log('auto recover check fail', e); }
+};
+
+
+let emptyIdxsCache = [];
+
+function findEmptyClients(){
+  saveInputs();
+  const empties=[];
+  inputClients.forEach((name,idx)=>{
+    const cache = inputCache[idx] || {collect:{},deliver:{},memo:''};
+    let hasData=false;
+    SIZES.forEach(sz=>{
+      if((parseInt(cache.collect[sz])||0) || (parseInt(cache.deliver[sz])||0)) hasData=true;
+    });
+    if((cache.memo||'').trim()) hasData=true;
+    if(!hasData) empties.push({idx,name});
+  });
+  return empties;
+}
 
 function openEmptyCheck(empties){
   emptyIdxsCache = empties.map(e=>e.idx).sort((a,b)=>b-a); // 삭제시 뒤부터
