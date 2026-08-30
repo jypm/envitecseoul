@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<link rel="icon" href="data:,">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -94,7 +93,7 @@ td input[type=number]:focus { border-color:#3D82F6 !important; background:#111 !
 td input[type=number]::placeholder { color:#2a2a2a; }
 
 /* ── 컬러 패치 v3: 크롬 다크 필터 대응 초고채도 ── */
-
+td.cb, td.cb30, td.cr, td.cr5, td.db, td.db30, td.dr, td.dr5 { background:#1a1a1a !important; }
 
 td input[type=number] {
   width:38px;
@@ -161,12 +160,12 @@ td input[type=number] {
 .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1e1e2e; border:1px solid #333; border-radius:10px; padding:10px 20px; font-size:13px; z-index:200; display:none; white-space:nowrap; }
 .toast.show { display:block; }
 
-/* v18 - 2가지 색상(주황/파랑) + 가운데 30,5만 밝게 구분, 20칸 유지, 삼성/크롬/엣지 동일 */
-html, body { color-scheme: dark only !important; }
+/* v19 FINAL - 2색 + 가운데 밝게, 확실히 보이는 버전 */
+html, body { color-scheme: dark only !important; background:#0e0e0e !important; }
 #inputTable { border-collapse: collapse !important; table-layout: fixed !important; }
-#inputTable th { background:#0d0d0d !important; color:#aaa !important; }
-#inputTable td { background:#0d0d0d !important; background-color:#0d0d0d !important; }
-td.cb, td.cb30, td.cr, td.cr5, td.db, td.db30, td.dr, td.dr5 { background:#0d0d0d !important; background-color:#0d0d0d !important; }
+#inputTable th { background:#111 !important; color:#aaa !important; }
+#inputTable td { background:#0d0d0d !important; }
+td.cb, td.cb30, td.cr, td.cr5, td.db, td.db30, td.dr, td.dr5 { background:#0d0d0d !important; }
 #inputTable input {
   background:#0d0d0d !important;
   background-color:#0d0d0d !important;
@@ -175,37 +174,32 @@ td.cb, td.cb30, td.cr, td.cr5, td.db, td.db30, td.dr, td.dr5 { background:#0d0d0
   outline: none !important;
   border-radius: 4px !important;
   text-align: center !important;
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  opacity: 1 !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
   border-width: 2px !important;
   border-style: solid !important;
-  border-color: #555 !important;
 }
-/* 수거 = 주황 계열 - 2색이지만 밝기 구분 */
-td.cb input, td.cr input { border-color: #7a4d1f !important; } /* 수거 일반 8칸 */
-td.cb30 input, td.cr5 input { border-color: #d48a20 !important; } /* 수거 가운데 30,5 = 밝은 주황 - 확실히 구분 */
-
-/* 납품 = 파랑 계열 */
-td.db input, td.dr input { border-color: #2a4a6e !important; } /* 납품 일반 8칸 */
-td.db30 input, td.dr5 input { border-color: #4a8ad4 !important; } /* 납품 가운데 30,5 = 밝은 파랑 - 확실히 구분 */
-
-#inputTable tbody tr { height:42px !important; min-height:42px !important; max-height:42px !important; }
+/* 수거 10칸 = 주황 계열 - 확실히 보이게 */
+td.cb input, td.cr input {
+  border-color: #b47a1f !important; /* 어두운 주황이지만 확실히 주황으로 보임 */
+}
+td.cb30 input, td.cr5 input {
+  border-color: #f0a500 !important; /* 가운데 30,5 = 밝은 주황 - 확실히 구분 */
+}
+/* 납품 10칸 = 파랑 계열 - 확실히 보이게 */
+td.db input, td.dr input {
+  border-color: #2a6cb0 !important; /* 어두운 파랑이지만 확실히 파랑 */
+}
+td.db30 input, td.dr5 input {
+  border-color: #4a9eff !important; /* 가운데 30,5 = 밝은 파랑 */
+}
+#inputTable tbody tr { height:42px !important; }
 #inputTable tbody td { height:42px !important; vertical-align:middle !important; }
-td.td-name { padding:3px 4px !important; height:42px !important; overflow:hidden; display:flex; flex-direction:column; justify-content:center; background:#0d0d0d !important; }
+td.td-name { padding:3px 4px !important; height:42px !important; display:flex; flex-direction:column; justify-content:center; background:#0d0d0d !important; }
 td.td-name .cn { line-height:13px !important; max-height:26px !important; white-space:normal !important; overflow:hidden !important; display:-webkit-box !important; -webkit-line-clamp:2 !important; -webkit-box-orient:vertical !important; font-size:11px !important; word-break:break-all !important; }
 .today-memo { font-size:8px !important; line-height:9px !important; max-height:9px !important; margin-top:1px !important; white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:85px !important; }
 
 </style>
-
-<script>
-window.addEventListener('error', function(e){
-  if(e.message && (e.message.includes('startTime') || e.message.includes('reportAllChanges'))){ e.preventDefault(); return true; }
-});
-window.addEventListener('unhandledrejection', function(e){
-  if(e.reason && e.reason.message && e.reason.message.includes('startTime')){ e.preventDefault(); }
-});
-</script>
 </head>
 <body>
 
