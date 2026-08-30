@@ -295,9 +295,9 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
     </div>
     <button class="btn btn-secondary btn-sm" onclick="saveTmp()">임시저장</button>
   </div>
-  <div class="top-bar" style="gap:6px;flex-wrap:nowrap">
+  <div class="top-bar" style="gap:6px;flex-wrap:nowrap"><span id="totalCollectBadge" style="background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:5px 10px;font-size:12px;color:#f0a500;white-space:nowrap">수거 0개</span>
     <input type="date" id="inputDate" class="date-inp" style="flex-shrink:0">
-    <button class="btn-ghost" style="font-size:11px;padding:5px 8px;white-space:nowrap" onclick="openLoadCourseModal()">코스 불러오기</button>
+    <button class="btn-ghost" style="font-size:11px;padding:5px 8px;white-space:nowrap" onclick="openLoadCourseModal()">코스 불러오기</button><button class="btn-ghost" style="font-size:11px;padding:5px 8px;white-space:nowrap;background:#1e1e1e;border-color:#f0a500;color:#f0a500" onclick="openTempRecover()">임시복구</button>
     <button class="btn-ghost" style="font-size:11px;padding:5px 8px;white-space:nowrap" onclick="addExtraClient()">+ 거래처 추가</button>
   </div>
   <div class="table-wrap">
@@ -384,6 +384,29 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="btn btn-danger btn-sm" onclick="deleteMemo()">삭제</button>
       <button class="btn btn-primary" style="flex:1" onclick="saveMemo()">저장</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-bg" id="tempRecoverModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('tempRecoverModal')">✕</button>
+    <h3>임시저장 복구</h3>
+    <div id="tempRecoverList" style="max-height:50vh;overflow-y:auto;margin:10px 0"></div>
+    <div style="font-size:11px;color:#888">앱이 꺼져도 임시저장된 데이터가 여기 남아있어요</div>
+  </div>
+</div>
+
+
+<div class="modal-bg" id="emptyCheckModal">
+  <div class="modal" style="max-width:360px">
+    <h3 style="color:#f0a500">입력 안된 거래처 있어요</h3>
+    <div id="emptyList" style="max-height:40vh;overflow-y:auto;margin:12px 0"></div>
+    <div style="font-size:11px;color:#888;margin-bottom:12px">사유를 메모에 입력하거나 목록에서 삭제해야 전송돼요<br>코스 중간에 변경되는 경우 대비</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('emptyCheckModal')">취소</button>
+      <button class="btn" style="flex:1;background:#c0392b;color:#fff" onclick="deleteAllEmptyAndSend()">모두 삭제 후 전송</button>
     </div>
   </div>
 </div>
@@ -1117,6 +1140,245 @@ window.addEventListener('popstate', (e) => {
     history.replaceState({ screen: 'loginScreen' }, '', location.pathname);
   }
 })();
+
+
+function calcTotalCollect(){
+  let total=0;
+  // inputCache에서 합산
+  Object.values(inputCache).forEach(row=>{
+    if(!row || !row.collect) return;
+    Object.values(row.collect).forEach(v=>{
+      const n=parseInt(v)||0;
+      total+=n;
+    });
+  });
+  // 현재 화면에 입력중인데 아직 cache에 안 들어간 것도 포함 (실시간)
+  document.querySelectorAll('#inputBody input[data-t="c"]').forEach(inp=>{
+    // cache에 이미 있으면 중복 방지 위해 cache만 믿음, 여기서는 실시간 감지를 위해 이벤트에서 호출
+  });
+  return total;
+}
+function updateTotalBadge(){
+  const t = calcTotalCollect();
+  const el = document.getElementById('totalCollectBadge');
+  if(el) el.textContent = `수거 ${t}개`;
+}
+function calcTotalFromDOM(){
+  let total=0;
+  document.querySelectorAll('#inputBody input[data-t="c"]').forEach(inp=>{
+    total += parseInt(inp.value)||0;
+  });
+  return total;
+}
+function updateTotalBadgeFromDOM(){
+  const t = calcTotalFromDOM();
+  const el = document.getElementById('totalCollectBadge');
+  if(el) el.textContent = `수거 ${t}개`;
+}
+// 기존 renderInputTable 후 total 업데이트 되도록 래핑
+const _origRender = renderInputTable;
+renderInputTable = function(){
+  _origRender();
+  updateTotalBadgeFromDOM();
+  // input 이벤트 바인딩
+  document.querySelectorAll('#inputBody input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      updateTotalBadgeFromDOM();
+    });
+  });
+};
+// saveInputs 후에도 업데이트
+const _origSaveInputs = saveInputs;
+saveInputs = function(){
+  _origSaveInputs();
+  updateTotalBadge();
+};
+
+
+// 임시저장 복구 기능
+window.openTempRecover = async function(){
+  const wrap = document.getElementById('tempRecoverList');
+  wrap.innerHTML = '<div style="text-align:center;color:#888;padding:20px">불러오는 중...</div>';
+  document.getElementById('tempRecoverModal').classList.add('show');
+  try{
+    const q = query(collection(db,'dailyTemp3'), where('userId','==',currentUser.userId), orderBy('updatedAt','desc'));
+    const snap = await getDocs(q);
+    if(snap.empty){
+      wrap.innerHTML = '<div style="text-align:center;color:#888;padding:20px">임시저장 없음</div>';
+      return;
+    }
+    let h='';
+    snap.docs.forEach(d=>{
+      const data = d.data();
+      const date = data.date || d.id.split('_')[1] || '';
+      const course = d.id.split('_')[2] || '수동저장';
+      const cnt = (data.clients||[]).length;
+      const time = data.updatedAt ? new Date(data.updatedAt.seconds*1000).toLocaleString() : '';
+      h+= `<div style="padding:12px;border:1px solid #222;border-radius:8px;margin-bottom:6px;cursor:pointer;background:#111" onclick="recoverTemp('${d.id}')">
+        <div style="font-size:13px;font-weight:600">${date} · ${course}</div>
+        <div style="font-size:11px;color:#888">${cnt}개 거래처 · ${time}</div>
+      </div>`;
+    });
+    wrap.innerHTML = h;
+  }catch(e){
+    console.error(e);
+    wrap.innerHTML = '<div style="text-align:center;color:#e74c3c;padding:20px">불러오기 실패 (인덱스 필요할 수 있음)</div>';
+    // fallback without orderBy
+    try{
+      const snap2 = await getDocs(query(collection(db,'dailyTemp3'), where('userId','==',currentUser.userId)));
+      let h='';
+      snap2.docs.forEach(d=>{
+        const data = d.data();
+        const date = data.date || '';
+        const cnt = (data.clients||[]).length;
+        h+= `<div style="padding:12px;border:1px solid #222;border-radius:8px;margin-bottom:6px;cursor:pointer;background:#111" onclick="recoverTemp('${d.id}')">
+          <div style="font-size:13px;font-weight:600">${date}</div>
+          <div style="font-size:11px;color:#888">${cnt}개 거래처</div>
+        </div>`;
+      });
+      document.getElementById('tempRecoverList').innerHTML = h || '<div style="text-align:center;color:#888">없음</div>';
+    }catch(e2){}
+  }
+};
+
+window.recoverTemp = async function(docId){
+  try{
+    const snap = await getDoc(doc(db,'dailyTemp3',docId));
+    if(!snap.exists()){ toast('데이터 없음', false); return; }
+    const data = snap.data();
+    inputClients = data.clients || [];
+    inputCache = data.cache || {};
+    tmpKey = docId;
+    if(data.date) document.getElementById('inputDate').value = data.date;
+    closeModal('tempRecoverModal');
+    renderInputTable();
+    toast('임시저장 복구됐어요!');
+  }catch(e){ toast('복구 실패', false); }
+};
+
+// initInputScreen에 자동 복구 체크 추가
+const _origInit = initInputScreen;
+initInputScreen = async function(){
+  _origInit();
+  // 오늘 날짜의 임시저장이 있는지 자동 체크
+  try{
+    const date = document.getElementById('inputDate').value || today();
+    const q = query(collection(db,'dailyTemp3'), where('userId','==',currentUser.userId), where('date','==',date));
+    const snap = await getDocs(q);
+    if(!snap.empty){
+      // 가장 최근 것 하나 자동 복구 제안
+      const latest = snap.docs.sort((a,b)=>(b.data().updatedAt?.seconds||0)-(a.data().updatedAt?.seconds||0))[0];
+      if(confirm(`${date} 임시저장 ${snap.size}개가 있어요. 복구할까요?`)){
+        await recoverTemp(latest.id);
+      }
+    }
+  }catch(e){ console.log('auto recover check fail', e); }
+};
+
+
+let emptyIdxsCache = [];
+
+function findEmptyClients(){
+  saveInputs();
+  const empties=[];
+  inputClients.forEach((name,idx)=>{
+    const cache = inputCache[idx] || {collect:{},deliver:{},memo:''};
+    let hasData=false;
+    SIZES.forEach(sz=>{
+      if((parseInt(cache.collect[sz])||0) || (parseInt(cache.deliver[sz])||0)) hasData=true;
+    });
+    if((cache.memo||'').trim()) hasData=true;
+    if(!hasData) empties.push({idx,name});
+  });
+  return empties;
+}
+
+function openEmptyCheck(empties){
+  emptyIdxsCache = empties.map(e=>e.idx).sort((a,b)=>b-a); // 삭제시 뒤부터
+  const wrap = document.getElementById('emptyList');
+  let h='';
+  empties.forEach(e=>{
+    h+= `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:#1a1a1a;border:1px solid #222;border-radius:8px;margin-bottom:6px">
+      <span style="font-size:13px">${e.idx+1}. ${e.name}</span>
+      <span style="display:flex;gap:4px">
+        <button class="btn btn-sm" style="background:#1e1e2a;border:1px solid #444;color:#ddd;font-size:11px" onclick="closeModal('emptyCheckModal'); openMemo(${e.idx})">사유입력</button>
+        <button class="btn btn-sm" style="background:#2a1a1a;border:1px solid #633;color:#e88;font-size:11px" onclick="deleteSingleEmpty(${e.idx})">삭제</button>
+      </span>
+    </div>`;
+  });
+  wrap.innerHTML=h;
+  document.getElementById('emptyCheckModal').classList.add('show');
+}
+
+window.deleteSingleEmpty = function(idx){
+  if(!confirm(inputClients[idx]+'을 목록에서 삭제할까요?')) return;
+  inputClients.splice(idx,1);
+  // cache도 정리
+  const newCache={};
+  let newIdx=0;
+  for(let i=0;i<Object.keys(inputCache).length+inputClients.length;i++){
+    if(i===idx) continue;
+    if(inputCache[i]){ newCache[newIdx]=inputCache[i]; newIdx++; }
+  }
+  // 간단: inputCache 재구성
+  const tmp=[];
+  inputClients.forEach((_,i)=>{
+    // 기존 캐시 매핑이 꼬일 수 있어서 saveInputs 먼저 했으므로 현재 DOM 기준으로 다시...
+  });
+  // 기존 방식: 그냥 inputCache에서 해당 idx 삭제 후 리인덱스
+  const arr=[];
+  Object.keys(inputCache).sort((a,b)=>a-b).forEach(k=>{
+    if(parseInt(k)!==idx) arr.push(inputCache[k]);
+  });
+  inputCache={};
+  arr.forEach((v,i)=>{ inputCache[i]=v; });
+  // 삭제 후 모달 닫고 재검사
+  closeModal('emptyCheckModal');
+  renderInputTable();
+  updateTotalBadgeFromDOM();
+  // 남은 빈거 다시 체크해서 또 있으면 모달
+  const remain = findEmptyClients();
+  if(remain.length){
+    setTimeout(()=>openEmptyCheck(remain),200);
+  }else{
+    toast('삭제됐어요. 다시 전송 눌러주세요');
+  }
+};
+
+window.deleteAllEmptyAndSend = function(){
+  // 뒤부터 삭제
+  emptyIdxsCache.sort((a,b)=>b-a).forEach(idx=>{
+    inputClients.splice(idx,1);
+  });
+  // cache 재구성
+  const newCache={};
+  let j=0;
+  const sortedKeys = Object.keys(inputCache).map(k=>parseInt(k)).sort((a,b)=>a-b);
+  sortedKeys.forEach(k=>{
+    if(!emptyIdxsCache.includes(k)){
+      newCache[j++]=inputCache[k];
+    }
+  });
+  inputCache=newCache;
+  closeModal('emptyCheckModal');
+  renderInputTable();
+  updateTotalBadgeFromDOM();
+  setTimeout(()=>{ window.sendData(true); },300);
+};
+
+// sendData 래핑 - 빈 거래처 체크
+const _origSendData = window.sendData;
+window.sendData = async function(skipCheck){
+  if(!skipCheck){
+    const empties = findEmptyClients();
+    if(empties.length){
+      openEmptyCheck(empties);
+      return;
+    }
+  }
+  // 원래 전송 로직 실행
+  await _origSendData();
+};
 
 </script>
 </body>
