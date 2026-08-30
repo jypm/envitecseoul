@@ -92,16 +92,27 @@ td input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 td input[type=number]:focus { border-color:#3D82F6 !important; background:#111 !important; }
 td input[type=number]::placeholder { color:#2a2a2a; }
 
-/* ── 컬러 패치: 크롬/삼성브라우저 통일 (input 자체에 색칠) ── */
+/* ── 컬러 패치 v2: 크롬 강제 밝기 보정 ── */
 td.cb, td.cb30, td.cr, td.cr5, td.db, td.db30, td.dr, td.dr5 { background:#111 !important; }
-td.cb input  { background:#2e2615 !important; border-color:#5a4420 !important; }
-td.cb30 input{ background:#3d331a !important; border-color:#6b5428 !important; }
-td.cr input  { background:#162916 !important; border-color:#2a4d2a !important; }
-td.cr5 input { background:#1f3d1f !important; border-color:#355e35 !important; }
-td.db input  { background:#15213a !important; border-color:#243a5e !important; }
-td.db30 input{ background:#1c2e4f !important; border-color:#2e4d7a !important; }
-td.dr input  { background:#23183a !important; border-color:#3d2a5e !important; }
-td.dr5 input { background:#2f2150 !important; border-color:#4e3a7a !important; }
+
+/* input 자체에 훨씬 밝고 채도 높게 */
+td.cb input  { background:#4d3d23 !important; border-color:#8a6d3b !important; }
+td.cb30 input{ background:#6b542f !important; border-color:#c49a4a !important; } /* 30L 제일 밝게 */
+
+td.cr input  { background:#1e3a1e !important; border-color:#3a6b3a !important; }
+td.cr5 input { background:#2a5a2a !important; border-color:#5aaa5a !important; } /* 5L 제일 밝게 */
+
+td.db input  { background:#1e304f !important; border-color:#3a5a8a !important; }
+td.db30 input{ background:#2a456b !important; border-color:#5a8ac4 !important; }
+
+td.dr input  { background:#2e214d !important; border-color:#5a408a !important; }
+td.dr5 input { background:#3d2e6b !important; border-color:#7a5ac4 !important; }
+
+/* 크롬이 색을 눌러버리는 것 방지 */
+td input[type=number] {
+  -webkit-appearance: none !important;
+  filter: brightness(1.15) saturate(1.2) !important;
+}
 
 .sep { border-left:2px solid #2a2a2a !important; }
 #inputScreen .action-bar { background:#111; border-top:1px solid #222; padding:8px 12px; display:flex; gap:8px; flex-shrink:0; }
