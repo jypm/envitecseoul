@@ -72,7 +72,7 @@ html, body { height:100%; background:#0e0e0e; color:#f0f0f5; font-family:-apple-
 .ac-item:last-child { border-bottom:none; }
 
 /* ── 수거 입력 ── */
-#inputScreen .top-bar { background:#111; border-bottom:1px solid #222; padding:8px 12px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:wrap; }
+#inputScreen .top-bar { overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;  background:#111; border-bottom:1px solid #222; padding:8px 12px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:wrap; }
 .date-inp { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:8px; padding:5px 10px; color:#f0f0f5; font-size:12px; outline:none; color-scheme: dark; }
 #inputScreen .table-wrap { flex:1; overflow:auto; -webkit-overflow-scrolling:touch; padding-bottom:60px; }
 table { border-collapse:collapse; min-width:max-content; }
@@ -295,10 +295,12 @@ td.td-name .cn { line-height:13px !important; max-height:26px !important; white-
     </div>
     <button class="btn btn-secondary btn-sm" onclick="saveTmp()">임시저장</button>
   </div>
-  <div class="top-bar" style="gap:6px;flex-wrap:nowrap"><span id="totalCollectBadge" style="background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:5px 10px;font-size:12px;color:#f0a500;white-space:nowrap">수거 0개</span>
+  <div class="top-bar" style="gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;scrollbar-width:none">
     <input type="date" id="inputDate" class="date-inp" style="flex-shrink:0">
-    <button class="btn-ghost" style="font-size:11px;padding:5px 8px;white-space:nowrap" onclick="openLoadCourseModal()">코스 불러오기</button><button class="btn-ghost" style="font-size:11px;padding:5px 8px;white-space:nowrap;background:#1e1e1e;border-color:#f0a500;color:#f0a500" onclick="openTempRecover()">임시복구</button>
-    <button class="btn-ghost" style="font-size:11px;padding:5px 8px;white-space:nowrap" onclick="addExtraClient()">+ 거래처 추가</button>
+    <button class="btn-ghost" style="font-size:11px;padding:5px 8px;white-space:nowrap;flex-shrink:0" onclick="openLoadCourseModal()">코스 불러오기</button>
+    <button class="btn-ghost" style="font-size:11px;padding:5px 8px;white-space:nowrap;background:#1e1e1e;border-color:#f0a500;color:#f0a500;flex-shrink:0" onclick="openTempRecover()">임시복구</button>
+    <button class="btn-ghost" style="font-size:11px;padding:5px 8px;white-space:nowrap;flex-shrink:0" onclick="addExtraClient()">+ 거래처 추가</button>
+    <span id="totalCollectBadge" style="background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:5px 10px;font-size:12px;color:#f0a500;white-space:nowrap;flex-shrink:0;margin-left:auto">수거 0개</span>
   </div>
   <div class="table-wrap">
     <table id="inputTable">
@@ -1140,35 +1142,57 @@ window.loadCourseList = loadCourseList;
 
 async function initHistoryFilter(){
   try{
-    const todayStr = today();
-    const firstDay = todayStr.substring(0,7)+'-01';
+    // 날짜 기본값: 오늘 기준 최근 7일
+    const now = new Date();
+    const toStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const fromDate = new Date(now);
+    fromDate.setDate(now.getDate()-6);
+    const fromStr = `${fromDate.getFullYear()}-${String(fromDate.getMonth()+1).padStart(2,'0')}-${String(fromDate.getDate()).padStart(2,'0')}`;
     const fromEl = document.getElementById('histFrom');
     const toEl = document.getElementById('histTo');
     const carEl = document.getElementById('histCar');
     const badgeEl = document.getElementById('histCarBadge');
-    if(fromEl && !fromEl.value) fromEl.value = firstDay;
-    if(toEl && !toEl.value) toEl.value = todayStr;
+    
+    if(fromEl){ 
+      if(!fromEl.value) fromEl.value = fromStr;
+      console.log('from set', fromEl.value);
+    }
+    if(toEl){ 
+      if(!toEl.value) toEl.value = toStr;
+      console.log('to set', toEl.value);
+    }
     if(!carEl) return;
     
-    let myCars = currentUser?.cars || [];
-    const perms = currentUser?.permissions || currentUser?.raw?.permissions || {};
+    let myCars = [];
+    try{ myCars = currentUser?.cars || []; }catch(e){ myCars=[]; }
+    let perms = {};
+    try{ perms = currentUser?.permissions || currentUser?.raw?.permissions || {}; }catch(e){}
     const lockQuery = perms.lockCollectQuery !== false;
-
-    if(myCars.length===0 && currentUser?.userId){
-      try{
-        const snap = await getDocs(query(collection(db,'일지db'), where('userId','==',currentUser.userId)));
-        const set = new Set();
-        snap.docs.forEach(d=>{ const cn=d.data().carNumber; if(cn) set.add(String(cn)); });
-        if(set.size>0){ myCars = Array.from(set); currentUser.cars = myCars; }
-      }catch(e){}
-    }
 
     let allCars = [];
     try{
       const vSnap = await getDocs(collection(db,'vehicles'));
-      allCars = vSnap.docs.map(d=>d.data().carNumber).filter(Boolean).sort();
-      window.activeCarList = vSnap.docs.filter(d=>d.data().active!==false).map(d=>d.data().carNumber).filter(Boolean).sort();
-    }catch(e){ allCars = myCars; }
+      allCars = vSnap.docs.map(d=>d.data().carNumber).filter(Boolean).map(c=>String(c).trim()).sort();
+      if(allCars.length>0) window.activeCarList = vSnap.docs.filter(d=>d.data().active!==false).map(d=>d.data().carNumber).filter(Boolean).map(c=>String(c).trim()).sort();
+    }catch(e){ console.warn('vehicles fetch fail', e); }
+
+    if(myCars.length===0 && allCars.length===0){
+      try{
+        const snap = await getDocs(collection(db,'일지db'));
+        const set = new Set();
+        snap.docs.forEach(d=>{
+          const cn = d.data().carNumber;
+          if(cn) set.add(String(cn).trim());
+        });
+        allCars = Array.from(set).sort();
+        if(allCars.length===1) myCars = allCars;
+      }catch(e){ console.warn('일지db car scan fail', e); }
+    }
+
+    if(allCars.length===0 && myCars.length>0) allCars = myCars;
+    if(allCars.length===0) allCars = ['9471']; // 최소 표시용 fallback
+
+    console.log('initFilter final', {myCars, allCars, lockQuery, from: fromEl?.value, to: toEl?.value});
 
     if(currentUser?.type==='admin'){
       carEl.innerHTML = '<option value="">전체 차량</option>' + allCars.map(c=>`<option value="${c}">${c}</option>`).join('');
@@ -1177,7 +1201,7 @@ async function initHistoryFilter(){
     }else{
       if(lockQuery){
         if(myCars.length===0){
-          carEl.innerHTML = '<option value="">전체 차량</option>';
+          carEl.innerHTML = '<option value="">전체 차량</option>' + allCars.map(c=>`<option value="${c}">${c}</option>`).join('');
           carEl.style.display = '';
           if(badgeEl) badgeEl.style.display='none';
         }else if(myCars.length===1){
@@ -1202,8 +1226,20 @@ async function initHistoryFilter(){
     }
   }catch(e){
     console.error('initHistoryFilter error', e);
+    // 최소 날짜라도 채우기
+    try{
+      const now = new Date();
+      const toStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      const fromDate = new Date(now); fromDate.setDate(now.getDate()-6);
+      const fromStr = `${fromDate.getFullYear()}-${String(fromDate.getMonth()+1).padStart(2,'0')}-${String(fromDate.getDate()).padStart(2,'0')}`;
+      const fe = document.getElementById('histFrom'); if(fe && !fe.value) fe.value = fromStr;
+      const te = document.getElementById('histTo'); if(te && !te.value) te.value = toStr;
+    }catch(e2){}
   }
 }
+window.initHistoryFilter = initHistoryFilter;
+
+
 
 
 
