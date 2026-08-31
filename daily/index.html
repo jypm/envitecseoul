@@ -414,9 +414,10 @@ function initInputScreen(){ return window.initInputScreen(); }
 
 // v31: 십자 하이라이트 + 헤더 키패드 고정 + 버그 픽스
 (function(){
-  // v39 십자 하이라이트 - data-k/t 기반으로 정확한 열 매칭 + 초강력
+  // v40 십자 하이라이트 - 행+열 모두 초강력 + 정확한 매칭
   function clearHl(){
     document.querySelectorAll('#inputTable .hl-row').forEach(el=>el.classList.remove('hl-row'));
+    document.querySelectorAll('#inputTable .hl-row-cell').forEach(el=>el.classList.remove('hl-row-cell'));
     document.querySelectorAll('#inputTable .hl-col').forEach(el=>el.classList.remove('hl-col'));
     document.querySelectorAll('#inputTable .hl-col-head').forEach(el=>el.classList.remove('hl-col-head'));
     document.querySelectorAll('#inputTable input.hl-active').forEach(el=>el.classList.remove('hl-active'));
@@ -430,25 +431,25 @@ function initInputScreen(){ return window.initInputScreen(); }
     const k=input.dataset.k;
     const t=input.dataset.t;
     if(!k || !t) return;
-    // 행 하이라이트
+    // 행 하이라이트 - tr + 모든 td에 클래스 추가 (더 확실하게)
     tr.classList.add('hl-row');
+    tr.querySelectorAll('td').forEach(cell=>{
+      cell.classList.add('hl-row-cell');
+    });
     input.classList.add('hl-active');
-    // 같은 k,t를 가진 모든 열 하이라이트 (정확히 같은 사이즈, 같은 수거/납품 구분)
+    // 열 하이라이트 - 같은 k,t 전체
     document.querySelectorAll('#inputBody td').forEach(cell=>{
       const inp=cell.querySelector('input');
       if(inp && inp.dataset.k===k && inp.dataset.t===t){
         cell.classList.add('hl-col');
       }
     });
-    // 헤더 하이라이트 - data-k/t로 정확히 매칭
+    // 헤더 하이라이트
     document.querySelectorAll('#subHeaderRow th').forEach(th=>{
       if(th.dataset.k===k && th.dataset.t===t){
         th.classList.add('hl-col-head');
       }
     });
-    // 그룹 헤더도 같이 강조 (수거 박스/합성 등)
-    const groupTh = document.querySelectorAll('#inputTable thead tr:first-child th');
-    // 간단히: t와 k로 그룹 유추해서 그룹 헤더 강조는 생략, 세부 헤더만 강조
   }
   function handleTarget(e){
     const input = e.target.closest ? e.target.closest('#inputBody input') : null;
