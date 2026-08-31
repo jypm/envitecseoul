@@ -30,9 +30,8 @@ td { border-bottom:1px solid #1a1a1a; padding:3px 2px; text-align:center; vertic
 td.td-seq { position:sticky; left:0; background:#0d0d0d !important; z-index:6; padding:6px 2px; width:26px; min-width:26px; max-width:26px; text-align:center; font-size:10px; color:#bbb; }
 td.td-name { position:sticky; left:26px; background:#0d0d0d !important; z-index:5; padding:3px 4px !important; border-right:1px solid #1e1e1e; min-width:90px; max-width:90px; width:90px; text-align:left; height:42px !important; display:flex; flex-direction:column; justify-content:center; cursor:pointer; }
 .cn { font-size:11px; color:#f5f5f5; font-weight:500; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:13px; max-height:26px; word-break:break-all; }
-.cn.has-memo { color:#f0d060 !important; font-weight:700 !important; } /* 노란색 복구 - envitecseoul처럼 */
-.today-memo { font-size:8px; line-height:9px; max-height:9px; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:85px; }
-.today-memo.current { color:#27ae60; } .today-memo.prev { color:#c9b458; } /* 이전메모는 노란계열로 보이게 */
+.cn.has-memo { color:#f0d060 !important; font-weight:700 !important; }
+.today-memo { font-size:8px; line-height:9px; max-height:9px; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:85px; color:#27ae60; }
 #inputTable { border-collapse:collapse !important; table-layout:fixed !important; } #inputTable th { background:#111 !important; color:#aaa !important; } #inputTable tbody tr, #inputTable tbody td { height:42px !important; }
 #inputTable input[type=number] { width:38px; background:#0d0d0d !important; color:#fff !important; -webkit-text-fill-color:#fff !important; font-weight:700 !important; border-width:2px !important; border-style:solid !important; border-radius:4px !important; text-align:center !important; outline:none !important; -webkit-appearance:none !important; appearance:none !important; padding:4px 2px; font-size:13px; }
 td.cb input, td.cr input { border-color:#b47a1f !important; } td.cb30 input, td.cr5 input { border-color:#f0a500 !important; }
@@ -117,21 +116,26 @@ window.acSelect=async function(name){
   try{
     const snap=await getDocs(query(collection(db,'일지db'), where('clientName','==',name)));
     if(!snap.empty){
-      const docs=snap.docs.map(d=>d.data()).filter(d=>d.memo && d.memo.trim()!=='').sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
-      if(docs.length){ memoCache[name]=docs[0].memo; renderInputTable(); }
+      const docs=snap.docs.map(d=>d.data()).sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+      const latest=docs[0];
+      if(latest && latest.memo && String(latest.memo).trim()!==''){ memoCache[name]=latest.memo; renderInputTable(); }
     }
   }catch(e){ console.log('acSelect memo fail', e); }
 };
 
-// v24 - 원본과 100% 동일한 단순 조회 (인덱스 불필요)
+// v25 - 요청하신대로: 가장 최근 1건의 메모만. 최근건에 메모 없으면 이전메모 없음
 async function loadMemoCache(){
   memoCache={};
   for(const name of inputClients){
     try{
       const snap=await getDocs(query(collection(db,'일지db'), where('clientName','==',name)));
       if(!snap.empty){
-        const docs=snap.docs.map(d=>d.data()).filter(d=>d.memo && String(d.memo).trim()!=='').sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
-        if(docs.length) memoCache[name]=docs[0].memo;
+        const docs=snap.docs.map(d=>d.data()).sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0) || (b.date||'').localeCompare(a.date||''));
+        const latest=docs[0]; // 가장 최근 1건
+        if(latest && latest.memo && String(latest.memo).trim()!==''){
+          memoCache[name]=latest.memo; // 최근건에 메모가 있을때만 저장
+        }
+        // 최근건에 메모 없으면 memoCache에 안넣음 -> 노란색 없음, 팝업에서 이전메모 없음
       }
     }catch(e){ console.log('loadMemoCache fail', name, e.message); }
   }
@@ -140,18 +144,17 @@ async function loadMemoCache(){
 
 function saveInputs(){ inputClients.forEach((name,idx)=>{ const row=document.querySelector(`tr[data-idx="${idx}"]`); if(!row) return; if(!inputCache[idx]) inputCache[idx]={collect:{},deliver:{},memo:''}; SIZES.forEach(sz=>{ const c=row.querySelector(`[data-t="c"][data-k="${sz}"]`); const d=row.querySelector(`[data-t="d"][data-k="${sz}"]`); if(c) inputCache[idx].collect[sz]=c.value; if(d) inputCache[idx].deliver[sz]=d.value; }); }); }
 
+// v25 - 목록에서는 이전메모 텍스트 안띄움. 오늘 메모만 초록으로 표시
 function renderInputTable(){
   const body=document.getElementById('inputBody');
   if(!inputClients.length){ body.innerHTML=`<tr><td colspan="22" style="padding:20px;text-align:center;color:#aaa">코스를 불러오거나 거래처를 추가하세요</td></tr>`; updateTotal(); return; }
   let h='';
   inputClients.forEach((name,idx)=>{
     const cache=inputCache[idx]||{collect:{},deliver:{},memo:''};
-    const prevMemo=memoCache[name]||'';
-    const hasPrev=!!prevMemo;
+    const hasPrev=!!memoCache[name];
     h+=`<tr data-idx="${idx}"><td class="td-seq">${idx+1}</td>`;
     h+=`<td class="td-name" onclick="openMemo(${idx})"><div class="cn${hasPrev?' has-memo':''}">${name}</div>`;
-    if(cache.memo){ h+=`<div class="today-memo current">📝 ${cache.memo}</div>`; }
-    else if(hasPrev){ h+=`<div class="today-memo prev">· ${prevMemo}</div>`; }
+    if(cache.memo){ h+=`<div class="today-memo">📝 ${cache.memo}</div>`; }
     h+=`</td>`;
     BOX.forEach((sz,i)=>{ const v=cache.collect[sz]||''; const cls=sz==='30L'?'cb30':'cb'; h+=`<td class="${cls}${i===0?' sep':''}"><input type="number" data-t="c" data-k="${sz}" value="${v}" min="0"></td>`; });
     RESIN.forEach((sz,i)=>{ const v=cache.collect[sz]||''; const cls=sz==='5L'?'cr5':'cr'; h+=`<td class="${cls}${i===0?' sep':''}"><input type="number" data-t="c" data-k="${sz}" value="${v}" min="0"></td>`; });
