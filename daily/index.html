@@ -171,7 +171,18 @@ window.ceAcFilter=function(){ const val=document.getElementById('ceSearch').valu
 window.ceAdd=function(name){ if(!ceClients.includes(name)) ceClients.push(name); document.getElementById('ceSearch').value=''; document.getElementById('ceAcList').style.display='none'; renderCeList(); };
 window.saveCourseEdit=async function(){ try{ const c=courseList.find(c=>c.id===ceCourseId); const nameToSave=ceCourseName||c?.name||''; await setDoc(doc(db,'courses3',ceCourseId), {clients:ceClients,userId:currentUser.userId,type:c?.type||'default',name:nameToSave}); showScreen('courseScreen'); await loadCourseList(); toast('저장됐어요!'); }catch(e){ toast('실패', false); } };
 function initCeDrag(){ const items=document.querySelectorAll('#ceClientList .edit-client-row'); let dragIdx=null,startY=0,curY=0,itemH=50,timer=null,dragging=false,ghost=null; items.forEach(item=>{ item.addEventListener('touchstart', e=>{ if(e.target.classList.contains('edit-client-del')) return; const idx=parseInt(item.dataset.idx); timer=setTimeout(()=>{ dragIdx=idx; dragging=true; startY=e.touches[0].clientY; curY=startY; item.classList.add('dragging'); if(navigator.vibrate) navigator.vibrate(40); ghost=document.createElement('div'); ghost.className='drag-ghost'; ghost.textContent=ceClients[idx]; ghost.style.top=(startY-20)+'px'; document.body.appendChild(ghost); const list=document.getElementById('ceClientList'); list._startScroll=list.scrollTop; },400); },{passive:true}); item.addEventListener('touchmove', e=>{ if(!dragging){ clearTimeout(timer); return; } e.preventDefault(); curY=e.touches[0].clientY; if(ghost) ghost.style.top=(curY-20)+'px'; const list=document.getElementById('ceClientList'); const rect=list.getBoundingClientRect(); if(curY>rect.bottom-50) list.scrollTop+=3; else if(curY<rect.top+50) list.scrollTop-=3; const scrollDiff=list.scrollTop-(list._startScroll||0); const steps=Math.round((curY-startY+scrollDiff)/itemH); const newIdx=Math.max(0,Math.min(ceClients.length-1,dragIdx+steps)); [...document.querySelectorAll('#ceClientList .edit-client-row')].forEach((el,i)=>{ el.style.transition='transform 0.15s'; if(i===dragIdx){ el.style.transform=''; return; } if(dragIdx<newIdx && i>dragIdx && i<=newIdx) el.style.transform='translateY(-50px)'; else if(dragIdx>newIdx && i>=newIdx && i<dragIdx) el.style.transform='translateY(50px)'; else el.style.transform=''; }); },{passive:false}); item.addEventListener('touchend', e=>{ clearTimeout(timer); if(ghost){ ghost.remove(); ghost=null; } if(!dragging){ dragging=false; return; } const list=document.getElementById('ceClientList'); const scrollDiff=list.scrollTop-(list._startScroll||0); const steps=Math.round((curY-startY+scrollDiff)/itemH); const newIdx=Math.max(0,Math.min(ceClients.length-1,dragIdx+steps)); if(newIdx!==dragIdx){ const moved=ceClients.splice(dragIdx,1)[0]; ceClients.splice(newIdx,0,moved); } dragIdx=null; dragging=false; renderCeList(); }); }); }
-function renderSubHeader(){ const tr=document.getElementById('subHeaderRow'); const box=['4','12','30','50','63']; const resin=['1','2','5','10','20']; const base='font-size:11px;padding:4px 1px;border-bottom:3px solid #999;font-weight:800;border-right:1px solid #444;'; let html=''; box.forEach((s,i)=>{ html+='<th style="top:28px;position:sticky;background:#2a1500 !important;color:#ff6a00;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); resin.forEach((s,i)=>{ html+='<th style="top:28px;position:sticky;background:#2a1010 !important;color:#ff3a30;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); box.forEach((s,i)=>{ html+='<th style="top:28px;position:sticky;background:#00152a !important;color:#2e8cff;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); resin.forEach((s,i)=>{ html+='<th style="top:28px;position:sticky;background:#002a24 !important;color:#00c2a8;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); tr.innerHTML=html; }
+function renderSubHeader(){ 
+  const tr=document.getElementById('subHeaderRow'); 
+  const box=['4','12','30','50','63']; 
+  const resin=['1','2','5','10','20']; 
+  const base='font-size:11px;padding:4px 1px;border-bottom:3px solid #999;font-weight:800;border-right:1px solid #444;'; 
+  let html=''; 
+  box.forEach((s,i)=>{ html+='<th data-t="c" data-k="'+s+'L" data-group="sbox" style="top:28px;position:sticky;background:#2a1500 !important;color:#ff6a00;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); 
+  resin.forEach((s,i)=>{ html+='<th data-t="c" data-k="'+s+'L" data-group="sresin" style="top:28px;position:sticky;background:#2a1010 !important;color:#ff3a30;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); 
+  box.forEach((s,i)=>{ html+='<th data-t="d" data-k="'+s+'L" data-group="dbox" style="top:28px;position:sticky;background:#00152a !important;color:#2e8cff;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); 
+  resin.forEach((s,i)=>{ html+='<th data-t="d" data-k="'+s+'L" data-group="dresin" style="top:28px;position:sticky;background:#002a24 !important;color:#00c2a8;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); 
+  tr.innerHTML=html; 
+}
 window.openLoadCourseModal=async function(){ if(!courseList.length) await loadCourseList(); const el=document.getElementById('loadCourseList'); el.innerHTML=courseList.map(c=>`<div style="padding:12px;border-bottom:1px solid #444;cursor:pointer;display:flex;justify-content:space-between" onclick="loadCourse('${c.id}')"><span style="font-size:13px">${c.name}</span><span style="font-size:11px;color:#bbb">${c.clients.length}개</span></div>`).join(''); document.getElementById('loadCourseModal').classList.add('show'); };
 window.loadCourse=async function(id){
   closeModal('loadCourseModal'); const c=courseList.find(c=>c.id===id); if(!c) return;
@@ -403,11 +414,11 @@ function initInputScreen(){ return window.initInputScreen(); }
 
 // v31: 십자 하이라이트 + 헤더 키패드 고정 + 버그 픽스
 (function(){
-  // v37 십자 하이라이트 - 터치 즉시 + 포커스
-  let lastHl=null;
+  // v39 십자 하이라이트 - data-k/t 기반으로 정확한 열 매칭 + 초강력
   function clearHl(){
     document.querySelectorAll('#inputTable .hl-row').forEach(el=>el.classList.remove('hl-row'));
     document.querySelectorAll('#inputTable .hl-col').forEach(el=>el.classList.remove('hl-col'));
+    document.querySelectorAll('#inputTable .hl-col-head').forEach(el=>el.classList.remove('hl-col-head'));
     document.querySelectorAll('#inputTable input.hl-active').forEach(el=>el.classList.remove('hl-active'));
   }
   function setHl(input){
@@ -416,19 +427,33 @@ function initInputScreen(){ return window.initInputScreen(); }
     const td=input.closest('td');
     const tr=input.closest('tr');
     if(!td || !tr) return;
+    const k=input.dataset.k;
+    const t=input.dataset.t;
+    if(!k || !t) return;
+    // 행 하이라이트
     tr.classList.add('hl-row');
     input.classList.add('hl-active');
-    const colIdx=td.cellIndex;
-    document.querySelectorAll('#inputTable tr').forEach(row=>{
-      const cell=row.cells[colIdx];
-      if(cell) cell.classList.add('hl-col');
+    // 같은 k,t를 가진 모든 열 하이라이트 (정확히 같은 사이즈, 같은 수거/납품 구분)
+    document.querySelectorAll('#inputBody td').forEach(cell=>{
+      const inp=cell.querySelector('input');
+      if(inp && inp.dataset.k===k && inp.dataset.t===t){
+        cell.classList.add('hl-col');
+      }
     });
+    // 헤더 하이라이트 - data-k/t로 정확히 매칭
+    document.querySelectorAll('#subHeaderRow th').forEach(th=>{
+      if(th.dataset.k===k && th.dataset.t===t){
+        th.classList.add('hl-col-head');
+      }
+    });
+    // 그룹 헤더도 같이 강조 (수거 박스/합성 등)
+    const groupTh = document.querySelectorAll('#inputTable thead tr:first-child th');
+    // 간단히: t와 k로 그룹 유추해서 그룹 헤더 강조는 생략, 세부 헤더만 강조
   }
   function handleTarget(e){
     const input = e.target.closest ? e.target.closest('#inputBody input') : null;
     if(input){ setHl(input); }
   }
-  // 터치 즉시 반응 (모바일에서 focus보다 빠름)
   document.addEventListener('touchstart', (e)=>{
     const input = e.target.closest ? e.target.closest('#inputBody input, #inputBody td') : null;
     if(input){
@@ -442,6 +467,11 @@ function initInputScreen(){ return window.initInputScreen(); }
       setHl(e.target);
     }
   });
+  // 클릭으로도 즉시
+  document.addEventListener('click', (e)=>{
+    const input = e.target.closest ? e.target.closest('#inputBody input') : null;
+    if(input) setHl(input);
+  });
   document.addEventListener('focusout', (e)=>{
     if(e.target.matches && e.target.matches('#inputBody input')){
       setTimeout(()=>{
@@ -449,7 +479,7 @@ function initInputScreen(){ return window.initInputScreen(); }
         if(!(active && active.matches && active.matches('#inputBody input'))){
           clearHl();
         }
-      },300);
+      },500);
     }
   });
 
