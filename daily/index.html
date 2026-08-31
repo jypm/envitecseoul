@@ -22,10 +22,13 @@ html, body { height:100%; background:#0e0e0e !important; color:#f0f0f5; font-fam
 #courseScreen .scroll { flex:1; overflow-y:auto; padding:12px; min-height:0; } .course-row { background:#111; border:1px solid #444; border-radius:10px; padding:14px; margin-bottom:8px; display:flex; align-items:center; gap:10px; cursor:pointer; } .course-row-name { flex:1; font-size:14px; font-weight:600; } .course-row-count { font-size:11px; color:#ccc; font-weight:600; } .add-btn-row { background:none; border:1px dashed #555; border-radius:10px; padding:14px; display:flex; align-items:center; justify-content:center; gap:8px; color:#bbb; font-size:13px; cursor:pointer; margin-bottom:8px; width:100%; }
 #courseEditScreen .scroll { flex:1; overflow-y:auto; padding:12px; min-height:0; } .edit-client-row { background:#111; border:1px solid #333; border-radius:8px; padding:12px; margin-bottom:6px; display:flex; align-items:center; gap:10px; } .edit-client-seq { font-size:11px; color:#999; min-width:20px; } .edit-client-name { flex:1; font-size:13px; color:#ddd; } .edit-client-del { background:none; border:none; color:#bbb; font-size:16px; cursor:pointer; padding:4px; } .drag-ghost { position:fixed; background:#3D82F6; color:#fff; padding:10px 16px; border-radius:10px; font-size:13px; z-index:9999; pointer-events:none; box-shadow:0 4px 20px rgba(0,0,0,0.5); left:10%; width:80%; } .ac-wrap { position:relative; margin-bottom:10px; } .ac-list { display:none; position:absolute; top:100%; left:0; right:0; background:#1e1e28; border:1px solid #555; border-radius:8px; z-index:50; max-height:180px; overflow-y:auto; margin-top:3px; } .ac-item { padding:10px 12px; font-size:13px; cursor:pointer; border-bottom:1px solid #333; color:#ddd; }
 
-/* v31 최종 - 7개 수정 통합 */
-html, body { height:100dvh; }
-.screen { height:100dvh; }
-#inputScreen { height:100dvh; height:100svh; overflow:hidden; display:none; flex-direction:column; } #inputScreen.active { display:flex; }
+/* v31 최종 - 7개 수정 통합 - v32 로그인 수정 */
+html, body { height:100%; }
+.screen { height:100vh; height:100dvh; }
+#loginScreen { height:100vh; height:100dvh; justify-content:center; align-items:center; padding:20px; box-sizing:border-box; }
+#loginScreen .login-box { width:100%; max-width:320px; margin:auto; display:flex; flex-direction:column; gap:10px; }
+#loginScreen .login-box .inp { width:100%; background:#1a1a1a; border:1px solid #555; border-radius:8px; padding:10px; color:#f0f0f5; font-size:14px; }
+#inputScreen { height:100vh; height:100dvh; height:100svh; overflow:hidden; display:none; flex-direction:column; } #inputScreen.active { display:flex; }
 #inputScreen .hdr { position:sticky; top:0; z-index:30; background:#111; }
 #inputScreen .hdr-mid { display:flex; gap:6px; align-items:center; flex:1; justify-content:center; }
 #inputScreen .top-bar { position:sticky; top:45px; z-index:29; overflow-x:auto; scrollbar-width:none; background:#151515; border-bottom:2px solid #555; padding:8px 10px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:nowrap; }
@@ -186,7 +189,7 @@ async function loadMemoCache(){
   }
   renderInputTable();
 }
-function saveInputs(){ inputClients.forEach((name,idx)=>{ const row=document.querySelector(`tr[data-idx="${idx}"]`); if(!row) return; if(!inputCache[idx]) inputCache[idx]={collect:{},deliver:{},memo:''}; SIZES.forEach(sz=>{ const c=row.querySelector(`[data-t="c"][data-k="${sz}"]`); const d=row.querySelector(`[data-t="d"][data-k="${sz}"]`); if(c) inputCache[idx].collect[sz]=c.value; if(d) inputCache[idx].deliver[sz]=d.value; }); }); }
+function saveInputs(){ inputClients.forEach((name,idx)=>{ const row=document.querySelector(`tr[data-idx="${idx}"]`); if(!row) return; if(!inputCache[idx]) inputCache[idx]={collect:{},deliver:{},memo:''}; else { if(!inputCache[idx].collect) inputCache[idx].collect={}; if(!inputCache[idx].deliver) inputCache[idx].deliver={}; if(typeof inputCache[idx].memo!=='string') inputCache[idx].memo=''; } SIZES.forEach(sz=>{ const c=row.querySelector(`[data-t="c"][data-k="${sz}"]`); const d=row.querySelector(`[data-t="d"][data-k="${sz}"]`); if(c) inputCache[idx].collect[sz]=c.value; if(d) inputCache[idx].deliver[sz]=d.value; }); }); }
 function renderInputTable(){
   const body=document.getElementById('inputBody');
   if(!inputClients.length){ body.innerHTML=`<tr><td colspan="22" style="padding:20px;text-align:center;color:#aaa">코스를 불러오거나 거래처를 추가하세요</td></tr>`; updateTotal(); return; }
@@ -216,7 +219,20 @@ window.limit3=function(el){
   updateTotal();
 }
 function updateTotal(){ let t=0; document.querySelectorAll('#inputBody input[data-t="c"]').forEach(inp=>{ t+=parseInt(inp.value)||0; }); const el=document.getElementById('totalCollectBadge'); if(el) el.textContent=`수거 ${t}개`; }
-window.openMemo=function(idx){ try{ saveInputs(); }catch(e){} memoIdx=idx; const name=inputClients[idx]; document.getElementById('memoTitle').textContent=name; document.getElementById('memoPrev').textContent=memoCache[name]?'이전: '+memoCache[name]:'이전 메모 없음'; document.getElementById('memoInput').value=inputCache[idx]?.memo||''; document.getElementById('memoModal').classList.add('show'); };
+window.openMemo=function(idx){ 
+  // v32: 입력값 보존 먼저
+  try{ saveInputs(); }catch(e){} 
+  memoIdx=idx; 
+  const name=inputClients[idx]; 
+  document.getElementById('memoTitle').textContent=name; 
+  const prevMemo = memoCache[name] || '';
+  // 이전메모와 오늘메모 명확히 구분
+  document.getElementById('memoPrev').textContent = prevMemo ? '이전: ' + prevMemo : '이전 메모 없음';
+  document.getElementById('memoPrev').style.display = prevMemo ? 'block' : 'block';
+  const todayMemo = (inputCache[idx] && inputCache[idx].memo) ? inputCache[idx].memo : '';
+  document.getElementById('memoInput').value = todayMemo;
+  document.getElementById('memoModal').classList.add('show'); 
+};
 window.saveMemo=function(){ try{ saveInputs(); }catch(e){} if(!inputCache[memoIdx]) inputCache[memoIdx]={collect:{},deliver:{},memo:''}; inputCache[memoIdx].memo=document.getElementById('memoInput').value.trim(); closeModal('memoModal'); renderInputTable(); };
 window.deleteMemo=function(){ try{ saveInputs(); }catch(e){} if(inputCache[memoIdx]) inputCache[memoIdx].memo=''; closeModal('memoModal'); renderInputTable(); };
 window.saveTmp=async function(){ saveInputs(); if(!tmpKey){ const date=document.getElementById('inputDate').value||today(); tmpKey=currentUser.userId+'_'+date+'_manual_'+Date.now(); } let curCar=''; try{ curCar=(currentUser?.cars&&currentUser.cars[0])?currentUser.cars[0]:(currentUser?.userId||''); }catch(e){} let curCourse=''; try{ curCourse=document.getElementById('inputTitle')?.textContent||''; }catch(e){} try{ await setDoc(doc(db,'dailyTemp3',tmpKey), {clients:inputClients,cache:inputCache,date:document.getElementById('inputDate').value||today(),userId:currentUser.userId,carNumber:curCar,courseName:curCourse,updatedAt:Timestamp.now()}); toast('임시저장 완료!'); }catch(e){ toast('실패', false); } };
@@ -352,17 +368,19 @@ function initInputScreen(){ return window.initInputScreen(); }
     }
   });
 
-  // 키패드 올라갈 때 헤더 고정 - visualViewport 대응
+  // 키패드 올라갈 때 헤더 고정 - visualViewport 대응 (inputScreen만)
   function fixViewport(){
     try{
       const vv=window.visualViewport;
       if(!vv) return;
       const screenEl=document.getElementById('inputScreen');
       if(!screenEl || !screenEl.classList.contains('active')) return;
-      // 헤더는 그대로 두고 table-wrap만 조정
       const h=vv.height;
-      if(h){
+      if(h && h < window.innerHeight){
+        // 키패드 올라왔을 때만 높이 조정, 헤더는 sticky로 고정
         screenEl.style.height=h+'px';
+      } else {
+        screenEl.style.height='';
       }
     }catch(e){}
   }
@@ -372,7 +390,13 @@ function initInputScreen(){ return window.initInputScreen(); }
   }
   // 화면 전환 시 높이 리셋
   const origShow=window.showScreen;
-  window.showScreen=function(id,push){ origShow(id,push); if(id==='inputScreen'){ setTimeout(fixViewport,100); } else { const el=document.getElementById('inputScreen'); if(el) { el.style.height=''; } } };
+  window.showScreen=function(id,push){ 
+    origShow(id,push); 
+    if(id==='inputScreen'){ setTimeout(fixViewport,100); } 
+    else { const el=document.getElementById('inputScreen'); if(el) { el.style.height=''; } }
+    // 로그인 화면은 항상 높이 리셋
+    if(id==='loginScreen'){ const loginEl=document.getElementById('loginScreen'); if(loginEl) loginEl.style.height=''; }
+  };
 })();
 
 </script>
