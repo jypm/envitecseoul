@@ -87,59 +87,64 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 .sep { border-left:2.5px solid #888 !important; }
 .sep-strong { border-left:2.5px solid #aaa !important; }
 
-/* v47 십자 하이라이트 - 흰색, 은은하게, 과하지 않게 */
+/* v48 십자 하이라이트 - 흰색 SOLID, 모바일에서도 확실히 흰색 */
 #inputTable tbody tr.hl-row td, #inputTable td.hl-row-cell { background:#2a2a2a !important; }
 #inputTable tbody tr.hl-row td.td-seq, #inputTable td.hl-row-cell.td-seq { 
-  background:#333 !important; 
-  color:#fff !important; 
-  border-right:3px solid #fff !important; 
-  font-weight:700 !important; 
+  background:#fff !important; 
+  color:#000 !important; 
+  border-right:3px solid #000 !important; 
+  font-weight:800 !important; 
 }
 #inputTable tbody tr.hl-row td.td-name, #inputTable td.hl-row-cell.td-name { 
-  background:#333 !important; 
-  box-shadow:inset 3px 0 0 #fff !important; 
+  background:#e8e8e8 !important; 
+  box-shadow:inset 4px 0 0 #fff !important; 
 }
-#inputTable tbody tr.hl-row td.td-name .cn, #inputTable td.hl-row-cell.td-name .cn { color:#fff !important; }
+#inputTable tbody tr.hl-row td.td-name .cn, #inputTable td.hl-row-cell.td-name .cn { color:#000 !important; font-weight:700 !important; }
 
-#inputTable td.hl-col { background:#2a2a2a !important; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.5) !important; }
+#inputTable td.hl-col { background:#333 !important; border:2.5px solid #fff !important; box-shadow:0 0 8px rgba(255,255,255,0.6) !important; }
 #inputTable th.hl-col-head { 
-  background:#333 !important; 
-  color:#fff !important; 
-  border-bottom:3px solid #fff !important; 
-  font-weight:700 !important; 
+  background:#fff !important; 
+  color:#000 !important; 
+  border:3px solid #000 !important; 
+  border-bottom:5px solid #000 !important; 
+  font-weight:900 !important; 
+  font-size:13px !important; 
 }
 
 #inputTable tr.hl-row td input, #inputTable td.hl-row-cell input { 
-  border-color:#bbb !important; 
+  border-color:#fff !important; 
   border-width:2px !important; 
+  background:#3a3a3a !important;
 }
 
 #inputTable td.hl-col input { 
   border-color:#fff !important; 
-  border-width:2px !important; 
+  border-width:3px !important; 
+  background:#4a4a4a !important;
 }
 
-#inputTable tr.hl-row td.hl-col, #inputTable td.hl-row-cell.hl-col { background:#3a3a3a !important; }
+#inputTable tr.hl-row td.hl-col, #inputTable td.hl-row-cell.hl-col { background:#fff !important; border:3px solid #000 !important; }
 #inputTable tr.hl-row td.hl-col input, #inputTable td.hl-row-cell.hl-col input { 
   background:#fff !important; 
   color:#000 !important; 
   -webkit-text-fill-color:#000 !important; 
-  border-color:#fff !important; 
+  border:3px solid #000 !important; 
+  font-weight:800 !important;
 }
 
-#inputTable tbody tr.hl-row { outline:1px solid rgba(255,255,255,0.3) !important; outline-offset:-1px !important; }
+#inputTable tbody tr.hl-row { outline:2px solid #fff !important; outline-offset:-2px !important; }
 
 #inputTable input:focus, #inputTable input.hl-active { 
-  border:2.5px solid #fff !important; 
+  border:3px solid #000 !important; 
   background:#ffffff !important; 
   color:#000 !important; 
   -webkit-text-fill-color:#000 !important;
-  font-weight:700 !important;
-  font-size:13px !important;
-  box-shadow:0 0 0 2px rgba(255,255,255,0.4), 0 0 10px rgba(255,255,255,0.3) !important; 
-  transform:scale(1.12) !important; 
-  z-index:10 !important; 
-  border-radius:6px !important;
+  font-weight:800 !important;
+  font-size:14px !important;
+  box-shadow:0 0 0 3px #fff, 0 0 12px rgba(255,255,255,0.8) !important; 
+  transform:scale(1.15) !important; 
+  z-index:20 !important; 
+  border-radius:8px !important;
 }
 
 
@@ -525,28 +530,19 @@ function initInputScreen(){ return window.initInputScreen(); }
     if(!e.target.closest || !e.target.closest('#inputTable')){ clearHl(); }
   });
 
-  // 키패드 올라갈 때 헤더 고정 - visualViewport 대응
+  // 키패드 올라갈 때 헤더 고정 - 표가 위로 올라가는 버그 수정
   function fixViewport(){
     try{
-      const vv=window.visualViewport;
-      if(!vv) return;
-      const screenEl=document.getElementById('inputScreen');
-      if(!screenEl || !screenEl.classList.contains('active')) return;
-      const h=vv.height;
-      if(h && h < window.innerHeight){ screenEl.style.height=h+'px'; }
-      else { screenEl.style.height=''; }
+      // 모바일에서 표가 위로 올라가는 문제 방지 - 높이 고정 안 함
+      // sticky 헤더는 CSS로만 처리
     }catch(e){}
-  }
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize', fixViewport);
-    window.visualViewport.addEventListener('scroll', fixViewport);
   }
   const origShow=window.showScreen;
   window.showScreen=function(id,push){ 
     origShow(id,push); 
-    if(id==='inputScreen'){ setTimeout(fixViewport,100); } 
-    else { const el=document.getElementById('inputScreen'); if(el) { el.style.height=''; } }
-    if(id==='loginScreen'){ const loginEl=document.getElementById('loginScreen'); if(loginEl) loginEl.style.height=''; }
+    // 높이 리셋만
+    const el=document.getElementById('inputScreen'); if(el) { el.style.height=''; }
+    const loginEl=document.getElementById('loginScreen'); if(loginEl) loginEl.style.height='';
   };
 })();
 
