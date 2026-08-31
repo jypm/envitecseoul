@@ -71,17 +71,32 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 #inputTable th.group-dbox { background:#00152a !important; color:#2e8cff !important; border-bottom-color:#0066ff !important; }
 #inputTable th.group-dresin { background:#002a24 !important; color:#00c2a8 !important; border-bottom-color:#00c2a8 !important; }
 
-#inputTable input:focus { border-color:#fff !important; box-shadow:0 0 8px rgba(255,255,255,0.8) !important; transform:scale(1.08); z-index:2; position:relative; }
+#inputTable input:focus, #inputTable input.hl-active { 
+  border:3px solid #3D82F6 !important; 
+  background:#ffffff !important; 
+  color:#000 !important; 
+  -webkit-text-fill-color:#000 !important;
+  font-weight:900 !important;
+  font-size:14px !important;
+  box-shadow:0 0 0 4px rgba(61,130,246,0.5), 0 0 24px rgba(61,130,246,0.9), inset 0 0 0 1px #fff !important; 
+  transform:scale(1.22) !important; 
+  z-index:10 !important; 
+  position:relative !important; 
+  border-radius:8px !important;
+}
 .sep { border-left:2.5px solid #888 !important; }
 .sep-strong { border-left:2.5px solid #aaa !important; }
 
-/* v31 십자 하이라이트 */
-#inputTable tbody tr.hl-row td { background:#1e1e1e !important; }
-#inputTable tbody tr.hl-row td.td-seq { background:#252525 !important; }
-#inputTable tbody tr.hl-row td.td-name { background:#252525 !important; }
-#inputTable td.hl-col { background:#1e1e1e !important; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.15) !important; }
-#inputTable th.hl-col { background:#333 !important; color:#fff !important; }
-#inputTable td.hl-col.td-seq, #inputTable td.hl-col.td-name { background:#252525 !important; }
+/* v37 십자 하이라이트 초강력 */
+#inputTable tbody tr.hl-row td { background:#2f2f44 !important; }
+#inputTable tbody tr.hl-row td.td-seq { background:#404060 !important; color:#fff !important; border-right:2.5px solid #3D82F6 !important; }
+#inputTable tbody tr.hl-row td.td-name { background:#3a3a5a !important; }
+#inputTable tbody tr.hl-row td.td-name .cn { color:#fff !important; font-weight:700 !important; }
+#inputTable td.hl-col { background:#25255a !important; box-shadow:inset 0 0 0 1.5px rgba(61,130,246,0.7) !important; }
+#inputTable th.hl-col { background:#2a2a7a !important; color:#8ab4ff !important; border-bottom:3px solid #3D82F6 !important; font-weight:800 !important; }
+#inputTable td.hl-col.td-seq, #inputTable td.hl-col.td-name { background:#303070 !important; }
+#inputTable tbody tr.hl-row td.hl-col { background:#44448a !important; box-shadow:inset 0 0 0 2px #3D82F6, 0 0 12px rgba(61,130,246,0.8) !important; z-index:4; }
+#inputTable tbody tr.hl-row { outline:1.5px solid rgba(61,130,246,0.5); outline-offset:-1.5px; }
 #historyScreen .scroll { flex:1; overflow-y:auto; padding:12px; min-height:0; } .hist-item { background:#111; border:1px solid #555; border-radius:10px; padding:12px 14px; margin-bottom:6px; display:flex; align-items:center; gap:10px; cursor:pointer; }
 .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; justify-content:center; align-items:center; } .modal-bg.show { display:flex; } .modal { background:#111; border:1px solid #555; border-radius:16px; padding:20px; width:90%; max-width:360px; position:relative; } .modal-close { position:absolute; top:12px; right:14px; background:none; border:none; color:#bbb; font-size:20px; cursor:pointer; } .modal h3 { font-size:15px; margin-bottom:14px; } .modal textarea { width:100%; background:#1a1a1a; border:1px solid #555; border-radius:8px; padding:10px; color:#f0f0f5; font-size:14px; resize:none; outline:none; }
 .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1e1e2e; border:1px solid #666; border-radius:10px; padding:10px 20px; font-size:13px; z-index:200; display:none; white-space:nowrap; } .toast.show { display:block; }
@@ -388,11 +403,12 @@ function initInputScreen(){ return window.initInputScreen(); }
 
 // v31: 십자 하이라이트 + 헤더 키패드 고정 + 버그 픽스
 (function(){
-  // 십자 하이라이트
+  // v37 십자 하이라이트 - 터치 즉시 + 포커스
   let lastHl=null;
   function clearHl(){
     document.querySelectorAll('#inputTable .hl-row').forEach(el=>el.classList.remove('hl-row'));
     document.querySelectorAll('#inputTable .hl-col').forEach(el=>el.classList.remove('hl-col'));
+    document.querySelectorAll('#inputTable input.hl-active').forEach(el=>el.classList.remove('hl-active'));
   }
   function setHl(input){
     clearHl();
@@ -401,13 +417,26 @@ function initInputScreen(){ return window.initInputScreen(); }
     const tr=input.closest('tr');
     if(!td || !tr) return;
     tr.classList.add('hl-row');
+    input.classList.add('hl-active');
     const colIdx=td.cellIndex;
-    // 같은 컬럼 하이라이트
     document.querySelectorAll('#inputTable tr').forEach(row=>{
       const cell=row.cells[colIdx];
       if(cell) cell.classList.add('hl-col');
     });
   }
+  function handleTarget(e){
+    const input = e.target.closest ? e.target.closest('#inputBody input') : null;
+    if(input){ setHl(input); }
+  }
+  // 터치 즉시 반응 (모바일에서 focus보다 빠름)
+  document.addEventListener('touchstart', (e)=>{
+    const input = e.target.closest ? e.target.closest('#inputBody input, #inputBody td') : null;
+    if(input){
+      const realInput = input.tagName==='INPUT' ? input : input.querySelector('input');
+      if(realInput) setHl(realInput);
+    }
+  }, {passive:true});
+  document.addEventListener('mousedown', handleTarget);
   document.addEventListener('focusin', (e)=>{
     if(e.target.matches && e.target.matches('#inputBody input')){
       setHl(e.target);
@@ -415,13 +444,12 @@ function initInputScreen(){ return window.initInputScreen(); }
   });
   document.addEventListener('focusout', (e)=>{
     if(e.target.matches && e.target.matches('#inputBody input')){
-      // 약간 딜레이 후 클리어 (다음 인풋으로 이동 시 유지)
       setTimeout(()=>{
         const active=document.activeElement;
         if(!(active && active.matches && active.matches('#inputBody input'))){
           clearHl();
         }
-      },50);
+      },300);
     }
   });
 
