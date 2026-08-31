@@ -26,8 +26,17 @@ html, body { height:100%; background:#0e0e0e !important; color:#f0f0f5; font-fam
 html, body { height:100%; }
 .screen { height:100vh; height:100dvh; }
 #loginScreen { height:100vh; height:100dvh; justify-content:center; align-items:center; padding:20px; box-sizing:border-box; }
-#loginScreen .login-box { width:100%; max-width:320px; margin:auto; display:flex; flex-direction:column; gap:10px; }
-#loginScreen .login-box .inp { width:100%; background:#1a1a1a; border:1px solid #555; border-radius:8px; padding:10px; color:#f0f0f5; font-size:14px; }
+.login-box { width:90%; max-width:320px; background:#111; border:1px solid #333; border-radius:16px; padding:32px 24px; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+.login-logo { font-size:32px; text-align:center; margin-bottom:8px; }
+.login-title { font-size:18px; font-weight:700; text-align:center; margin-bottom:4px; }
+.login-sub { font-size:12px; color:#aaa; text-align:center; margin-bottom:24px; }
+#loginScreen .inp { width:100%; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:10px; padding:12px 14px; color:#f0f0f5; font-size:15px; outline:none; margin-bottom:10px; }
+#loginScreen .inp:focus { border-color:#3D82F6; }
+.save-id-row { display:flex; align-items:center; gap:6px; font-size:12px; color:#aaa; margin-bottom:14px; cursor:pointer; }
+.save-id-row input { accent-color:#3D82F6; }
+.login-err { font-size:12px; color:#e74c3c; text-align:center; margin-top:8px; display:none; }
+
+
 #inputScreen { height:100vh; height:100dvh; height:100svh; overflow:hidden; display:none; flex-direction:column; } #inputScreen.active { display:flex; }
 #inputScreen .hdr { position:sticky; top:0; z-index:30; background:#111; }
 #inputScreen .hdr-mid { display:flex; gap:6px; align-items:center; flex:1; justify-content:center; }
@@ -130,7 +139,7 @@ window.openExitModal=function(){ document.getElementById('exitModal').classList.
 const CS='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'; function getCS(str){ return [...str].map(c=>{ const n=c.charCodeAt(0); return (n>=0xAC00 && n<=0xD7A3) ? CS[Math.floor((n-0xAC00)/(21*28))] : c; }).join(''); }
 function acSearch(list,val){ if(!val) return []; const isCS=[...val].every(c=>c>='ㄱ'&&c<='ㅎ'); return list.filter(item=>isCS?getCS(item).includes(val):item.includes(val)||getCS(item).includes(val)).slice(0,10); }
 window.doLogin=async function(){ const id=document.getElementById('loginId').value.trim(); const pw=document.getElementById('loginPw').value.trim(); document.getElementById('loginErr').style.display='none'; try{ const adminSnap=await getDoc(doc(db,'adminConfig','auth')); if(id==='admin' && adminSnap.exists() && adminSnap.data().password===pw){ currentUser={type:'admin',name:'관리자',userId:'admin',cars:[]}; afterLogin(); return; } const snap=await getDocs(query(collection(db,'users'), where('userId','==',id))); for(const ud of snap.docs){ if(ud.data().password===pw){ const udata=ud.data(); let carsRaw=udata.cars||udata.carNumbers||udata.carNumber||[]; if(typeof carsRaw==='string') carsRaw=[carsRaw]; if(!Array.isArray(carsRaw)) carsRaw=[]; carsRaw=carsRaw.map(c=>String(c).trim()).filter(Boolean); const perms=udata.permissions||{lockCollectInput:true,lockCollectQuery:true,lockLoadingInput:true,lockLoadingQuery:true}; currentUser={type:'vehicle',userId:id,name:udata.name||'',docId:ud.id,cars:carsRaw,permissions:perms,raw:udata}; afterLogin(); return; } } }catch(e){ console.error(e); } document.getElementById('loginErr').style.display='block'; };
-async function afterLogin(){ if(document.getElementById('saveIdChk').checked) localStorage.setItem('d3_savedId', currentUser.userId); else localStorage.removeItem('d3_savedId'); localStorage.setItem('d3_session', JSON.stringify(currentUser)); localStorage.setItem('envitec_session', JSON.stringify(currentUser)); document.getElementById('mainSub').textContent=currentUser.name||currentUser.userId; try{ const snap=await getDocs(collection(db,'clients')); allClients=snap.docs.map(d=>d.data().name).filter(Boolean).sort(); }catch(e){ allClients=[]; } showScreen('mainScreen', false); history.replaceState({screen:'mainScreen'}, '', '#mainScreen'); history.pushState({screen:'mainScreen'}, '', '#mainScreen'); }
+async function afterLogin(){ if(document.getElementById('saveIdChk').checked) localStorage.setItem('d3_savedId', currentUser.userId); else localStorage.removeItem('d3_savedId'); localStorage.setItem('d3_session', JSON.stringify(currentUser)); localStorage.setItem('envitec_session', JSON.stringify(currentUser)); document.getElementById('mainSub').textContent=currentUser.name||currentUser.userId; try{ const snap=await getDocs(collection(db,'clients')); allClients=snap.docs.map(d=>d.data().name).filter(Boolean).sort(); }catch(e){ allClients=[]; } try{ await loadCourseList(); }catch(e){} showScreen('mainScreen', false); history.replaceState({screen:'mainScreen'}, '', '#mainScreen'); history.pushState({screen:'mainScreen'}, '', '#mainScreen'); }
 document.getElementById('loginId').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('loginPw').focus(); }); document.getElementById('loginPw').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 window.confirmLogout=function(){ currentUser=null; localStorage.removeItem('d3_session'); closeModal('exitModal'); history.replaceState(null,'',location.pathname); window.showScreen('loginScreen', false); history.replaceState({screen:'loginScreen'}, '', location.pathname); };
 async function loadCourseList(){ courseList=[]; try{ const snap=await getDocs(query(collection(db,'courses3'), where('userId','==',currentUser.userId))); snap.docs.forEach(d=>{ courseList.push({id:d.id,name:d.data().name||'이름없음',type:d.data().type||'custom',clients:d.data().clients||[]}); }); courseList.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ko')); }catch(e){} renderCourseList(); }
@@ -303,33 +312,68 @@ window.loadHistoryList=loadHistoryList;
 async function initHistoryFilter(){ try{ const now=new Date(); const toStr=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`; const fromDate=new Date(now); fromDate.setDate(now.getDate()-6); const fromStr=`${fromDate.getFullYear()}-${String(fromDate.getMonth()+1).padStart(2,'0')}-${String(fromDate.getDate()).padStart(2,'0')}`; const fromEl=document.getElementById('histFrom'); const toEl=document.getElementById('histTo'); const carEl=document.getElementById('histCar'); const badgeEl=document.getElementById('histCarBadge'); if(fromEl && !fromEl.value) fromEl.value=fromStr; if(toEl && !toEl.value) toEl.value=toStr; if(!carEl) return; let myCars=[]; try{ myCars=currentUser?.cars||[]; }catch(e){} let perms={}; try{ perms=currentUser?.permissions||currentUser?.raw?.permissions||{}; }catch(e){} const lockQuery=perms.lockCollectQuery!==false; let allCars=[]; try{ const vSnap=await getDocs(collection(db,'vehicles')); allCars=vSnap.docs.map(d=>d.data().carNumber).filter(Boolean).map(c=>String(c).trim()).sort(); }catch(e){} if(myCars.length===0 && allCars.length===0){ try{ const snap=await getDocs(collection(db,'일지db')); const set=new Set(); snap.docs.forEach(d=>{ const cn=d.data().carNumber; if(cn) set.add(String(cn).trim()); }); allCars=Array.from(set).sort(); if(allCars.length===1) myCars=allCars; }catch(e){} } if(allCars.length===0 && myCars.length>0) allCars=myCars; if(allCars.length===0) allCars=['9471']; if(currentUser?.type==='admin'){ carEl.innerHTML='<option value="">전체 차량</option>'+allCars.map(c=>`<option value="${c}">${c}</option>`).join(''); carEl.style.display=''; if(badgeEl) badgeEl.style.display='none'; }else{ if(lockQuery){ if(myCars.length===0){ carEl.innerHTML='<option value="">전체 차량</option>'+allCars.map(c=>`<option value="${c}">${c}</option>`).join(''); carEl.style.display=''; if(badgeEl) badgeEl.style.display='none'; }else if(myCars.length===1){ if(badgeEl){ badgeEl.textContent='🚛 '+myCars[0]+' (내 차량)'; badgeEl.style.display=''; } carEl.innerHTML=`<option value="${myCars[0]}">${myCars[0]}</option>`; carEl.value=myCars[0]; carEl.disabled=true; carEl.style.display=''; carEl.style.opacity='0.6'; }else{ carEl.innerHTML='<option value="">전체 차량</option>'+myCars.map(c=>`<option value="${c}">${c}</option>`).join(''); carEl.style.display=''; if(badgeEl) badgeEl.style.display='none'; } }else{ carEl.innerHTML='<option value="">전체 차량</option>'+allCars.map(c=>`<option value="${c}">${c}</option>`).join(''); carEl.style.display=''; if(badgeEl) badgeEl.style.display='none'; if(myCars.length===1) carEl.value=myCars[0]; } } }catch(e){} }
 window.initHistoryFilter=initHistoryFilter; window.loadCourseList=loadCourseList;
 window.openHistDetail=function(date){ const items=(histData[date]||[]).sort((a,b)=>(a.seq||0)-(b.seq||0)); histDetailData={date,items}; document.getElementById('histDetailTitle').textContent=date; let html=''; items.forEach((d,i)=>{ const cols=SIZES.map(sz=>{ const cv=d['collect'+sz]||0,dv=d['deliver'+sz]||0; if(!cv&&!dv) return null; return `${sz} 수${cv}/납${dv}`; }).filter(Boolean).join(', '); html+=`<div style="background:#111;border:1px solid #555;border-radius:10px;padding:12px;margin-bottom:8px"><div style="font-size:13px;font-weight:600;margin-bottom:4px">${i+1}. ${d.clientName}</div><div style="font-size:12px;color:#888">${cols||'내용 없음'}</div>${d.memo?`<div style="font-size:11px;color:#f0d060;margin-top:4px">📝 ${d.memo}</div>`:''}</div>`; }); document.getElementById('histDetailWrap').innerHTML=html; showScreen('histDetailScreen'); };
-window.editHistDetail=function(){ if(!histDetailData) return; const {date,items}=histDetailData; 
-  // v31: 코스 순서대로 정렬 시도
+window.editHistDetail=async function(){ 
+  if(!histDetailData) return; 
+  const {date,items}=histDetailData; 
+  // v35: 코스 리스트 없으면 먼저 불러오기
+  if(!courseList || !courseList.length){
+    try{ await loadCourseList(); }catch(e){}
+  }
   let orderedItems=[...items];
   try{
     if(courseList && courseList.length){
-      // 가장 많이 겹치는 코스 찾기
       let bestCourse=null, bestScore=-1;
       courseList.forEach(c=>{
         const score = items.filter(it=>c.clients.includes(it.clientName)).length;
         if(score>bestScore){ bestScore=score; bestCourse=c; }
       });
       if(bestCourse && bestScore>0){
-        const orderMap=new Map(); bestCourse.clients.forEach((name,i)=>orderMap.set(name,i));
+        const orderMap=new Map(); 
+        bestCourse.clients.forEach((name,i)=>orderMap.set(name,i));
         orderedItems.sort((a,b)=>{
-          const ai=orderMap.has(a.clientName)?orderMap.get(a.clientName):9999;
-          const bi=orderMap.has(b.clientName)?orderMap.get(b.clientName):9999;
-          if(ai!==bi) return ai-bi;
+          const aIn = orderMap.has(a.clientName);
+          const bIn = orderMap.has(b.clientName);
+          if(aIn && bIn){
+            return orderMap.get(a.clientName) - orderMap.get(b.clientName);
+          }
+          if(aIn) return -1;
+          if(bIn) return 1;
           return (a.seq||0)-(b.seq||0);
         });
+        console.log('코스 순서 정렬:', bestCourse.name, bestScore);
       }else{
+        // 코스 못찾으면 seq 순으로
         orderedItems.sort((a,b)=>(a.seq||0)-(b.seq||0));
       }
     }else{
       orderedItems.sort((a,b)=>(a.seq||0)-(b.seq||0));
     }
-  }catch(e){ orderedItems.sort((a,b)=>(a.seq||0)-(b.seq||0)); }
-  inputClients=orderedItems.map(d=>d.clientName); inputCache={}; window.editingOriginalDocIds=orderedItems.map(d=>d.docId).filter(Boolean); window.editingOriginalDate=date; window.editingOriginalCar=orderedItems[0]?.carNumber||''; orderedItems.forEach((d,idx)=>{ inputCache[idx]={collect:{},deliver:{},memo:d.memo||''}; SIZES.forEach(sz=>{ inputCache[idx].collect[sz]=d['collect'+sz]?String(d['collect'+sz]):''; inputCache[idx].deliver[sz]=d['deliver'+sz]?String(d['deliver'+sz]):''; }); }); document.getElementById('inputDate').value=date; document.getElementById('inputTitle').textContent=date+' 수정'; document.getElementById('inputSub').textContent=(currentUser.name||currentUser.userId)+' · 수정모드 (날짜 고정)'; tmpKey=null; memoCache={}; renderSubHeader(); renderInputTable(); showScreen('inputScreen'); toast('코스 순서로 정렬했어요: '+date); };
+  }catch(e){ 
+    console.error(e);
+    orderedItems.sort((a,b)=>(a.seq||0)-(b.seq||0)); 
+  }
+  inputClients=orderedItems.map(d=>d.clientName); 
+  inputCache={}; 
+  window.editingOriginalDocIds=orderedItems.map(d=>d.docId).filter(Boolean); 
+  window.editingOriginalDate=date; 
+  window.editingOriginalCar=orderedItems[0]?.carNumber||''; 
+  orderedItems.forEach((d,idx)=>{ 
+    inputCache[idx]={collect:{},deliver:{},memo:d.memo||''}; 
+    SIZES.forEach(sz=>{ 
+      inputCache[idx].collect[sz]=d['collect'+sz]?String(d['collect'+sz]):''; 
+      inputCache[idx].deliver[sz]=d['deliver'+sz]?String(d['deliver'+sz]):''; 
+    }); 
+  }); 
+  document.getElementById('inputDate').value=date; 
+  document.getElementById('inputTitle').textContent=date+' 수정 (코스순)'; 
+  document.getElementById('inputSub').textContent=(currentUser.name||currentUser.userId)+' · '+orderedItems.length+'건 코스 순서 정렬됨'; 
+  tmpKey=null; 
+  memoCache={}; 
+  renderSubHeader(); 
+  renderInputTable(); 
+  showScreen('inputScreen'); 
+  toast('코스 순서로 정렬했어요: '+date); 
+};
 window.addEventListener('popstate', (e)=>{ if(!currentUser) return; const openedModal=document.querySelector('.modal-bg.show'); if(openedModal){ openedModal.classList.remove('show'); history.pushState({screen:getActiveScreenId()}, '', location.href); return; } const state=e.state; if(!state||!state.screen){ history.pushState({screen:'mainScreen'}, '', '#mainScreen'); document.getElementById('exitModal').classList.add('show'); return; } isPopNav=true; document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); const target=document.getElementById(state.screen); if(target) target.classList.add('active'); setTimeout(()=>isPopNav=false,100); });
 (async function(){ const savedId=localStorage.getItem('d3_savedId'); if(savedId){ document.getElementById('loginId').value=savedId; document.getElementById('saveIdChk').checked=true; } const session=localStorage.getItem('d3_session'); if(session){ try{ currentUser=JSON.parse(session); await afterLogin(); }catch(e){ localStorage.removeItem('d3_session'); history.replaceState({screen:'loginScreen'}, '', location.pathname); } }else{ history.replaceState({screen:'loginScreen'}, '', location.pathname); } })();
 let emptyIdxsCache=[]; function findEmptyClients(){ saveInputs(); const empties=[]; inputClients.forEach((name,idx)=>{ const cache=inputCache[idx]||{collect:{},deliver:{},memo:''}; let hasData=false; SIZES.forEach(sz=>{ if((parseInt(cache.collect[sz])||0) || (parseInt(cache.deliver[sz])||0)) hasData=true; }); if((cache.memo||'').trim()) hasData=true; if(!hasData) empties.push({idx,name}); }); return empties; }
