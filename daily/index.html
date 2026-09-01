@@ -9,11 +9,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0e0e0e">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
 <title>수거 일지</title>
 <style>
-:root { color-scheme: dark; } * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html, body { height:100%; background:#0e0e0e !important; color:#f0f0f5; font-family:-apple-system,'Noto Sans KR',sans-serif; font-size:14px; overflow:hidden; color-scheme: dark only !important; }
+:root { color-scheme: light dark; } * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; background:#0e0e0e !important; color:#f0f0f5; font-family:-apple-system,'Noto Sans KR',sans-serif; font-size:14px; overflow:hidden; color-scheme: light !important; }
 .screen { display:none; flex-direction:column; height:100vh; overflow:hidden; } .screen.active { display:flex; }
 .hdr { background:#111; border-bottom:2px solid #444; padding:8px 10px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; gap:8px; }
 .hdr-left { display:flex; align-items:center; gap:10px; flex-shrink:0; } .back-btn { background:none; border:none; color:#3D82F6; font-size:14px; cursor:pointer; padding:4px 0; } .hdr-title { font-size:15px; font-weight:700; white-space:nowrap; } .hdr-sub { font-size:11px; color:#aaa; margin-top:2px; }
@@ -243,25 +243,94 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 #inputTable input.hl-active { border:none !important; }
 
 
-/* ===== 용기종류 숫자 헤더 흰바탕 고정 - 최종 덮어쓰기 ===== */
-#inputTable th.group-sbox,
-#inputTable th.group-sresin { background:#e7e2cc !important; background-color:#e7e2cc !important; color:#000 !important; border-bottom:1px solid #b5b5b5 !important; }
-#inputTable th.group-dbox,
-#inputTable th.group-dresin { background:#d2deef !important; background-color:#d2deef !important; color:#000 !important; border-bottom:1px solid #b5b5b5 !important; }
-#subHeaderRow th { background:#ffffff !important; background-color:#ffffff !important; color:#000 !important; border:1px solid #b5b5b5 !important; border-bottom:2px solid #7a7a7a !important; }
-#subHeaderRow th[data-group="sbox"],
-#subHeaderRow th[data-group="sresin"] { background:#efe9d6 !important; background-color:#efe9d6 !important; color:#000 !important; }
-#subHeaderRow th[data-group="dbox"],
-#subHeaderRow th[data-group="dresin"] { background:#d9e6f2 !important; background-color:#d9e6f2 !important; color:#000 !important; }
-/* 입력칸 배경도 흰바탕으로 - 이전 다크 input 배경 제거 */
-td.cb input, td.cr input, td.db input, td.dr input { background:transparent !important; background-color:transparent !important; border-color:transparent !important; color:#000 !important; -webkit-text-fill-color:#000 !important; }
+/* ===== 삼성 인터넷 다크모드 완전 차단 - 최종 ===== */
+html, body { color-scheme: light dark !important; }
+#inputScreen, #inputScreen .hdr, #inputScreen .top-bar, #inputScreen .table-wrap, #inputTable {
+  color-scheme: light only !important;
+  forced-color-adjust: none !important;
+  -webkit-forced-color-adjust: none !important;
+  print-color-adjust: exact !important;
+  -webkit-print-color-adjust: exact !important;
+}
+#inputScreen {
+  background:#ffffff !important;
+  background-color:#ffffff !important;
+  filter:none !important;
+  -webkit-filter:none !important;
+}
+#inputScreen * {
+  filter:none !important;
+  -webkit-filter:none !important;
+  mix-blend-mode: normal !important;
+}
 
-/* 삼성 다크모드 대응 - subHeaderRow도 강제 라이트 */
+/* 모든 이전 다크 배경 규칙 덮어쓰기 - ID 2개로 특이성 극대화 */
+html body #inputScreen #inputTable { background:#ffffff !important; background-color:#ffffff !important; }
+html body #inputScreen #inputTable thead th { background:#f2f2f2 !important; background-color:#f2f2f2 !important; color:#000 !important; }
+html body #inputScreen #inputTable thead th.group-sbox,
+html body #inputScreen #inputTable thead th.group-sresin { background:#e7e2cc !important; background-color:#e7e2cc !important; color:#000 !important; }
+html body #inputScreen #inputTable thead th.group-dbox,
+html body #inputScreen #inputTable thead th.group-dresin { background:#d2deef !important; background-color:#d2deef !important; color:#000 !important; }
+html body #inputScreen #inputTable tbody td { background:#ffffff !important; background-color:#ffffff !important; color:#000 !important; }
+html body #inputScreen #inputTable tbody td.td-seq { background:#f2f2f2 !important; background-color:#f2f2f2 !important; color:#000 !important; }
+html body #inputScreen #inputTable tbody td.td-name { background:#ffffff !important; background-color:#ffffff !important; color:#000 !important; }
+html body #inputScreen #inputTable tbody td.cb,
+html body #inputScreen #inputTable tbody td.cr,
+html body #inputScreen #inputTable tbody td.cb30,
+html body #inputScreen #inputTable tbody td.cr5 { background:#f5f0db !important; background-color:#f5f0db !important; color:#000 !important; }
+html body #inputScreen #inputTable tbody td.db,
+html body #inputScreen #inputTable tbody td.dr,
+html body #inputScreen #inputTable tbody td.db30,
+html body #inputScreen #inputTable tbody td.dr5 { background:#e2ecf7 !important; background-color:#e2ecf7 !important; color:#000 !important; }
+html body #inputScreen #inputTable input[type=number] { background:transparent !important; background-color:transparent !important; color:#000 !important; -webkit-text-fill-color:#000 !important; caret-color:#000 !important; }
+
+/* 삼성 인터넷이 prefers-color-scheme: dark 일때 강제로 라이트 재적용 */
 @media (prefers-color-scheme: dark) {
-  #inputTable th.group-sbox, #inputTable th.group-sresin { background:#e7e2cc !important; background-color:#e7e2cc !important; color:#000 !important; }
-  #inputTable th.group-dbox, #inputTable th.group-dresin { background:#d2deef !important; background-color:#d2deef !important; color:#000 !important; }
-  #subHeaderRow th[data-group="sbox"], #subHeaderRow th[data-group="sresin"] { background:#efe9d6 !important; background-color:#efe9d6 !important; }
-  #subHeaderRow th[data-group="dbox"], #subHeaderRow th[data-group="dresin"] { background:#d9e6f2 !important; background-color:#d9e6f2 !important; }
+  html body #inputScreen, html body #inputScreen .table-wrap, html body #inputScreen #inputTable { background:#ffffff !important; background-color:#ffffff !important; }
+  html body #inputScreen #inputTable tbody td { background:#ffffff !important; }
+  html body #inputScreen #inputTable tbody td.cb,
+  html body #inputScreen #inputTable tbody td.cr { background:#f5f0db !important; background-color:#f5f0db !important; }
+  html body #inputScreen #inputTable tbody td.db,
+  html body #inputScreen #inputTable tbody td.dr { background:#e2ecf7 !important; background-color:#e2ecf7 !important; }
+}
+
+/* 칸 크기 3자리 고정 - 재확인 */
+#inputTable thead th:not(.th-seq):not(.th-name) { width:42px !important; min-width:42px !important; max-width:42px !important; }
+#inputTable tbody td:not(.td-seq):not(.td-name) { width:42px !important; min-width:42px !important; max-width:42px !important; height:30px !important; }
+
+
+/* ===== 엑셀 두 톤 디테일 복원 - 박스 연한 / 합성 진한 ===== */
+/* 헤더 그룹 - 박스 연한, 합성 진한 */
+html body #inputScreen #inputTable thead th.group-sbox { background:#ede9de !important; background-color:#ede9de !important; color:#000 !important; }
+html body #inputScreen #inputTable thead th.group-sresin { background:#dfd9c9 !important; background-color:#dfd9c9 !important; color:#000 !important; }
+html body #inputScreen #inputTable thead th.group-dbox { background:#d9e3ec !important; background-color:#d9e3ec !important; color:#000 !important; }
+html body #inputScreen #inputTable thead th.group-dresin { background:#c7d8ec !important; background-color:#c7d8ec !important; color:#000 !important; }
+
+/* 서브헤더 숫자 - 박스 연한 / 합성 진한 */
+#subHeaderRow th[data-group="sbox"] { background:#ede9de !important; background-color:#ede9de !important; color:#000 !important; }
+#subHeaderRow th[data-group="sresin"] { background:#dfd9c9 !important; background-color:#dfd9c9 !important; color:#000 !important; }
+#subHeaderRow th[data-group="dbox"] { background:#d9e3ec !important; background-color:#d9e3ec !important; color:#000 !important; }
+#subHeaderRow th[data-group="dresin"] { background:#c7d8ec !important; background-color:#c7d8ec !important; color:#000 !important; }
+
+/* 데이터 칸 - 박스 연한 / 합성 진한 - 엑셀 사진과 동일 */
+html body #inputScreen #inputTable tbody td.cb,
+html body #inputScreen #inputTable tbody td.cb30 { background:#ede9de !important; background-color:#ede9de !important; }
+html body #inputScreen #inputTable tbody td.cr,
+html body #inputScreen #inputTable tbody td.cr5 { background:#dfd9c9 !important; background-color:#dfd9c9 !important; }
+html body #inputScreen #inputTable tbody td.db,
+html body #inputScreen #inputTable tbody td.db30 { background:#d9e3ec !important; background-color:#d9e3ec !important; }
+html body #inputScreen #inputTable tbody td.dr,
+html body #inputScreen #inputTable tbody td.dr5 { background:#c7d8ec !important; background-color:#c7d8ec !important; }
+
+@media (prefers-color-scheme: dark) {
+  html body #inputScreen #inputTable thead th.group-sbox { background:#ede9de !important; background-color:#ede9de !important; }
+  html body #inputScreen #inputTable thead th.group-sresin { background:#dfd9c9 !important; background-color:#dfd9c9 !important; }
+  html body #inputScreen #inputTable thead th.group-dbox { background:#d9e3ec !important; background-color:#d9e3ec !important; }
+  html body #inputScreen #inputTable thead th.group-dresin { background:#c7d8ec !important; background-color:#c7d8ec !important; }
+  #subHeaderRow th[data-group="sbox"] { background:#ede9de !important; background-color:#ede9de !important; }
+  #subHeaderRow th[data-group="sresin"] { background:#dfd9c9 !important; background-color:#dfd9c9 !important; }
+  #subHeaderRow th[data-group="dbox"] { background:#d9e3ec !important; background-color:#d9e3ec !important; }
+  #subHeaderRow th[data-group="dresin"] { background:#c7d8ec !important; background-color:#c7d8ec !important; }
 }
 
 </style>
@@ -339,13 +408,12 @@ function renderSubHeader(){
   const tr=document.getElementById('subHeaderRow'); 
   const box=['4','12','30','50','63']; 
   const resin=['1','2','5','10','20']; 
-  // 엑셀 심플 - 흰바탕/검정글씨 + 그룹별 베이지/파랑
-  const base='font-size:12px;padding:6px 1px;border:1px solid #b5b5b5;border-bottom:2px solid #7a7a7a;font-weight:600;color:#000;'; 
+  const base='font-size:11px;padding:4px 1px;border-bottom:3px solid #999;font-weight:800;border-right:1px solid #444;'; 
   let html=''; 
-  box.forEach((s,i)=>{ html+='<th data-t="c" data-k="'+s+'L" data-group="sbox" style="top:28px;position:sticky;background:#efe9d6 !important;background-color:#efe9d6 !important;color:#000 !important;'+base+(i===0?'border-left:3px solid #7a7a7a;':'')+'">'+s+'</th>'; }); 
-  resin.forEach((s,i)=>{ html+='<th data-t="c" data-k="'+s+'L" data-group="sresin" style="top:28px;position:sticky;background:#efe9d6 !important;background-color:#efe9d6 !important;color:#000 !important;'+base+(i===0?'border-left:3px solid #7a7a7a;':'')+'">'+s+'</th>'; }); 
-  box.forEach((s,i)=>{ html+='<th data-t="d" data-k="'+s+'L" data-group="dbox" style="top:28px;position:sticky;background:#d9e6f2 !important;background-color:#d9e6f2 !important;color:#000 !important;'+base+(i===0?'border-left:3px solid #7a7a7a;':'')+'">'+s+'</th>'; }); 
-  resin.forEach((s,i)=>{ html+='<th data-t="d" data-k="'+s+'L" data-group="dresin" style="top:28px;position:sticky;background:#d9e6f2 !important;background-color:#d9e6f2 !important;color:#000 !important;'+base+(i===0?'border-left:3px solid #7a7a7a;':'')+'">'+s+'</th>'; }); 
+  box.forEach((s,i)=>{ html+='<th data-t="c" data-k="'+s+'L" data-group="sbox" style="top:28px;position:sticky;background:#2a1500 !important;color:#ff6a00;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); 
+  resin.forEach((s,i)=>{ html+='<th data-t="c" data-k="'+s+'L" data-group="sresin" style="top:28px;position:sticky;background:#2a1010 !important;color:#ff3a30;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); 
+  box.forEach((s,i)=>{ html+='<th data-t="d" data-k="'+s+'L" data-group="dbox" style="top:28px;position:sticky;background:#00152a !important;color:#2e8cff;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); 
+  resin.forEach((s,i)=>{ html+='<th data-t="d" data-k="'+s+'L" data-group="dresin" style="top:28px;position:sticky;background:#002a24 !important;color:#00c2a8;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); 
   tr.innerHTML=html; 
 }
 window.openLoadCourseModal=async function(){ if(!courseList.length) await loadCourseList(); const el=document.getElementById('loadCourseList'); el.innerHTML=courseList.map(c=>`<div style="padding:12px;border-bottom:1px solid #444;cursor:pointer;display:flex;justify-content:space-between" onclick="loadCourse('${c.id}')"><span style="font-size:13px">${c.name}</span><span style="font-size:11px;color:#bbb">${c.clients.length}개</span></div>`).join(''); document.getElementById('loadCourseModal').classList.add('show'); };
@@ -592,5 +660,68 @@ function initInputScreen(){ return window.initInputScreen(); }
 <script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js', {scope: './'}).then(reg=>{ reg.update(); }).catch(()=>{}); }); }</script>
 <div id="pwaInstallBtn" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3D82F6;color:#fff;padding:12px 20px;border-radius:30px;box-shadow:0 4px 20px rgba(61,130,246,0.5);z-index:9999;cursor:pointer;font-weight:700;font-size:13px;align-items:center;gap:8px;" onclick="installPWA()"><span>📲</span> 앱으로 설치하기</div>
 <script>let deferredPrompt=null; window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; const btn=document.getElementById('pwaInstallBtn'); if(btn) btn.style.display='flex'; }); window.installPWA=async function(){ if(!deferredPrompt){ alert('이미 설치되었거나 브라우저가 설치를 지원하지 않아요.'); return; } deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; const btn=document.getElementById('pwaInstallBtn'); if(btn) btn.style.display='none'; }; window.addEventListener('appinstalled', ()=>{ const btn=document.getElementById('pwaInstallBtn'); if(btn) btn.style.display='none'; });</script>
+
+<script>
+// 삼성 인터넷 다크모드 강제 해제 - 인라인 스타일로 최종 덮어쓰기
+(function(){
+  function forceLight(){
+    var screen = document.getElementById('inputScreen');
+    if(!screen) return;
+    var table = document.getElementById('inputTable');
+    if(!table) return;
+    // inputScreen 자체
+    screen.style.setProperty('background', '#ffffff', 'important');
+    screen.style.setProperty('background-color', '#ffffff', 'important');
+    screen.style.setProperty('color-scheme', 'light', 'important');
+    // 모든 td에 대해 강제
+    var tds = table.querySelectorAll('td');
+    tds.forEach(function(td){
+      if(td.classList.contains('td-seq')){
+        td.style.setProperty('background', '#f2f2f2', 'important');
+        td.style.setProperty('background-color', '#f2f2f2', 'important');
+      } else if(td.classList.contains('td-name')){
+        td.style.setProperty('background', '#ffffff', 'important');
+        td.style.setProperty('background-color', '#ffffff', 'important');
+      } else if(td.classList.contains('cb') || td.classList.contains('cr') || td.classList.contains('cb30') || td.classList.contains('cr5')){
+        td.style.setProperty('background', '#f5f0db', 'important');
+        td.style.setProperty('background-color', '#f5f0db', 'important');
+      } else if(td.classList.contains('db') || td.classList.contains('dr') || td.classList.contains('db30') || td.classList.contains('dr5')){
+        td.style.setProperty('background', '#e2ecf7', 'important');
+        td.style.setProperty('background-color', '#e2ecf7', 'important');
+      } else {
+        td.style.setProperty('background', '#ffffff', 'important');
+        td.style.setProperty('background-color', '#ffffff', 'important');
+      }
+      td.style.setProperty('color', '#000000', 'important');
+    });
+    var inputs = table.querySelectorAll('input');
+    inputs.forEach(function(inp){
+      inp.style.setProperty('background', 'transparent', 'important');
+      inp.style.setProperty('background-color', 'transparent', 'important');
+      inp.style.setProperty('color', '#000000', 'important');
+      inp.style.setProperty('-webkit-text-fill-color', '#000000', 'important');
+    });
+  }
+  // 화면 전환될 때마다 강제
+  var origShow = window.showScreen;
+  window.showScreen = function(id, push){
+    if(origShow) origShow(id, push);
+    else {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      var t = document.getElementById(id); if(t) t.classList.add('active');
+    }
+    if(id==='inputScreen'){
+      setTimeout(forceLight, 50);
+      setTimeout(forceLight, 300);
+    }
+  };
+  // 주기적으로 체크 (삼성 다크모드가 뒤늦게 적용되는 경우)
+  setInterval(function(){
+    var s = document.getElementById('inputScreen');
+    if(s && s.classList.contains('active')) forceLight();
+  }, 1000);
+})();
+</script>
+
 </body>
 </html>
