@@ -481,35 +481,46 @@ html body #inputScreen #inputTable input[type=number] { background:transparent !
 #customKeypad .kp-btn.kp-num { background:#ffffff !important; }
 
 
-/* ===== 선택 표시 강화 + 깜빡이는 커서 ===== */
+/* ===== 선택 표시 강화 + 깜빡이는 커서 - 완전 수정 ===== */
 #inputTable input.custom-active {
   background:#fffbe6 !important;
   background-color:#fffbe6 !important;
-  border:2px solid #000 !important;
-  font-weight:800 !important;
+  border:3px solid #000 !important;
+  outline:3px solid #ffe600 !important;
+  outline-offset:-3px !important;
+  font-weight:900 !important;
   color:#000 !important;
   -webkit-text-fill-color:#000 !important;
-  box-shadow:0 0 0 2px #ffe600 !important;
+  box-shadow:inset 0 0 0 1px #000 !important;
   position:relative !important;
+  z-index:10 !important;
 }
 
-/* 선택된 셀 td에 깜빡이는 커서 표시 */
+/* 선택된 셀 td - overflow visible로 테두리 안 잘리게 */
 #inputTable td.kp-focused {
   position:relative !important;
+  overflow:visible !important;
+  z-index:5 !important;
+  background:#fffbe6 !important;
+  background-color:#fffbe6 !important;
+  outline:3px solid #000 !important;
+  outline-offset:-1px !important;
+  border:2px solid #000 !important;
 }
-#inputTable td.kp-focused::after {
-  content:'';
-  position:absolute;
-  right:6px;
-  top:50%;
-  transform:translateY(-50%);
-  width:2px;
-  height:20px;
+
+/* 깜빡이는 커서 - input 위에 뜨는 가짜 커서 */
+#fakeCursor {
+  position:fixed;
+  width:3px;
+  height:22px;
   background:#000;
   animation:kp-blink 1s step-start infinite;
-  z-index:5;
+  z-index:10000;
   pointer-events:none;
+  display:none;
 }
+#fakeCursor.show { display:block; }
+
 @keyframes kp-blink {
   0%, 50% { opacity:1; }
   51%, 100% { opacity:0; }
@@ -523,10 +534,27 @@ html body #inputScreen #inputTable input[type=number] { background:transparent !
 #inputTable tbody td.db.custom-parent,
 #inputTable tbody td.dr.custom-parent,
 #inputTable tbody td.db30.custom-parent,
-#inputTable tbody td.dr5.custom-parent {
+#inputTable tbody td.dr5.custom-parent,
+#inputTable tbody td.custom-parent {
   background:#fffbe6 !important;
+  background-color:#fffbe6 !important;
+  outline:3px solid #000 !important;
+  outline-offset:-1px !important;
   border:2px solid #000 !important;
+  position:relative !important;
+  overflow:visible !important;
+  z-index:5 !important;
 }
+
+/* 진한 배경색(30L/5L)도 선택 시 노란색으로 덮어쓰기 - 특이성 높임 */
+html body #inputScreen #inputTable tbody td.cb30.custom-parent,
+html body #inputScreen #inputTable tbody td.cr5.custom-parent,
+html body #inputScreen #inputTable tbody td.db30.custom-parent,
+html body #inputScreen #inputTable tbody td.dr5.custom-parent {
+  background:#fffbe6 !important;
+  background-color:#fffbe6 !important;
+}
+
 
 /* ===== 달력 흰바탕 검정글자 검정테두리 + 상단 버튼 4개 동일 모양 ===== */
 #inputScreen .date-inp,
@@ -580,6 +608,75 @@ html body #inputScreen #inputTable input[type=number] { background:transparent !
   opacity:1 !important;
 }
 
+
+/* ===== 최종 선택 표시 - 모든 이전 규칙 덮어쓰기 ===== */
+#inputTable tbody td.kp-focused,
+#inputTable tbody td.custom-parent,
+#inputTable tbody td.cb.kp-focused,
+#inputTable tbody td.cr.kp-focused,
+#inputTable tbody td.cb30.kp-focused,
+#inputTable tbody td.cr5.kp-focused,
+#inputTable tbody td.db.kp-focused,
+#inputTable tbody td.dr.kp-focused,
+#inputTable tbody td.db30.kp-focused,
+#inputTable tbody td.dr5.kp-focused,
+#inputTable tbody td.cb.custom-parent,
+#inputTable tbody td.cr.custom-parent,
+#inputTable tbody td.cb30.custom-parent,
+#inputTable tbody td.cr5.custom-parent,
+#inputTable tbody td.db.custom-parent,
+#inputTable tbody td.dr.custom-parent,
+#inputTable tbody td.db30.custom-parent,
+#inputTable tbody td.dr5.custom-parent {
+  background:#fffbe6 !important;
+  background-color:#fffbe6 !important;
+  border:2px solid #000000 !important;
+  box-shadow:0 0 0 2px #ffe600, inset 0 0 0 1px #fff !important;
+  position:relative !important;
+}
+
+#inputTable input.custom-active,
+#inputTable tbody td.kp-focused input,
+#inputTable tbody td.custom-parent input,
+#inputTable input.custom-active[type="text"],
+#inputTable input.custom-active[type="number"] {
+  background:#fffbe6 !important;
+  background-color:#fffbe6 !important;
+  border:2px solid #000000 !important;
+  color:#000000 !important;
+  -webkit-text-fill-color:#000000 !important;
+  font-weight:800 !important;
+  font-size:14px !important;
+  box-shadow:none !important;
+  z-index:2 !important;
+}
+
+/* 깜빡이는 커서 - td 안에 가상 커서 */
+#inputTable td.kp-focused::after {
+  content:'';
+  position:absolute !important;
+  right:8px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+  width:3px !important;
+  height:24px !important;
+  background:#000000 !important;
+  animation:kp-blink 1s step-start infinite !important;
+  z-index:10 !important;
+  pointer-events:none !important;
+  display:block !important;
+}
+
+/* 포커스된 셀에 커서 텍스트도 추가 - 값이 있으면 끝에 */
+#inputTable td.kp-focused input.custom-active {
+  padding-right:16px !important;
+}
+
+@keyframes kp-blink {
+  0%, 50% { opacity:1; }
+  51%, 100% { opacity:0; }
+}
+
 </style>
 </head>
 <body>
@@ -624,6 +721,7 @@ html body #inputScreen #inputTable input[type=number] { background:transparent !
     <button class="kp-btn kp-nav" onclick="kpNext()">다음 ▶</button>
   </div>
 </div>
+<div id="fakeCursor"></div>
 </div>
 <div class="screen" id="historyScreen"><div class="hdr"><div class="hdr-left"><button class="back-btn" onclick="goBackFromInput()">← 뒤로</button><div class="hdr-title">이전 데이터</div></div></div><div style="background:#111;border-bottom:1px solid #444;padding:10px 12px;display:flex;flex-direction:column;gap:8px;flex-shrink:0"><div style="display:flex;gap:6px;align-items:center"><input type="date" id="histFrom" class="date-inp" style="flex:1"><span style="color:#666">~</span><input type="date" id="histTo" class="date-inp" style="flex:1"></div><div style="display:flex;gap:6px;align-items:center"><div id="histCarBadge" style="display:none;flex:1;background:#1e1e2a;border:1px solid #444;border-radius:8px;padding:8px 12px;font-size:13px;color:#60A5FA;font-weight:600"></div><select id="histCar" class="date-inp" style="flex:1"></select><button class="btn btn-primary btn-sm" style="padding:8px 16px" onclick="loadHistoryList()">조회</button></div><div id="histSummary" style="font-size:11px;color:#888"></div></div><div class="scroll" id="historyWrap" style="padding:12px;flex:1"><div style="text-align:center;color:#888;padding:20px">조회 버튼을 눌러주세요</div></div></div>
 <div class="screen" id="histDetailScreen"><div class="hdr"><div class="hdr-left"><button class="back-btn" onclick="showScreen('historyScreen')">← 뒤로</button><div class="hdr-title" id="histDetailTitle">상세 보기</div></div><button class="btn btn-secondary btn-sm" onclick="editHistDetail()">편집</button></div><div class="scroll" id="histDetailWrap" style="padding:12px;flex:1"></div></div>
@@ -824,6 +922,8 @@ window.openKeypad = function(el, idx, clientName, sizeLabel){
 window.closeKeypad = function(){
   document.getElementById('customKeypad').classList.remove('show');
   document.getElementById('inputScreen').classList.remove('kp-open');
+  var fc=document.getElementById('fakeCursor');
+  if(fc) fc.classList.remove('show');
   if(kpActiveInput){
     kpActiveInput.classList.remove('custom-active');
     if(kpActiveInput.parentElement){
@@ -841,20 +941,22 @@ window.kpPress = function(digit){
   if(!kpActiveInput) return;
   var cur = kpActiveInput.value || '';
   var next = cur + digit;
-  // 0으로 시작하는 경우 정리
   if(next.length>1 && next[0]==='0' && !next.startsWith('00')){
-    // 0으로 시작하면 제거 (00은 허용 안함, 그냥 0 유지)
     if(next.startsWith('0') && digit!=='0'){
       next = digit;
     }
   }
-  // 3자리 제한, 999 제한
   if(next.length>3) next = next.slice(0,3);
   if(parseInt(next)>999) next = '999';
-  // 빈문자열이면 0으로
   if(next==='00' || next==='000') next='0';
   kpActiveInput.value = next;
-  // kpValue 헤더 제거됨
+  // 커서 위치 업데이트
+  var fc=document.getElementById('fakeCursor');
+  if(fc && kpActiveInput){
+    var rect=kpActiveInput.getBoundingClientRect();
+    var textWidth = next.length * 8;
+    fc.style.left = (rect.left + Math.min(rect.width-8, 12 + textWidth)) + 'px';
+  }
   saveInputs();
   updateTotal();
 };
@@ -866,7 +968,12 @@ window.kpDelete = function(){
     cur = cur.slice(0,-1);
   }
   kpActiveInput.value = cur;
-  // kpValue 헤더 제거됨
+  var fc=document.getElementById('fakeCursor');
+  if(fc && kpActiveInput){
+    var rect=kpActiveInput.getBoundingClientRect();
+    var textWidth = cur.length * 8;
+    fc.style.left = (rect.left + Math.min(rect.width-8, 12 + textWidth)) + 'px';
+  }
   saveInputs();
   updateTotal();
 };
