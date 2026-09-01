@@ -592,14 +592,14 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
 }
 
 
-/* ===== 최종 선택 표시 + 깜빡이는 커서 - 확실하게 ===== */
+/* ===== 최종 선택 표시 - 테두리만, 커서 없음 ===== */
 #inputTable tbody td.kp-focused,
 #inputTable tbody td.custom-parent {
   background:#fffbe6 !important;
   background-color:#fffbe6 !important;
   border:2px solid #000 !important;
-  outline:3px solid #ffe600 !important;
-  outline-offset:-2px !important;
+  outline:none !important;
+  box-shadow:0 0 0 2px #000 !important;
   position:relative !important;
   overflow:visible !important;
   z-index:10 !important;
@@ -619,27 +619,10 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
   line-height:46px !important;
 }
 
-/* 깜빡이는 커서 - 글자 크기에 맞춤 */
-#fakeCursor {
-  position:fixed;
-  width:2px;
-  height:18px;
-  background:#000;
-  animation:kp-blink 1s step-start infinite;
-  z-index:99999;
-  pointer-events:none;
-  display:none;
-  border-radius:1px;
-}
-#fakeCursor.show { display:block !important; }
-
-@keyframes kp-blink {
-  0%, 50% { opacity:1; }
-  51%, 100% { opacity:0; }
-}
-
-/* 커서 중복 방지 - ::before 제거, fakeCursor만 사용 */
+/* 커서 제거 - 테두리만 표시 */ 
+#fakeCursor { display:none !important; }
 #inputTable td.kp-focused::before { display:none !important; }
+#inputTable td.kp-focused::after { display:none !important; }
 
 /* 달력 흰바탕 검정글자 */
 #inputScreen .date-inp {
@@ -689,11 +672,11 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
     <button class="kp-btn kp-del" onclick="kpDelete()">⌫</button>
     <button class="kp-btn kp-clear" onclick="kpClear()">C</button>
     <button class="kp-btn kp-num" onclick="kpPress('0')">0</button>
-    <button class="kp-btn kp-num" onclick="kpPress('.')">.</button>
-    <button class="kp-btn kp-nav" onclick="kpNext()">다음 ▶</button>
+    <button class="kp-btn kp-nav" onclick="kpPrev()">◀</button>
+    <button class="kp-btn kp-nav" onclick="kpNext()">▶</button>
   </div>
 </div>
-<div id="fakeCursor"></div>
+<div id="fakeCursor" style="display:none !important;"></div>
 </div>
 <div class="screen" id="historyScreen"><div class="hdr"><div class="hdr-left"><button class="back-btn" onclick="goBackFromInput()">← 뒤로</button><div class="hdr-title">이전 데이터</div></div></div><div style="background:#111;border-bottom:1px solid #444;padding:10px 12px;display:flex;flex-direction:column;gap:8px;flex-shrink:0"><div style="display:flex;gap:6px;align-items:center"><input type="date" id="histFrom" class="date-inp" style="flex:1"><span style="color:#666">~</span><input type="date" id="histTo" class="date-inp" style="flex:1"></div><div style="display:flex;gap:6px;align-items:center"><div id="histCarBadge" style="display:none;flex:1;background:#1e1e2a;border:1px solid #444;border-radius:8px;padding:8px 12px;font-size:13px;color:#60A5FA;font-weight:600"></div><select id="histCar" class="date-inp" style="flex:1"></select><button class="btn btn-primary btn-sm" style="padding:8px 16px" onclick="loadHistoryList()">조회</button></div><div id="histSummary" style="font-size:11px;color:#888"></div></div><div class="scroll" id="historyWrap" style="padding:12px;flex:1"><div style="text-align:center;color:#888;padding:20px">조회 버튼을 눌러주세요</div></div></div>
 <div class="screen" id="histDetailScreen"><div class="hdr"><div class="hdr-left"><button class="back-btn" onclick="showScreen('historyScreen')">← 뒤로</button><div class="hdr-title" id="histDetailTitle">상세 보기</div></div><button class="btn btn-secondary btn-sm" onclick="editHistDetail()">편집</button></div><div class="scroll" id="histDetailWrap" style="padding:12px;flex:1"></div></div>
@@ -896,78 +879,48 @@ window.openKeypad = function(el, idx, clientName, sizeLabel){
 window.closeKeypad = function(){
   document.getElementById('customKeypad').classList.remove('show');
   document.getElementById('inputScreen').classList.remove('kp-open');
-  var fc=document.getElementById('fakeCursor');
-  if(fc) fc.classList.remove('show');
   if(kpActiveInput){
     kpActiveInput.classList.remove('custom-active');
-    if(kpActiveInput.parentElement){
-      kpActiveInput.parentElement.classList.remove('kp-focused','custom-parent');
-    }
+    if(kpActiveInput.parentElement) kpActiveInput.parentElement.classList.remove('kp-focused','custom-parent');
   }
   document.querySelectorAll('#inputTable td.kp-focused').forEach(td=>td.classList.remove('kp-focused','custom-parent'));
-  kpActiveInput=null;
-  kpActiveIdx=-1;
-  saveInputs();
-  updateTotal();
-};
-
-window.kpPress = function(digit){
-  if(!kpActiveInput) return;
-  if(navigator.vibrate) navigator.vibrate(20);
-  var cur=kpActiveInput.value||'';
-  var next=cur+digit;
-  if(digit==='.'){
-    if(cur.includes('.')) return;
-    if(cur==='') next='0.';
-  } else {
-    if(next.length>1 && next[0]==='0' && next[1]!=='.' && digit!=='0'){ next=digit; }
-  }
-  // 4자리 + 소수점 포함 5자리까지 (예: 9999, 99.99, 999.9, 999.99는 5자리 초과라 안됨 -> 5자리까지 허용)
-  // 소수점 포함 5자리: 9999(4) / 99.99(5) / 999.9(5) / 9999.(5) -> 5자리까지
-  if(next.includes('.')){
-    if(next.length>5) next=next.slice(0,5);
-  } else {
-    if(next.length>4) next=next.slice(0,4);
-  }
-  if(!next.includes('.') && parseInt(next)>9999) next='9999';
-  if(next==='00'||next==='000'||next==='0000') next='0';
-  kpActiveInput.value=next;
-  var fc=document.getElementById('fakeCursor');
-  if(fc && kpActiveInput){
-    var rect=kpActiveInput.getBoundingClientRect();
-    var offset=12+next.length*8;
-    if(offset>rect.width-6) offset=rect.width-6;
-    fc.style.left=(rect.left+offset)+'px';
-  }
+  kpActiveInput=null; kpActiveIdx=-1;
   saveInputs(); updateTotal();
 };
 
 window.kpDelete = function(){
   if(!kpActiveInput) return;
-  if(navigator.vibrate) navigator.vibrate(20);
+  if(navigator.vibrate) navigator.vibrate(15);
   var cur=kpActiveInput.value||'';
   if(cur.length>0) cur=cur.slice(0,-1);
   kpActiveInput.value=cur;
-  var fc=document.getElementById('fakeCursor');
-  if(fc && kpActiveInput){
-    var rect=kpActiveInput.getBoundingClientRect();
-    var offset=12+cur.length*8;
-    if(offset>rect.width-6) offset=rect.width-6;
-    fc.style.left=(rect.left+offset)+'px';
-  }
   saveInputs(); updateTotal();
 };
 
 window.kpClear = function(){
   if(!kpActiveInput) return;
-  if(navigator.vibrate) navigator.vibrate(30);
+  if(navigator.vibrate) navigator.vibrate(25);
   kpActiveInput.value='';
-  var fc=document.getElementById('fakeCursor');
-  if(fc && kpActiveInput){
-    var rect=kpActiveInput.getBoundingClientRect();
-    fc.style.left=(rect.left+12)+'px';
-  }
   saveInputs(); updateTotal();
+};
+
+window.kpPrev = function(){
+  if(!kpActiveInput) return;
+  if(navigator.vibrate) navigator.vibrate(15);
+  var allInputs = Array.from(document.querySelectorAll('#inputBody input'));
+  var idx = allInputs.indexOf(kpActiveInput);
+  if(idx>0){
+    var target = allInputs[idx-1];
+    var cIdx = parseInt(target.getAttribute('data-idx'));
+    var cName = inputClients[cIdx]||'';
+    var colPos = (idx-1) % 20;
+    var group='';
+    if(colPos<5) group='수거 박스';
+    else if(colPos<10) group='수거 합성';
+    else if(colPos<15) group='납품 박스';
+    else group='납품 합성';
+    openKeypad(target, cIdx, cName, group + ' ' + target.getAttribute('data-k'));
+  }
 };
 
 window.kpMove = function(dir){
