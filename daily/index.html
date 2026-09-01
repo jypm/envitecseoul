@@ -37,13 +37,13 @@ html, body { height:100%; }
 .login-err { font-size:12px; color:#e74c3c; text-align:center; margin-top:8px; display:none; }
 
 
-#inputScreen { height:100vh; height:100dvh; height:100svh; overflow:hidden; display:none; flex-direction:column; position:relative; } #inputScreen.active { display:flex; }
-#inputScreen .hdr { position:fixed; top:0; left:0; right:0; z-index:50; background:#111; height:44px; }
+#inputScreen { height:100vh; height:100dvh; height:100svh; overflow:hidden; display:none; flex-direction:column; } #inputScreen.active { display:flex; }
+#inputScreen .hdr { position:sticky; top:0; z-index:30; background:#111; }
 #inputScreen .hdr-mid { display:flex; gap:6px; align-items:center; flex:1; justify-content:center; }
-#inputScreen .top-bar { position:fixed; top:44px; left:0; right:0; z-index:49; overflow-x:auto; scrollbar-width:none; background:#151515; border-bottom:2px solid #555; padding:8px 10px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:nowrap; height:44px; }
+#inputScreen .top-bar { position:sticky; top:45px; z-index:29; overflow-x:auto; scrollbar-width:none; background:#151515; border-bottom:2px solid #555; padding:8px 10px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:nowrap; }
 #inputScreen .top-bar::-webkit-scrollbar { display:none; }
 .date-inp { background:#1a1a1a; border:1px solid #555; border-radius:8px; padding:5px 10px; color:#f0f0f5; font-size:12px; outline:none; color-scheme: dark; flex-shrink:0; }
-#inputScreen .table-wrap { position:fixed; top:88px; left:0; right:0; bottom:0; overflow:auto; -webkit-overflow-scrolling:touch; background:#080808; z-index:1; }
+#inputScreen .table-wrap { flex:1; min-height:0; overflow:auto; -webkit-overflow-scrolling:touch; position:relative; background:#080808; }
 table { border-collapse:separate; border-spacing:0; min-width:max-content; }
 thead { position:sticky; top:0; z-index:20; }
 thead th { position:sticky; top:0; background:#1a1a1a !important; z-index:15; padding:6px 2px; font-size:10px; color:#ddd; border-bottom:3px solid #777; border-right:1px solid #333; white-space:nowrap; text-align:center; font-weight:800; }
@@ -156,12 +156,12 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 
 /* ===== EXCEL SIMPLE OVERRIDE - 2026-09-01 - 6개 수정 통합 ===== */
 #inputScreen { background:#ffffff !important; }
-#inputScreen .hdr { background:#f3f3f3 !important; border-bottom:1px solid #000000 !important; position:fixed !important; top:0 !important; left:0 !important; right:0 !important; z-index:50 !important; height:44px !important; }
+#inputScreen .hdr { background:#f3f3f3 !important; border-bottom:1px solid #000000 !important; }
 #inputScreen .hdr .hdr-title { color:#000 !important; }
 #inputScreen .hdr .hdr-sub { color:#555 !important; }
 #inputScreen .hdr .back-btn { color:#000 !important; }
-#inputScreen .top-bar { background:#efefef !important; border-bottom:1px solid #000000 !important; position:fixed !important; top:44px !important; left:0 !important; right:0 !important; z-index:49 !important; height:44px !important; }
-#inputScreen .table-wrap { background:#ffffff !important; position:fixed !important; top:88px !important; left:0 !important; right:0 !important; bottom:0 !important; overflow:auto !important; z-index:1 !important; }
+#inputScreen .top-bar { background:#efefef !important; border-bottom:1px solid #000000 !important; }
+#inputScreen .table-wrap { background:#ffffff !important; }
 
 #inputTable { border-collapse:collapse !important; border-spacing:0 !important; table-layout:fixed !important; background:#ffffff !important; }
 
@@ -311,6 +311,96 @@ html body #inputScreen #inputTable input[type=number] { background:transparent !
 #inputTable thead th:not(.th-seq):not(.th-name) { width:42px !important; min-width:42px !important; max-width:42px !important; }
 #inputTable tbody td:not(.td-seq):not(.td-name) { width:42px !important; min-width:42px !important; max-width:42px !important; height:30px !important; }
 
+
+/* ===== 커스텀 숫자 키패드 - 시스템 키패드 대체 ===== */
+#customKeypad {
+  display:none;
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#ffffff;
+  border-top:2px solid #000000;
+  z-index:9999;
+  padding:0;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.2);
+  flex-direction:column;
+}
+#customKeypad.show { display:flex; }
+#customKeypad .kp-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:8px 12px;
+  background:#f3f3f3;
+  border-bottom:1px solid #000;
+  gap:8px;
+}
+#customKeypad .kp-info {
+  flex:1;
+  min-width:0;
+}
+#customKeypad .kp-client {
+  font-size:12px;
+  font-weight:700;
+  color:#000;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#customKeypad .kp-size {
+  font-size:11px;
+  color:#555;
+  margin-top:2px;
+}
+#customKeypad .kp-value {
+  font-size:20px;
+  font-weight:800;
+  color:#000;
+  background:#fff;
+  border:2px solid #000;
+  border-radius:6px;
+  padding:4px 12px;
+  min-width:80px;
+  text-align:center;
+}
+#customKeypad .kp-grid {
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:1px;
+  background:#000;
+  padding:1px;
+}
+#customKeypad .kp-btn {
+  background:#ffffff;
+  border:none;
+  padding:14px 4px;
+  font-size:18px;
+  font-weight:700;
+  color:#000;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  user-select:none;
+}
+#customKeypad .kp-btn:active { background:#e0e0e0; }
+#customKeypad .kp-btn.kp-num { background:#ffffff; }
+#customKeypad .kp-btn.kp-del { background:#ffe0e0; color:#c00; }
+#customKeypad .kp-btn.kp-clear { background:#fff3cd; color:#856404; font-size:14px; }
+#customKeypad .kp-btn.kp-done { background:#000; color:#fff; font-size:14px; }
+#customKeypad .kp-btn.kp-nav { background:#f0f0f0; font-size:14px; }
+
+/* 키패드 열렸을 때 테이블 여백 확보 */
+#inputScreen.kp-open .table-wrap { bottom:260px !important; }
+
+/* 입력칸 포커스 스타일 */
+#inputTable input.custom-active {
+  background:#fffbe6 !important;
+  border:2px solid #000 !important;
+  font-weight:800 !important;
+  box-shadow:0 0 0 2px #ffe600 !important;
+}
+
 </style>
 </head>
 <body>
@@ -334,6 +424,35 @@ html body #inputScreen #inputTable input[type=number] { background:transparent !
   <button class="btn-ghost" style="margin-left:auto;background:#ffffff !important;color:#000 !important;border:1.5px solid #666 !important;font-weight:700 !important" onclick="addExtraClient()">+ 거래처 추가</button>
 </div>
 <div class="table-wrap"><table id="inputTable"><thead><tr><th class="th-seq" rowspan="2">#</th><th class="th-name" rowspan="2">거래처</th><th class="group-sbox" colspan="5" style="border-left:4px solid #aaa">수거 박스</th><th class="group-sresin" colspan="5" style="border-left:4px solid #aaa">수거 합성</th><th class="group-dbox" colspan="5" style="border-left:4px solid #aaa">납품 박스</th><th class="group-dresin" colspan="5" style="border-left:4px solid #aaa">납품 합성</th></tr><tr id="subHeaderRow"></tr></thead><tbody id="inputBody"></tbody></table></div>
+<!-- 커스텀 숫자 키패드 -->
+<div id="customKeypad">
+  <div class="kp-header">
+    <div class="kp-info">
+      <div class="kp-client" id="kpClient">거래처</div>
+      <div class="kp-size" id="kpSize">수거 박스 20L</div>
+    </div>
+    <div class="kp-value" id="kpValue">0</div>
+    <button class="kp-btn kp-done" onclick="closeKeypad()" style="padding:8px 16px;border-radius:6px;">완료</button>
+  </div>
+  <div class="kp-grid">
+    <button class="kp-btn kp-num" onclick="kpPress('1')">1</button>
+    <button class="kp-btn kp-num" onclick="kpPress('2')">2</button>
+    <button class="kp-btn kp-num" onclick="kpPress('3')">3</button>
+    <button class="kp-btn kp-nav" onclick="kpMove(-1)">▲</button>
+    <button class="kp-btn kp-num" onclick="kpPress('4')">4</button>
+    <button class="kp-btn kp-num" onclick="kpPress('5')">5</button>
+    <button class="kp-btn kp-num" onclick="kpPress('6')">6</button>
+    <button class="kp-btn kp-nav" onclick="kpMove(1)">▼</button>
+    <button class="kp-btn kp-num" onclick="kpPress('7')">7</button>
+    <button class="kp-btn kp-num" onclick="kpPress('8')">8</button>
+    <button class="kp-btn kp-num" onclick="kpPress('9')">9</button>
+    <button class="kp-btn kp-del" onclick="kpDelete()">⌫</button>
+    <button class="kp-btn kp-clear" onclick="kpClear()">C</button>
+    <button class="kp-btn kp-num" onclick="kpPress('0')">0</button>
+    <button class="kp-btn kp-num" onclick="kpPress('00')">00</button>
+    <button class="kp-btn kp-nav" onclick="kpNext()">다음 ▶</button>
+  </div>
+</div>
 </div>
 <div class="screen" id="historyScreen"><div class="hdr"><div class="hdr-left"><button class="back-btn" onclick="showScreen('mainScreen')">← 뒤로</button><div class="hdr-title">이전 데이터</div></div></div><div style="background:#111;border-bottom:1px solid #444;padding:10px 12px;display:flex;flex-direction:column;gap:8px;flex-shrink:0"><div style="display:flex;gap:6px;align-items:center"><input type="date" id="histFrom" class="date-inp" style="flex:1"><span style="color:#666">~</span><input type="date" id="histTo" class="date-inp" style="flex:1"></div><div style="display:flex;gap:6px;align-items:center"><div id="histCarBadge" style="display:none;flex:1;background:#1e1e2a;border:1px solid #444;border-radius:8px;padding:8px 12px;font-size:13px;color:#60A5FA;font-weight:600"></div><select id="histCar" class="date-inp" style="flex:1"></select><button class="btn btn-primary btn-sm" style="padding:8px 16px" onclick="loadHistoryList()">조회</button></div><div id="histSummary" style="font-size:11px;color:#888"></div></div><div class="scroll" id="historyWrap" style="padding:12px;flex:1"><div style="text-align:center;color:#888;padding:20px">조회 버튼을 눌러주세요</div></div></div>
 <div class="screen" id="histDetailScreen"><div class="hdr"><div class="hdr-left"><button class="back-btn" onclick="showScreen('historyScreen')">← 뒤로</button><div class="hdr-title" id="histDetailTitle">상세 보기</div></div><button class="btn btn-secondary btn-sm" onclick="editHistDetail()">편집</button></div><div class="scroll" id="histDetailWrap" style="padding:12px;flex:1"></div></div>
@@ -445,6 +564,9 @@ async function loadMemoCache(){
   renderInputTable();
 }
 function saveInputs(){ inputClients.forEach((name,idx)=>{ const row=document.querySelector(`tr[data-idx="${idx}"]`); if(!row) return; if(!inputCache[idx]) inputCache[idx]={collect:{},deliver:{},memo:''}; else { if(!inputCache[idx].collect) inputCache[idx].collect={}; if(!inputCache[idx].deliver) inputCache[idx].deliver={}; if(typeof inputCache[idx].memo!=='string') inputCache[idx].memo=''; } SIZES.forEach(sz=>{ const c=row.querySelector(`[data-t="c"][data-k="${sz}"]`); const d=row.querySelector(`[data-t="d"][data-k="${sz}"]`); if(c) inputCache[idx].collect[sz]=c.value; if(d) inputCache[idx].deliver[sz]=d.value; }); }); }
+let kpActiveInput = null;
+let kpActiveIdx = -1;
+
 function renderInputTable(){
   const body=document.getElementById('inputBody');
   if(!inputClients.length){ body.innerHTML=`<tr><td colspan="22" style="padding:20px;text-align:center;color:#aaa">코스를 불러오거나 거래처를 추가하세요</td></tr>`; updateTotal(); return; }
@@ -456,16 +578,146 @@ function renderInputTable(){
     h+=`<td class="td-name" onclick="openMemo(${idx})"><div class="cn${hasPrev?' has-memo':''}">${name}</div>`;
     if(cache.memo){ h+=`<div class="today-memo">📝 ${cache.memo}</div>`; }
     h+=`</td>`;
-    BOX.forEach((sz,i)=>{ const v=cache.collect[sz]||''; const cls=(sz==='30L'?'cb30':'cb'); h+=`<td class="${cls}${i===0?' sep-strong':''}"><input type="number" data-t="c" data-k="${sz}" value="${v}" min="0" max="999" maxlength="3" oninput="limit3(this)"></td>`; });
-    RESIN.forEach((sz,i)=>{ const v=cache.collect[sz]||''; const cls=(sz==='5L'?'cr5':'cr'); h+=`<td class="${cls}${i===0?' sep-strong':''}"><input type="number" data-t="c" data-k="${sz}" value="${v}" min="0" max="999" maxlength="3" oninput="limit3(this)"></td>`; });
-    BOX.forEach((sz,i)=>{ const v=cache.deliver[sz]||''; const cls=(sz==='30L'?'db30':'db'); h+=`<td class="${cls}${i===0?' sep-strong':''}"><input type="number" data-t="d" data-k="${sz}" value="${v}" min="0" max="999" maxlength="3" oninput="limit3(this)"></td>`; });
-    RESIN.forEach((sz,i)=>{ const v=cache.deliver[sz]||''; const cls=(sz==='5L'?'dr5':'dr'); h+=`<td class="${cls}${i===0?' sep-strong':''}"><input type="number" data-t="d" data-k="${sz}" value="${v}" min="0" max="999" maxlength="3" oninput="limit3(this)"></td>`; });
+    BOX.forEach((sz,i)=>{ const v=cache.collect[sz]||''; const cls=(sz==='30L'?'cb30':'cb'); h+=`<td class="${cls}${i===0?' sep-strong':''}"><input type="text" inputmode="none" readonly data-t="c" data-k="${sz}" data-idx="${idx}" value="${v}" onclick="openKeypad(this, ${idx}, '${name}', '수거 박스 ${sz}')" onfocus="openKeypad(this, ${idx}, '${name}', '수거 박스 ${sz}')"></td>`; });
+    RESIN.forEach((sz,i)=>{ const v=cache.collect[sz]||''; const cls=(sz==='5L'?'cr5':'cr'); h+=`<td class="${cls}${i===0?' sep-strong':''}"><input type="text" inputmode="none" readonly data-t="c" data-k="${sz}" data-idx="${idx}" value="${v}" onclick="openKeypad(this, ${idx}, '${name}', '수거 합성 ${sz}')" onfocus="openKeypad(this, ${idx}, '${name}', '수거 합성 ${sz}')"></td>`; });
+    BOX.forEach((sz,i)=>{ const v=cache.deliver[sz]||''; const cls=(sz==='30L'?'db30':'db'); h+=`<td class="${cls}${i===0?' sep-strong':''}"><input type="text" inputmode="none" readonly data-t="d" data-k="${sz}" data-idx="${idx}" value="${v}" onclick="openKeypad(this, ${idx}, '${name}', '납품 박스 ${sz}')" onfocus="openKeypad(this, ${idx}, '${name}', '납품 박스 ${sz}')"></td>`; });
+    RESIN.forEach((sz,i)=>{ const v=cache.deliver[sz]||''; const cls=(sz==='5L'?'dr5':'dr'); h+=`<td class="${cls}${i===0?' sep-strong':''}"><input type="text" inputmode="none" readonly data-t="d" data-k="${sz}" data-idx="${idx}" value="${v}" onclick="openKeypad(this, ${idx}, '${name}', '납품 합성 ${sz}')" onfocus="openKeypad(this, ${idx}, '${name}', '납품 합성 ${sz}')"></td>`; });
     h+='</tr>';
   });
   body.innerHTML=h;
-  document.querySelectorAll('#inputBody input').forEach(inp=>{ inp.addEventListener('input', updateTotal); });
   updateTotal();
 }
+
+window.openKeypad = function(el, idx, clientName, sizeLabel){
+  kpActiveInput = el;
+  kpActiveIdx = idx;
+  // 기존 active 제거
+  document.querySelectorAll('#inputTable input.custom-active').forEach(i=>i.classList.remove('custom-active'));
+  el.classList.add('custom-active');
+  document.getElementById('kpClient').textContent = clientName;
+  document.getElementById('kpSize').textContent = sizeLabel;
+  document.getElementById('kpValue').textContent = el.value || '0';
+  document.getElementById('customKeypad').classList.add('show');
+  document.getElementById('inputScreen').classList.add('kp-open');
+  // 해당 칸이 키패드에 가려지지 않게 테이블 스크롤
+  setTimeout(()=>{
+    var wrap=document.querySelector('#inputScreen .table-wrap');
+    if(wrap){
+      var rect = el.getBoundingClientRect();
+      var wrapRect = wrap.getBoundingClientRect();
+      var keypadHeight = 260;
+      var visibleBottom = window.innerHeight - keypadHeight - 20;
+      if(rect.bottom > visibleBottom){
+        var diff = rect.bottom - visibleBottom + 60;
+        wrap.scrollBy({top: diff, behavior:'smooth'});
+      }
+    }
+  }, 50);
+};
+
+window.closeKeypad = function(){
+  document.getElementById('customKeypad').classList.remove('show');
+  document.getElementById('inputScreen').classList.remove('kp-open');
+  if(kpActiveInput){
+    kpActiveInput.classList.remove('custom-active');
+  }
+  kpActiveInput = null;
+  kpActiveIdx = -1;
+  saveInputs();
+  updateTotal();
+};
+
+window.kpPress = function(digit){
+  if(!kpActiveInput) return;
+  var cur = kpActiveInput.value || '';
+  var next = cur + digit;
+  // 0으로 시작하는 경우 정리
+  if(next.length>1 && next[0]==='0' && !next.startsWith('00')){
+    // 0으로 시작하면 제거 (00은 허용 안함, 그냥 0 유지)
+    if(next.startsWith('0') && digit!=='0'){
+      next = digit;
+    }
+  }
+  // 3자리 제한, 999 제한
+  if(next.length>3) next = next.slice(0,3);
+  if(parseInt(next)>999) next = '999';
+  // 빈문자열이면 0으로
+  if(next==='00' || next==='000') next='0';
+  kpActiveInput.value = next;
+  document.getElementById('kpValue').textContent = next || '0';
+  saveInputs();
+  updateTotal();
+};
+
+window.kpDelete = function(){
+  if(!kpActiveInput) return;
+  var cur = kpActiveInput.value || '';
+  if(cur.length>0){
+    cur = cur.slice(0,-1);
+  }
+  kpActiveInput.value = cur;
+  document.getElementById('kpValue').textContent = cur || '0';
+  saveInputs();
+  updateTotal();
+};
+
+window.kpClear = function(){
+  if(!kpActiveInput) return;
+  kpActiveInput.value = '';
+  document.getElementById('kpValue').textContent = '0';
+  saveInputs();
+  updateTotal();
+};
+
+window.kpMove = function(dir){
+  if(!kpActiveInput) return;
+  // dir: -1 위, 1 아래 (같은 열에서 위아래 거래처 이동)
+  var allInputs = Array.from(document.querySelectorAll('#inputBody input'));
+  var idx = allInputs.indexOf(kpActiveInput);
+  if(idx===-1) return;
+  var cols = 20; // 전체 열 수
+  var targetIdx = idx + dir * cols;
+  if(targetIdx>=0 && targetIdx < allInputs.length){
+    var target = allInputs[targetIdx];
+    var t = target.getAttribute('data-t');
+    var k = target.getAttribute('data-k');
+    var cIdx = parseInt(target.getAttribute('data-idx'));
+    var cName = inputClients[cIdx]||'';
+    var label = (t==='c' ? (k.includes('L') && (k.includes('20L')||k.includes('10L')||k.includes('5L')||k.includes('3L')||k.includes('1L') ? '' : '') ) : '') + '';
+    // 간단 라벨 재생성
+    var group = '';
+    var colPos = idx % cols;
+    if(colPos<5) group='수거 박스';
+    else if(colPos<10) group='수거 합성';
+    else if(colPos<15) group='납품 박스';
+    else group='납품 합성';
+    openKeypad(target, cIdx, cName, group + ' ' + k);
+  }
+};
+
+window.kpNext = function(){
+  if(!kpActiveInput) return;
+  var allInputs = Array.from(document.querySelectorAll('#inputBody input'));
+  var idx = allInputs.indexOf(kpActiveInput);
+  if(idx>=0 && idx < allInputs.length-1){
+    var target = allInputs[idx+1];
+    var t = target.getAttribute('data-t');
+    var k = target.getAttribute('data-k');
+    var cIdx = parseInt(target.getAttribute('data-idx'));
+    var cName = inputClients[cIdx]||'';
+    var colPos = (idx+1) % 20;
+    var group='';
+    if(colPos<5) group='수거 박스';
+    else if(colPos<10) group='수거 합성';
+    else if(colPos<15) group='납품 박스';
+    else group='납품 합성';
+    openKeypad(target, cIdx, cName, group + ' ' + k);
+  } else {
+    closeKeypad();
+  }
+};
+
+
 window.limit3=function(el){
   let v=el.value.replace(/[^0-9]/g,'');
   if(v.length>3) v=v.slice(0,3);
@@ -635,138 +887,27 @@ function initInputScreen(){ return window.initInputScreen(); }
 
 
 
-// 키패드 올라와도 고정 헤더 절대 안 올라가게 + 아래쪽 칸 터치 시 테이블 내부만 스크롤
+
+
+
+// 커스텀 키패드 사용으로 시스템 키패드 문제 완전 해결 - 더 이상 visualViewport 보정 불필요
 (function(){
-  function isInputScreenActive(){
-    var s=document.getElementById('inputScreen');
-    return s && s.classList.contains('active');
-  }
-  var lastVVHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-
-  function adjustForKeyboard(){
-    if(!isInputScreenActive()) return;
-    var vv = window.visualViewport;
-    var vh = vv ? vv.height : window.innerHeight;
-    var vw = vv ? vv.width : window.innerWidth;
-    var hdr=document.querySelector('#inputScreen .hdr');
-    var topbar=document.querySelector('#inputScreen .top-bar');
-    var wrap=document.querySelector('#inputScreen .table-wrap');
-    var inputScreen=document.getElementById('inputScreen');
-    
-    // 전체 화면 높이를 visualViewport 높이에 맞춤 (키보드 올라오면 줄어듦)
-    if(inputScreen){
-      inputScreen.style.height = vh + 'px';
-      inputScreen.style.minHeight = vh + 'px';
-    }
-    // 헤더는 무조건 top 0,44에 고정
-    if(hdr){
-      hdr.style.position='fixed';
-      hdr.style.top='0px';
-      hdr.style.left='0px';
-      hdr.style.right='0px';
-      hdr.style.transform='none';
-    }
-    if(topbar){
-      topbar.style.position='fixed';
-      topbar.style.top='44px';
-      topbar.style.left='0px';
-      topbar.style.right='0px';
-      topbar.style.transform='none';
-    }
-    // 테이블 랩 높이를 키보드 제외한 영역으로
-    if(wrap){
-      wrap.style.position='fixed';
-      wrap.style.top='88px';
-      wrap.style.left='0px';
-      wrap.style.right='0px';
-      wrap.style.bottom='0px';
-      wrap.style.height = (vh - 88) + 'px';
-      wrap.style.maxHeight = (vh - 88) + 'px';
-    }
-    lastVVHeight = vh;
-  }
-
-  // visualViewport 리사이즈 = 키패드 올라옴/내려감
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize', adjustForKeyboard);
-    window.visualViewport.addEventListener('scroll', function(){
-      // visualViewport scroll 시에도 헤더 고정
-      if(!isInputScreenActive()) return;
-      var hdr=document.querySelector('#inputScreen .hdr');
-      var topbar=document.querySelector('#inputScreen .top-bar');
-      if(hdr){ hdr.style.top='0px'; }
-      if(topbar){ topbar.style.top='44px'; }
-    });
-  }
-  window.addEventListener('resize', adjustForKeyboard);
-
-  // 인풋 포커스 시: 브라우저 기본 자동 스크롤 막고, 테이블 내부에서만 스크롤
-  document.addEventListener('focusin', function(e){
-    if(!isInputScreenActive()) return;
-    if(e.target && e.target.matches('#inputTable input')){
-      var wrap=document.querySelector('#inputScreen .table-wrap');
-      var hdr=document.querySelector('#inputScreen .hdr');
-      var topbar=document.querySelector('#inputScreen .top-bar');
-      
-      // 헤더 강제 고정 (브라우저가 밀어올려도 다시 내림)
-      if(hdr){ hdr.style.top='0px'; hdr.style.transform='none'; }
-      if(topbar){ topbar.style.top='44px'; topbar.style.transform='none'; }
-      
-      // 윈도우 스크롤을 0으로 강제 (전체 페이지가 위로 올라가는 것 방지)
-      window.scrollTo(0,0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-
-      setTimeout(function(){
-        window.scrollTo(0,0);
-        // 테이블 랩 내부에서만 해당 입력칸이 보이게 스크롤
-        if(wrap){
-          var rect = e.target.getBoundingClientRect();
-          var wrapRect = wrap.getBoundingClientRect();
-          // 입력칸이 wrap의 하단 40% 아래에 있으면 위로 스크롤
-          var visibleBottom = wrapRect.bottom - 20; // 키보드 바로 위 여유
-          if(rect.bottom > visibleBottom){
-            var diff = rect.bottom - visibleBottom + 80; // 80px 여유
-            wrap.scrollTop += diff;
-          }
-          // 입력칸이 헤더에 가려지면 아래로 스크롤
-          var visibleTop = wrapRect.top + 60; // 헤더+서브헤더 여유
-          if(rect.top < visibleTop){
-            var diff2 = visibleTop - rect.top + 20;
-            wrap.scrollTop -= diff2;
-          }
-        }
-        // 다시 한번 헤더 고정 확인
-        if(hdr){ hdr.style.top='0px'; }
-        if(topbar){ topbar.style.top='44px'; }
-      }, 50);
+  // 테이블 빈 공간 터치 시 키패드 닫기
+  document.addEventListener('click', function(e){
+    var kp=document.getElementById('customKeypad');
+    var tableWrap=document.querySelector('#inputScreen .table-wrap');
+    if(!kp || !kp.classList.contains('show')) return;
+    if(e.target.closest('#customKeypad')) return;
+    if(e.target.closest('#inputTable input')) return;
+    if(e.target.closest('.td-name')) return;
+    // 테이블 빈 공간이나 헤더 터치 시 키패드 닫기
+    if(e.target.closest('.table-wrap') && !e.target.closest('input')){
+      // 빈 공간 터치는 닫지 않고 유지 (입력칸만 아니면)
+      // closeKeypad();
     }
   });
-
-  // focusout 시에도 헤더 고정 유지
-  document.addEventListener('focusout', function(){
-    if(!isInputScreenActive()) return;
-    setTimeout(function(){
-      window.scrollTo(0,0);
-      adjustForKeyboard();
-    }, 100);
-  });
-
-  // 초기 및 화면 전환 시 한번 적용
-  var origShow = window.showScreen;
-  window.showScreen = function(id, push){
-    if(origShow) origShow(id, push);
-    else {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      var t = document.getElementById(id); if(t) t.classList.add('active');
-    }
-    if(id==='inputScreen'){
-      setTimeout(adjustForKeyboard, 50);
-      setTimeout(adjustForKeyboard, 300);
-      setTimeout(adjustForKeyboard, 600);
-    }
-  };
 })();
+
 
 </script>
 <script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js', {scope: './'}).then(reg=>{ reg.update(); }).catch(()=>{}); }); }</script>
