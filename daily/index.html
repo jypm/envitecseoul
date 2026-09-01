@@ -295,43 +295,17 @@ html body #inputScreen #inputTable input[type=number] { background:transparent !
 }
 
 /* 칸 크기 3자리 고정 - 재확인 */
-#inputTable thead th:not(.th-seq):not(.th-name) { width:42px !important; min-width:42px !important; max-width:42px !important; }
-#inputTable tbody td:not(.td-seq):not(.td-name) { width:42px !important; min-width:42px !important; max-width:42px !important; height:30px !important; }
 
-
-/* ===== 엑셀 두 톤 디테일 복원 - 박스 연한 / 합성 진한 ===== */
-/* 헤더 그룹 - 박스 연한, 합성 진한 */
-html body #inputScreen #inputTable thead th.group-sbox { background:#ede9de !important; background-color:#ede9de !important; color:#000 !important; }
-html body #inputScreen #inputTable thead th.group-sresin { background:#dfd9c9 !important; background-color:#dfd9c9 !important; color:#000 !important; }
-html body #inputScreen #inputTable thead th.group-dbox { background:#d9e3ec !important; background-color:#d9e3ec !important; color:#000 !important; }
-html body #inputScreen #inputTable thead th.group-dresin { background:#c7d8ec !important; background-color:#c7d8ec !important; color:#000 !important; }
-
-/* 서브헤더 숫자 - 박스 연한 / 합성 진한 */
-#subHeaderRow th[data-group="sbox"] { background:#ede9de !important; background-color:#ede9de !important; color:#000 !important; }
-#subHeaderRow th[data-group="sresin"] { background:#dfd9c9 !important; background-color:#dfd9c9 !important; color:#000 !important; }
-#subHeaderRow th[data-group="dbox"] { background:#d9e3ec !important; background-color:#d9e3ec !important; color:#000 !important; }
-#subHeaderRow th[data-group="dresin"] { background:#c7d8ec !important; background-color:#c7d8ec !important; color:#000 !important; }
-
-/* 데이터 칸 - 박스 연한 / 합성 진한 - 엑셀 사진과 동일 */
-html body #inputScreen #inputTable tbody td.cb,
-html body #inputScreen #inputTable tbody td.cb30 { background:#ede9de !important; background-color:#ede9de !important; }
-html body #inputScreen #inputTable tbody td.cr,
-html body #inputScreen #inputTable tbody td.cr5 { background:#dfd9c9 !important; background-color:#dfd9c9 !important; }
-html body #inputScreen #inputTable tbody td.db,
-html body #inputScreen #inputTable tbody td.db30 { background:#d9e3ec !important; background-color:#d9e3ec !important; }
-html body #inputScreen #inputTable tbody td.dr,
-html body #inputScreen #inputTable tbody td.dr5 { background:#c7d8ec !important; background-color:#c7d8ec !important; }
-
-@media (prefers-color-scheme: dark) {
-  html body #inputScreen #inputTable thead th.group-sbox { background:#ede9de !important; background-color:#ede9de !important; }
-  html body #inputScreen #inputTable thead th.group-sresin { background:#dfd9c9 !important; background-color:#dfd9c9 !important; }
-  html body #inputScreen #inputTable thead th.group-dbox { background:#d9e3ec !important; background-color:#d9e3ec !important; }
-  html body #inputScreen #inputTable thead th.group-dresin { background:#c7d8ec !important; background-color:#c7d8ec !important; }
-  #subHeaderRow th[data-group="sbox"] { background:#ede9de !important; background-color:#ede9de !important; }
-  #subHeaderRow th[data-group="sresin"] { background:#dfd9c9 !important; background-color:#dfd9c9 !important; }
-  #subHeaderRow th[data-group="dbox"] { background:#d9e3ec !important; background-color:#d9e3ec !important; }
-  #subHeaderRow th[data-group="dresin"] { background:#c7d8ec !important; background-color:#c7d8ec !important; }
-}
+/* ===== 칸 크기 초소형 - 숫자 3자리 딱 맞게 ===== */
+#inputTable { table-layout: fixed !important; }
+#inputTable thead th:not(.th-seq):not(.th-name) { width:30px !important; min-width:30px !important; max-width:30px !important; padding:4px 0 !important; font-size:10px !important; }
+#inputTable tbody td:not(.td-seq):not(.td-name) { width:30px !important; min-width:30px !important; max-width:30px !important; height:24px !important; padding:0 !important; }
+#inputTable input[type=number] { width:28px !important; min-width:28px !important; max-width:28px !important; height:22px !important; line-height:22px !important; font-size:11px !important; letter-spacing:0 !important; padding:0 !important; margin:0 auto !important; display:block !important; }
+#inputTable thead th.th-seq { width:24px !important; min-width:24px !important; max-width:24px !important; }
+#inputTable tbody td.td-seq { width:24px !important; min-width:24px !important; max-width:24px !important; font-size:10px !important; }
+#inputTable thead th.th-name { width:110px !important; min-width:110px !important; max-width:110px !important; }
+#inputTable tbody td.td-name { width:110px !important; min-width:110px !important; max-width:110px !important; }
+#subHeaderRow th { width:30px !important; min-width:30px !important; max-width:30px !important; font-size:10px !important; padding:4px 0 !important; }
 
 </style>
 </head>
