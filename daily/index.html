@@ -152,6 +152,71 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 #historyScreen .scroll { flex:1; overflow-y:auto; padding:12px; min-height:0; } .hist-item { background:#111; border:1px solid #555; border-radius:10px; padding:12px 14px; margin-bottom:6px; display:flex; align-items:center; gap:10px; cursor:pointer; }
 .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; justify-content:center; align-items:center; } .modal-bg.show { display:flex; } .modal { background:#111; border:1px solid #555; border-radius:16px; padding:20px; width:90%; max-width:360px; position:relative; } .modal-close { position:absolute; top:12px; right:14px; background:none; border:none; color:#bbb; font-size:20px; cursor:pointer; } .modal h3 { font-size:15px; margin-bottom:14px; } .modal textarea { width:100%; background:#1a1a1a; border:1px solid #555; border-radius:8px; padding:10px; color:#f0f0f5; font-size:14px; resize:none; outline:none; }
 .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1e1e2e; border:1px solid #666; border-radius:10px; padding:10px 20px; font-size:13px; z-index:200; display:none; white-space:nowrap; } .toast.show { display:block; }
+
+/* ===== EXCEL SIMPLE OVERRIDE - 2026-09-01 - 기존 틀 유지, 흰바탕 엑셀 ===== */
+#inputScreen { background:#ffffff !important; }
+#inputScreen .hdr { background:#f3f3f3 !important; border-bottom:2px solid #a0a0a0 !important; }
+#inputScreen .hdr .hdr-title { color:#000 !important; }
+#inputScreen .hdr .hdr-sub { color:#555 !important; }
+#inputScreen .hdr .back-btn { color:#000 !important; }
+#inputScreen .top-bar { background:#efefef !important; border-bottom:2px solid #a0a0a0 !important; }
+#inputScreen .table-wrap { background:#ffffff !important; }
+
+#inputTable { border-collapse:collapse !important; border-spacing:0 !important; table-layout:fixed !important; background:#ffffff !important; }
+#inputTable thead th { background:#f2f2f2 !important; color:#000 !important; border:1px solid #b5b5b5 !important; border-bottom:2px solid #7a7a7a !important; font-weight:600 !important; font-size:11px !important; padding:6px 2px !important; }
+#inputTable thead th.th-seq { background:#f2f2f2 !important; color:#000 !important; border-right:2px solid #7a7a7a !important; left:0 !important; z-index:26 !important; width:28px !important; min-width:28px !important; max-width:28px !important; }
+#inputTable thead th.th-name { background:#f2f2f2 !important; color:#000 !important; border-right:2px solid #7a7a7a !important; left:28px !important; z-index:25 !important; min-width:110px !important; max-width:110px !important; width:110px !important; }
+
+#inputTable thead tr:first-child th.group-sbox,
+#inputTable thead tr:first-child th.group-sresin { background:#e7e2cc !important; color:#000 !important; border-left:3px solid #7a7a7a !important; border-bottom:1px solid #b5b5b5 !important; }
+#inputTable thead tr:first-child th.group-dbox,
+#inputTable thead tr:first-child th.group-dresin { background:#d2deef !important; color:#000 !important; border-left:3px solid #7a7a7a !important; border-bottom:1px solid #b5b5b5 !important; }
+
+/* 서브헤더 - 사진 색상 그대로 */
+#subHeaderRow th { background:#ffffff !important; color:#000 !important; border:1px solid #b5b5b5 !important; border-bottom:2px solid #7a7a7a !important; font-size:11px !important; top:30px !important; }
+#subHeaderRow th[data-group="sbox"],
+#subHeaderRow th[data-group="sresin"] { background:#efe9d6 !important; color:#000 !important; }
+#subHeaderRow th[data-group="dbox"],
+#subHeaderRow th[data-group="dresin"] { background:#d9e6f2 !important; color:#000 !important; }
+#subHeaderRow th[data-group="sbox"]:first-child,
+#subHeaderRow th[data-group="dbox"]:first-child { border-left:3px solid #7a7a7a !important; }
+
+/* 바디 */
+#inputTable tbody td { background:#ffffff !important; border:1px solid #d4d4d4 !important; height:28px !important; padding:0 !important; }
+#inputTable tbody tr { height:28px !important; }
+#inputTable tbody td.td-seq { background:#f2f2f2 !important; color:#000 !important; border-right:2px solid #7a7a7a !important; left:0 !important; width:28px !important; min-width:28px !important; max-width:28px !important; font-size:11px !important; text-align:center !important; }
+#inputTable tbody td.td-name { background:#ffffff !important; color:#000 !important; border-right:2px solid #7a7a7a !important; left:28px !important; min-width:110px !important; max-width:110px !important; width:110px !important; padding:3px 6px !important; }
+#inputTable tbody td.td-name .cn { color:#000 !important; font-size:11px !important; font-weight:500 !important; }
+#inputTable tbody td.td-name .cn.has-memo { color:#0b5d1e !important; font-weight:700 !important; }
+#inputTable tbody td.td-name .today-memo { color:#1a7f37 !important; font-size:9px !important; }
+
+/* 수거 = 베이지 / 납품 = 연파랑 - 사진이랑 동일 */
+#inputTable tbody td.cb,
+#inputTable tbody td.cr,
+#inputTable tbody td.cb30,
+#inputTable tbody td.cr5 { background:#f5f0db !important; }
+#inputTable tbody td.db,
+#inputTable tbody td.dr,
+#inputTable tbody td.db30,
+#inputTable tbody td.dr5 { background:#e2ecf7 !important; }
+
+#inputTable tbody td.sep,
+#inputTable tbody td.sep-strong { border-left:3px solid #7a7a7a !important; }
+
+/* 인풋 - 엑셀처럼 투명하고 셀 가득 */
+#inputTable input[type=number] { width:100% !important; height:26px !important; background:transparent !important; border:none !important; border-radius:0 !important; color:#000 !important; -webkit-text-fill-color:#000 !important; font-weight:500 !important; font-size:12px !important; text-align:center !important; box-shadow:none !important; padding:0 !important; }
+
+/* 포커스 - 엑셀 선택 테두리 */
+#inputTable input[type=number]:focus { background:#ffffff !important; border:2px solid #000 !important; outline:none !important; font-weight:700 !important; }
+
+/* 십자 하이라이트 심플하게 - 흰바탕이라 연하게 */
+#inputTable tbody tr.hl-row td { background:#fffbe6 !important; }
+#inputTable tbody tr.hl-row td.td-seq { background:#ffe680 !important; }
+#inputTable tbody tr.hl-row td.td-name { background:#fff8cc !important; }
+#inputTable td.hl-col { background:#fff3a0 !important; border:1px solid #000 !important; }
+#inputTable th.hl-col-head { background:#000 !important; color:#fff !important; }
+#inputTable input.hl-active { background:#fff !important; border:2px solid #000 !important; color:#000 !important; }
+
 </style>
 </head>
 <body>
