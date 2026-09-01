@@ -76,7 +76,7 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
   background:#ffffff !important; 
   color:#000 !important; 
   -webkit-text-fill-color:#000 !important;
-  font-weight:900 !important;
+  font-weight:500 !important;
   font-size:14px !important;
   box-shadow:0 0 0 4px rgba(61,130,246,0.5), 0 0 24px rgba(61,130,246,0.9), inset 0 0 0 1px #fff !important; 
   transform:scale(1.22) !important; 
@@ -107,7 +107,7 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
   color:#000 !important; 
   border:3px solid #000 !important; 
   border-bottom:5px solid #000 !important; 
-  font-weight:900 !important; 
+  font-weight:500 !important; 
   font-size:13px !important; 
 }
 
@@ -139,7 +139,7 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
   background:#ffffff !important; 
   color:#000 !important; 
   -webkit-text-fill-color:#000 !important;
-  font-weight:800 !important;
+  font-weight:500 !important;
   font-size:14px !important;
   box-shadow:0 0 0 3px #fff, 0 0 12px rgba(255,255,255,0.8) !important; 
   transform:scale(1.15) !important; 
@@ -574,7 +574,7 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
   border:2px solid #000000 !important;
   color:#000000 !important;
   -webkit-text-fill-color:#000000 !important;
-  font-weight:800 !important;
+  font-weight:500 !important;
   font-size:14px !important;
   box-shadow:none !important;
   z-index:2 !important;
@@ -611,7 +611,7 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
   border:none !important;
   color:#000 !important;
   -webkit-text-fill-color:#000 !important;
-  font-weight:800 !important;
+  font-weight:500 !important;
   font-size:15px !important;
   text-align:center !important;
   position:relative !important;
@@ -913,24 +913,24 @@ window.closeKeypad = function(){
 
 window.kpPress = function(digit){
   if(!kpActiveInput) return;
+  if(navigator.vibrate) navigator.vibrate(20);
   var cur=kpActiveInput.value||'';
   var next=cur+digit;
-  // 점 처리
   if(digit==='.'){
-    if(cur.includes('.')) return; // 점은 한번만
+    if(cur.includes('.')) return;
     if(cur==='') next='0.';
   } else {
     if(next.length>1 && next[0]==='0' && next[1]!=='.' && digit!=='0'){ next=digit; }
   }
-  // 길이 제한: 점 포함 4자리까지 (예: 99.9)
-  if(next.length>4) {
-    // 점 있으면 4자리, 없으면 3자리
-    if(!next.includes('.')) next=next.slice(0,3);
-    else next=next.slice(0,4);
+  // 4자리 + 소수점 포함 5자리까지 (예: 9999, 99.99, 999.9, 999.99는 5자리 초과라 안됨 -> 5자리까지 허용)
+  // 소수점 포함 5자리: 9999(4) / 99.99(5) / 999.9(5) / 9999.(5) -> 5자리까지
+  if(next.includes('.')){
+    if(next.length>5) next=next.slice(0,5);
+  } else {
+    if(next.length>4) next=next.slice(0,4);
   }
-  // 점 없을 때만 999 제한
-  if(!next.includes('.') && parseInt(next)>999) next='999';
-  if(next==='00'||next==='000') next='0';
+  if(!next.includes('.') && parseInt(next)>9999) next='9999';
+  if(next==='00'||next==='000'||next==='0000') next='0';
   kpActiveInput.value=next;
   var fc=document.getElementById('fakeCursor');
   if(fc && kpActiveInput){
@@ -944,13 +944,14 @@ window.kpPress = function(digit){
 
 window.kpDelete = function(){
   if(!kpActiveInput) return;
+  if(navigator.vibrate) navigator.vibrate(20);
   var cur=kpActiveInput.value||'';
   if(cur.length>0) cur=cur.slice(0,-1);
   kpActiveInput.value=cur;
   var fc=document.getElementById('fakeCursor');
   if(fc && kpActiveInput){
     var rect=kpActiveInput.getBoundingClientRect();
-    var offset=12+cur.length*9;
+    var offset=12+cur.length*8;
     if(offset>rect.width-6) offset=rect.width-6;
     fc.style.left=(rect.left+offset)+'px';
   }
@@ -959,6 +960,7 @@ window.kpDelete = function(){
 
 window.kpClear = function(){
   if(!kpActiveInput) return;
+  if(navigator.vibrate) navigator.vibrate(30);
   kpActiveInput.value='';
   var fc=document.getElementById('fakeCursor');
   if(fc && kpActiveInput){
@@ -970,6 +972,7 @@ window.kpClear = function(){
 
 window.kpMove = function(dir){
   if(!kpActiveInput) return;
+  if(navigator.vibrate) navigator.vibrate(15);
   // dir: -1 위, 1 아래 (같은 열에서 위아래 거래처 이동)
   var allInputs = Array.from(document.querySelectorAll('#inputBody input'));
   var idx = allInputs.indexOf(kpActiveInput);
@@ -996,6 +999,7 @@ window.kpMove = function(dir){
 
 window.kpNext = function(){
   if(!kpActiveInput) return;
+  if(navigator.vibrate) navigator.vibrate(15);
   var allInputs = Array.from(document.querySelectorAll('#inputBody input'));
   var idx = allInputs.indexOf(kpActiveInput);
   if(idx>=0 && idx < allInputs.length-1){
@@ -1017,6 +1021,78 @@ window.kpNext = function(){
 };
 
 
+
+// 지우기 길게 누르면 주루룩 삭제 + 진동
+(function(){
+  var delBtn = null;
+  var delInterval = null;
+  var delTimeout = null;
+  
+  function startDelRepeat(){
+    delTimeout = setTimeout(()=>{
+      delInterval = setInterval(()=>{
+        if(kpActiveInput && kpActiveInput.value.length>0){
+          if(navigator.vibrate) navigator.vibrate(15);
+          window.kpDelete();
+        } else {
+          stopDelRepeat();
+        }
+      }, 80);
+    }, 400);
+  }
+  
+  function stopDelRepeat(){
+    if(delTimeout){ clearTimeout(delTimeout); delTimeout=null; }
+    if(delInterval){ clearInterval(delInterval); delInterval=null; }
+  }
+  
+  document.addEventListener('DOMContentLoaded', ()=>{
+    setupDelBtn();
+  });
+  
+  function setupDelBtn(){
+    var btn = document.querySelector('#customKeypad .kp-del');
+    if(!btn) return;
+    delBtn = btn;
+    btn.addEventListener('touchstart', (e)=>{
+      e.preventDefault();
+      startDelRepeat();
+    }, {passive:false});
+    btn.addEventListener('touchend', (e)=>{
+      e.preventDefault();
+      stopDelRepeat();
+    });
+    btn.addEventListener('touchcancel', stopDelRepeat);
+    btn.addEventListener('mousedown', startDelRepeat);
+    btn.addEventListener('mouseup', stopDelRepeat);
+    btn.addEventListener('mouseleave', stopDelRepeat);
+  }
+  
+  // 키패드가 나타날 때마다 다시 설정
+  var origOpen = window.openKeypad;
+  window.openKeypad = function(el, idx, name, size){
+    var result = origOpen ? origOpen.apply(this, arguments) : null;
+    setTimeout(setupDelBtn, 100);
+    return result;
+  };
+})();
+
+// 모든 키패드 버튼에 진동 추가
+(function(){
+  function addVibe(){
+    document.querySelectorAll('#customKeypad .kp-btn').forEach(btn=>{
+      if(btn._vibeAdded) return;
+      btn._vibeAdded = true;
+      btn.addEventListener('touchstart', ()=>{
+        if(navigator.vibrate && !btn.classList.contains('kp-del')) navigator.vibrate(15);
+      }, {passive:true});
+    });
+  }
+  document.addEventListener('touchstart', addVibe, {once:true});
+  setInterval(addVibe, 1000);
+})();
+
+
 window.limit3=function(el){
   let v=el.value.replace(/[^0-9]/g,'');
   if(v.length>3) v=v.slice(0,3);
@@ -1024,7 +1100,7 @@ window.limit3=function(el){
   el.value=v;
   updateTotal();
 }
-function updateTotal(){ let t=0; document.querySelectorAll('#inputBody input[data-t="c"]').forEach(inp=>{ t+=parseInt(inp.value)||0; }); const el=document.getElementById('totalCollectBadge'); if(el) el.textContent=`수거 ${t}개`; }
+function updateTotal(){ let t=0; document.querySelectorAll('#inputBody input[data-t="c"]').forEach(inp=>{ t+=parseFloat(inp.value)||0; }); const el=document.getElementById('totalCollectBadge'); if(el) el.textContent=`수거 ${t}개`; }
 window.openMemo=function(idx){ 
   try{ saveInputs(); }catch(e){} 
   memoIdx=idx; 
