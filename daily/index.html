@@ -217,6 +217,42 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 #inputTable th.hl-col-head { background:#000 !important; color:#fff !important; }
 #inputTable input.hl-active { background:#fff !important; border:2px solid #000 !important; color:#000 !important; }
 
+
+/* ===== 테마 영향 완전 차단 - 라이트 고정 ===== */
+#inputScreen, #inputScreen * { color-scheme: light !important; }
+#inputScreen { background:#ffffff !important; color:#000000 !important; color-scheme: light only !important; }
+#inputScreen .table-wrap { background:#ffffff !important; color-scheme: light !important; }
+#inputTable { background:#ffffff !important; color:#000000 !important; forced-color-adjust: none !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+#inputTable th, #inputTable td, #inputTable input { forced-color-adjust: none !important; }
+@media (prefers-color-scheme: dark) {
+  #inputScreen, #inputScreen .hdr, #inputScreen .top-bar, #inputScreen .table-wrap, #inputTable, #inputTable th, #inputTable td, #inputTable input { background-color: inherit !important; color: inherit !important; color-scheme: light !important; }
+  #inputTable tbody td.cb, #inputTable tbody td.cr { background:#f5f0db !important; }
+  #inputTable tbody td.db, #inputTable tbody td.dr { background:#e2ecf7 !important; }
+}
+
+
+/* ===== 하이라이트 기능 완전 제거 ===== */
+#inputTable tbody tr.hl-row td,
+#inputTable td.hl-row-cell,
+#inputTable td.hl-col,
+#inputTable th.hl-col-head,
+#inputTable input.hl-active,
+#inputTable tbody tr.hl-row,
+#inputTable input:focus.hl-active { background: inherit !important; outline: none !important; box-shadow: none !important; border: 1px solid #d4d4d4 !important; transform: none !important; }
+#inputTable input:focus { border:2px solid #000 !important; background:#ffffff !important; transform:none !important; box-shadow:none !important; }
+#inputTable input.hl-active { border:none !important; }
+
+
+/* ===== 칸 크기 3자리 숫자 들어갈 크기로 고정 ===== */
+#inputTable { table-layout: fixed !important; }
+#inputTable thead th:not(.th-seq):not(.th-name) { width:42px !important; min-width:42px !important; max-width:42px !important; }
+#inputTable tbody td:not(.td-seq):not(.td-name) { width:42px !important; min-width:42px !important; max-width:42px !important; height:30px !important; }
+#inputTable input[type=number] { width:40px !important; min-width:40px !important; max-width:40px !important; height:28px !important; line-height:28px !important; font-size:13px !important; letter-spacing:0.2px !important; }
+#inputTable thead th.th-seq { width:30px !important; min-width:30px !important; max-width:30px !important; }
+#inputTable tbody td.td-seq { width:30px !important; min-width:30px !important; max-width:30px !important; }
+#inputTable thead th.th-name { width:120px !important; min-width:120px !important; max-width:120px !important; }
+#inputTable tbody td.td-name { width:120px !important; min-width:120px !important; max-width:120px !important; }
+
 </style>
 </head>
 <body>
@@ -529,87 +565,16 @@ function initInputScreenBase(){ document.getElementById('inputDate').value=today
 window.initInputScreen=async function(){ initInputScreenBase(); try{ const date=document.getElementById('inputDate').value||today(); const q=query(collection(db,'dailyTemp3'), where('userId','==',currentUser.userId), where('date','==',date)); const snap=await getDocs(q); if(!snap.empty){ const latest=snap.docs.sort((a,b)=>(b.data().updatedAt?.seconds||0)-(a.data().updatedAt?.seconds||0))[0]; if(confirm(`${date} 임시저장 ${snap.size}개가 있어요. 복구할까요?`)){ await recoverTemp(latest.id); } } }catch(e){} };
 function initInputScreen(){ return window.initInputScreen(); }
 
-// v31: 십자 하이라이트 + 헤더 키패드 고정 + 버그 픽스
-(function(){
-  // v45 십자 하이라이트 - 모바일/PC 모두 확실히, 노란색, 로그인 버그 수정
-  function clearHl(){
-    document.querySelectorAll('#inputTable .hl-row').forEach(el=>el.classList.remove('hl-row'));
-    document.querySelectorAll('#inputTable .hl-row-cell').forEach(el=>el.classList.remove('hl-row-cell'));
-    document.querySelectorAll('#inputTable .hl-col').forEach(el=>el.classList.remove('hl-col'));
-    document.querySelectorAll('#inputTable .hl-col-head').forEach(el=>el.classList.remove('hl-col-head'));
-    document.querySelectorAll('#inputTable input.hl-active').forEach(el=>el.classList.remove('hl-active'));
-  }
-  function setHl(input){
-    if(!input) return;
-    const td=input.closest('td');
-    const tr=input.closest('tr');
-    if(!td || !tr) return;
-    const k=input.dataset.k;
-    const t=input.dataset.t;
-    if(!k || !t) return;
-    clearHl();
-    tr.classList.add('hl-row');
-    tr.querySelectorAll('td').forEach(cell=>{ cell.classList.add('hl-row-cell'); });
-    document.querySelectorAll('#inputBody td').forEach(cell=>{
-      const inp=cell.querySelector('input');
-      if(inp && inp.dataset.k===k && inp.dataset.t===t){ cell.classList.add('hl-col'); }
-    });
-    document.querySelectorAll('#subHeaderRow th').forEach(th=>{
-      if(th.dataset.k===k && th.dataset.t===t){ th.classList.add('hl-col-head'); }
-    });
-    input.classList.add('hl-active');
-  }
-  document.addEventListener('mousedown', (e)=>{
-    const input = e.target.closest ? e.target.closest('#inputBody input') : null;
-    if(input) setHl(input);
-  });
-  document.addEventListener('touchstart', (e)=>{
-    const target = e.target.closest ? e.target.closest('#inputBody td, #inputBody input') : null;
-    if(target){
-      const realInput = target.tagName==='INPUT' ? target : target.querySelector('input');
-      if(realInput) setHl(realInput);
-    }
-  }, {passive:false});
-  document.addEventListener('touchend', (e)=>{
-    const target = e.target.closest ? e.target.closest('#inputBody td, #inputBody input') : null;
-    if(target){
-      const realInput = target.tagName==='INPUT' ? target : target.querySelector('input');
-      if(realInput){ setTimeout(()=>setHl(realInput), 50); }
-    }
-  }, {passive:true});
-  document.addEventListener('focusin', (e)=>{
-    if(e.target.matches && e.target.matches('#inputBody input')){
-      setHl(e.target);
-      setTimeout(()=>setHl(e.target), 100);
-      setTimeout(()=>setHl(e.target), 300);
-    }
-  });
-  document.addEventListener('focus', (e)=>{
-    if(e.target.matches && e.target.matches('#inputBody input')){ setHl(e.target); }
-  }, true);
-  document.addEventListener('click', (e)=>{
-    const input = e.target.closest ? e.target.closest('#inputBody input') : null;
-    if(input) setHl(input);
-  });
-  document.addEventListener('pointerdown', (e)=>{
-    if(!e.target.closest || !e.target.closest('#inputTable')){ clearHl(); }
-  });
 
-  // 키패드 올라갈 때 헤더 고정 - 표가 위로 올라가는 버그 수정
-  function fixViewport(){
-    try{
-      // 모바일에서 표가 위로 올라가는 문제 방지 - 높이 고정 안 함
-      // sticky 헤더는 CSS로만 처리
-    }catch(e){}
-  }
-  const origShow=window.showScreen;
-  window.showScreen=function(id,push){ 
-    origShow(id,push); 
-    // 높이 리셋만
-    const el=document.getElementById('inputScreen'); if(el) { el.style.height=''; }
-    const loginEl=document.getElementById('loginScreen'); if(loginEl) loginEl.style.height='';
+// 하이라이트 기능 제거됨 - 엑셀 심플 버전에서는 사용 안함
+(function(){
+  window.showScreen = window.showScreen || function(id,push){
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById(id);
+    if(target) target.classList.add('active');
   };
 })();
+
 
 </script>
 <script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js', {scope: './'}).then(reg=>{ reg.update(); }).catch(()=>{}); }); }</script>
