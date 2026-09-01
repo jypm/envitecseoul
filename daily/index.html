@@ -196,6 +196,57 @@ td.cb input, td.cr input, td.db input, td.dr input { border-color:transparent !i
   #inputTable tbody td.dr, #inputTable tbody td.dr5 { background:#c7d8ec !important; background-color:#c7d8ec !important; }
 }
 
+
+/* ===== 엑셀처럼 플랫 입력칸 - 둥근 박스 완전 제거 ===== */
+#inputTable input[type=number],
+html body #inputScreen #inputTable input[type=number],
+html body #inputScreen #inputTable tbody td input[type=number] {
+  width:100% !important;
+  min-width:100% !important;
+  max-width:100% !important;
+  height:100% !important;
+  min-height:24px !important;
+  background:transparent !important;
+  background-color:transparent !important;
+  border:none !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  -webkit-box-shadow:none !important;
+  outline:none !important;
+  margin:0 !important;
+  padding:0 !important;
+  display:block !important;
+  text-align:center !important;
+  font-size:11px !important;
+  font-weight:500 !important;
+  color:#000 !important;
+  -webkit-text-fill-color:#000 !important;
+  caret-color:#000 !important;
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  line-height:24px !important;
+}
+#inputTable input[type=number]:focus {
+  background:#ffffff !important;
+  background-color:#ffffff !important;
+  border:2px solid #000 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+}
+#inputTable tbody td {
+  padding:0 !important;
+  background-clip: padding-box !important;
+}
+/* 둥근 테두리 잔재 완전 제거 */
+td.cb input, td.cr input, td.db input, td.dr input,
+td.cb30 input, td.cr5 input, td.db30 input, td.dr5 input {
+  background:transparent !important;
+  background-color:transparent !important;
+  border:none !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+}
+
 </style>
 </head>
 <body>
