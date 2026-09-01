@@ -13,7 +13,7 @@
 <title>수거 일지</title>
 <style>
 :root { color-scheme: light dark; } * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html, body { height:100%; background:#0e0e0e !important; color:#f0f0f5; font-family:-apple-system,'Noto Sans KR',sans-serif; font-size:14px; overflow:hidden; color-scheme: light !important; }
+html, body { height:100%; background:#0e0e0e !important; color:#f0f0f5; font-family:-apple-system,'Noto Sans KR',sans-serif; font-size:14px; overflow:hidden; color-scheme: dark only !important; }
 .screen { display:none; flex-direction:column; height:100vh; overflow:hidden; } .screen.active { display:flex; }
 .hdr { background:#111; border-bottom:2px solid #444; padding:8px 10px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; gap:8px; }
 .hdr-left { display:flex; align-items:center; gap:10px; flex-shrink:0; } .back-btn { background:none; border:none; color:#3D82F6; font-size:14px; cursor:pointer; padding:4px 0; } .hdr-title { font-size:15px; font-weight:700; white-space:nowrap; } .hdr-sub { font-size:11px; color:#aaa; margin-top:2px; }
@@ -61,15 +61,12 @@ td.td-name { position:sticky; left:22px; background:#151515 !important; z-index:
 #inputTable input[type=number] { width:30px !important; height:28px !important; color:#fff !important; -webkit-text-fill-color:#fff !important; font-weight:800 !important; border-width:1.5px !important; border-style:solid !important; border-radius:6px !important; text-align:center !important; outline:none !important; -webkit-appearance:none !important; appearance:none !important; padding:2px 1px !important; font-size:12px !important; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.5); }
 
 /* v31 4색 최종 - 수거(주황/빨강), 납품(파랑/청녹) 묶음 */
-td.cb input { border-color:#ff6a00 !important; background:#3d1f00 !important; }
-td.cr input { border-color:#ff3a30 !important; background:#3d1212 !important; }
-td.db input { border-color:#0066ff !important; background:#001a3d !important; }
-td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
+td.cb input, td.cr input, td.db input, td.dr input { border-color:transparent !important; background:transparent !important; background-color:transparent !important; }
 
-#inputTable th.group-sbox { background:#2a1500 !important; color:#ff6a00 !important; border-bottom-color:#ff6a00 !important; }
-#inputTable th.group-sresin { background:#2a1010 !important; color:#ff3a30 !important; border-bottom-color:#ff3a30 !important; }
-#inputTable th.group-dbox { background:#00152a !important; color:#2e8cff !important; border-bottom-color:#0066ff !important; }
-#inputTable th.group-dresin { background:#002a24 !important; color:#00c2a8 !important; border-bottom-color:#00c2a8 !important; }
+#inputTable th.group-sbox { background:#ede9de !important; background-color:#ede9de !important; color:#000 !important; border-bottom:1px solid #b5b5b5 !important; }
+#inputTable th.group-sresin { background:#dfd9c9 !important; background-color:#dfd9c9 !important; color:#000 !important; border-bottom:1px solid #b5b5b5 !important; }
+#inputTable th.group-dbox { background:#d9e3ec !important; background-color:#d9e3ec !important; color:#000 !important; border-bottom:1px solid #b5b5b5 !important; }
+#inputTable th.group-dresin { background:#c7d8ec !important; background-color:#c7d8ec !important; color:#000 !important; border-bottom:1px solid #b5b5b5 !important; }
 
 #inputTable input:focus, #inputTable input.hl-active { 
   border:3px solid #3D82F6 !important; 
@@ -153,159 +150,51 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; justify-content:center; align-items:center; } .modal-bg.show { display:flex; } .modal { background:#111; border:1px solid #555; border-radius:16px; padding:20px; width:90%; max-width:360px; position:relative; } .modal-close { position:absolute; top:12px; right:14px; background:none; border:none; color:#bbb; font-size:20px; cursor:pointer; } .modal h3 { font-size:15px; margin-bottom:14px; } .modal textarea { width:100%; background:#1a1a1a; border:1px solid #555; border-radius:8px; padding:10px; color:#f0f0f5; font-size:14px; resize:none; outline:none; }
 .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1e1e2e; border:1px solid #666; border-radius:10px; padding:10px 20px; font-size:13px; z-index:200; display:none; white-space:nowrap; } .toast.show { display:block; }
 
-/* ===== EXCEL SIMPLE OVERRIDE - 2026-09-01 - 기존 틀 유지, 흰바탕 엑셀 ===== */
-#inputScreen { background:#ffffff !important; }
-#inputScreen .hdr { background:#f3f3f3 !important; border-bottom:2px solid #a0a0a0 !important; }
-#inputScreen .hdr .hdr-title { color:#000 !important; }
-#inputScreen .hdr .hdr-sub { color:#555 !important; }
-#inputScreen .hdr .back-btn { color:#000 !important; }
-#inputScreen .top-bar { background:#efefef !important; border-bottom:2px solid #a0a0a0 !important; }
-#inputScreen .table-wrap { background:#ffffff !important; }
+/* ===== 최종 - 흰바탕 엑셀 + 두톤 + 초소형 + 삼성 다크모드 차단 ===== */
+#inputScreen { background:#ffffff !important; background-color:#ffffff !important; color:#000 !important; color-scheme: light only !important; }
+#inputScreen .hdr { background:#f3f3f3 !important; background-color:#f3f3f3 !important; border-bottom:2px solid #a0a0a0 !important; }
+#inputScreen .hdr .hdr-title, #inputScreen .hdr .back-btn { color:#000 !important; }
+#inputScreen .top-bar { background:#efefef !important; background-color:#efefef !important; border-bottom:2px solid #a0a0a0 !important; }
+#inputScreen .table-wrap { background:#ffffff !important; background-color:#ffffff !important; }
+#inputTable { border-collapse:collapse !important; background:#ffffff !important; background-color:#ffffff !important; color-scheme: light only !important; forced-color-adjust: none !important; -webkit-forced-color-adjust: none !important; filter:none !important; }
+#inputTable thead th { background:#f2f2f2 !important; background-color:#f2f2f2 !important; color:#000 !important; border:1px solid #b5b5b5 !important; border-bottom:2px solid #7a7a7a !important; font-weight:600 !important; }
+#inputTable thead th.th-seq { background:#f2f2f2 !important; left:0 !important; width:24px !important; min-width:24px !important; max-width:24px !important; border-right:2px solid #7a7a7a !important; z-index:26 !important; }
+#inputTable thead th.th-name { background:#f2f2f2 !important; left:24px !important; width:110px !important; min-width:110px !important; max-width:110px !important; border-right:2px solid #7a7a7a !important; z-index:25 !important; }
+#subHeaderRow th { position:sticky !important; top:28px !important; z-index:14 !important; }
 
-#inputTable { border-collapse:collapse !important; border-spacing:0 !important; table-layout:fixed !important; background:#ffffff !important; }
-#inputTable thead th { background:#f2f2f2 !important; color:#000 !important; border:1px solid #b5b5b5 !important; border-bottom:2px solid #7a7a7a !important; font-weight:600 !important; font-size:11px !important; padding:6px 2px !important; }
-#inputTable thead th.th-seq { background:#f2f2f2 !important; color:#000 !important; border-right:2px solid #7a7a7a !important; left:0 !important; z-index:26 !important; width:28px !important; min-width:28px !important; max-width:28px !important; }
-#inputTable thead th.th-name { background:#f2f2f2 !important; color:#000 !important; border-right:2px solid #7a7a7a !important; left:28px !important; z-index:25 !important; min-width:110px !important; max-width:110px !important; width:110px !important; }
+/* 바디 - 흰바탕 */
+#inputTable tbody td { background:#ffffff !important; background-color:#ffffff !important; border:1px solid #d4d4d4 !important; height:24px !important; padding:0 !important; color:#000 !important; }
+#inputTable tbody td.td-seq { background:#f2f2f2 !important; background-color:#f2f2f2 !important; left:0 !important; width:24px !important; min-width:24px !important; max-width:24px !important; font-size:10px !important; border-right:2px solid #7a7a7a !important; text-align:center !important; }
+#inputTable tbody td.td-name { background:#ffffff !important; background-color:#ffffff !important; left:24px !important; width:110px !important; min-width:110px !important; max-width:110px !important; border-right:2px solid #7a7a7a !important; padding:3px 4px !important; }
+#inputTable tbody td.td-name .cn { color:#000 !important; font-size:11px !important; }
+#inputTable tbody td.td-name .cn.has-memo { color:#0b5d1e !important; }
+#inputTable tbody td.td-name .today-memo { color:#1a7f37 !important; }
 
-#inputTable thead tr:first-child th.group-sbox,
-#inputTable thead tr:first-child th.group-sresin { background:#e7e2cc !important; color:#000 !important; border-left:3px solid #7a7a7a !important; border-bottom:1px solid #b5b5b5 !important; }
-#inputTable thead tr:first-child th.group-dbox,
-#inputTable thead tr:first-child th.group-dresin { background:#d2deef !important; color:#000 !important; border-left:3px solid #7a7a7a !important; border-bottom:1px solid #b5b5b5 !important; }
+/* 두톤 - 엑셀 사진 그대로 */
+#inputTable tbody td.cb, #inputTable tbody td.cb30 { background:#ede9de !important; background-color:#ede9de !important; }
+#inputTable tbody td.cr, #inputTable tbody td.cr5 { background:#dfd9c9 !important; background-color:#dfd9c9 !important; }
+#inputTable tbody td.db, #inputTable tbody td.db30 { background:#d9e3ec !important; background-color:#d9e3ec !important; }
+#inputTable tbody td.dr, #inputTable tbody td.dr5 { background:#c7d8ec !important; background-color:#c7d8ec !important; }
+#inputTable tbody td.sep, #inputTable tbody td.sep-strong { border-left:3px solid #7a7a7a !important; }
 
-/* 서브헤더 - 사진 색상 그대로 */
-#subHeaderRow th { background:#ffffff !important; color:#000 !important; border:1px solid #b5b5b5 !important; border-bottom:2px solid #7a7a7a !important; font-size:11px !important; top:30px !important; }
-#subHeaderRow th[data-group="sbox"],
-#subHeaderRow th[data-group="sresin"] { background:#efe9d6 !important; color:#000 !important; }
-#subHeaderRow th[data-group="dbox"],
-#subHeaderRow th[data-group="dresin"] { background:#d9e6f2 !important; color:#000 !important; }
-#subHeaderRow th[data-group="sbox"]:first-child,
-#subHeaderRow th[data-group="dbox"]:first-child { border-left:3px solid #7a7a7a !important; }
-
-/* 바디 */
-#inputTable tbody td { background:#ffffff !important; border:1px solid #d4d4d4 !important; height:28px !important; padding:0 !important; }
-#inputTable tbody tr { height:28px !important; }
-#inputTable tbody td.td-seq { background:#f2f2f2 !important; color:#000 !important; border-right:2px solid #7a7a7a !important; left:0 !important; width:28px !important; min-width:28px !important; max-width:28px !important; font-size:11px !important; text-align:center !important; }
-#inputTable tbody td.td-name { background:#ffffff !important; color:#000 !important; border-right:2px solid #7a7a7a !important; left:28px !important; min-width:110px !important; max-width:110px !important; width:110px !important; padding:3px 6px !important; }
-#inputTable tbody td.td-name .cn { color:#000 !important; font-size:11px !important; font-weight:500 !important; }
-#inputTable tbody td.td-name .cn.has-memo { color:#0b5d1e !important; font-weight:700 !important; }
-#inputTable tbody td.td-name .today-memo { color:#1a7f37 !important; font-size:9px !important; }
-
-/* 수거 = 베이지 / 납품 = 연파랑 - 사진이랑 동일 */
-#inputTable tbody td.cb,
-#inputTable tbody td.cr,
-#inputTable tbody td.cb30,
-#inputTable tbody td.cr5 { background:#f5f0db !important; }
-#inputTable tbody td.db,
-#inputTable tbody td.dr,
-#inputTable tbody td.db30,
-#inputTable tbody td.dr5 { background:#e2ecf7 !important; }
-
-#inputTable tbody td.sep,
-#inputTable tbody td.sep-strong { border-left:3px solid #7a7a7a !important; }
-
-/* 인풋 - 엑셀처럼 투명하고 셀 가득 */
-#inputTable input[type=number] { width:100% !important; height:26px !important; background:transparent !important; border:none !important; border-radius:0 !important; color:#000 !important; -webkit-text-fill-color:#000 !important; font-weight:500 !important; font-size:12px !important; text-align:center !important; box-shadow:none !important; padding:0 !important; }
-
-/* 포커스 - 엑셀 선택 테두리 */
-#inputTable input[type=number]:focus { background:#ffffff !important; border:2px solid #000 !important; outline:none !important; font-weight:700 !important; }
-
-/* 십자 하이라이트 심플하게 - 흰바탕이라 연하게 */
-#inputTable tbody tr.hl-row td { background:#fffbe6 !important; }
-#inputTable tbody tr.hl-row td.td-seq { background:#ffe680 !important; }
-#inputTable tbody tr.hl-row td.td-name { background:#fff8cc !important; }
-#inputTable td.hl-col { background:#fff3a0 !important; border:1px solid #000 !important; }
-#inputTable th.hl-col-head { background:#000 !important; color:#fff !important; }
-#inputTable input.hl-active { background:#fff !important; border:2px solid #000 !important; color:#000 !important; }
-
-
-/* ===== 테마 영향 완전 차단 - 라이트 고정 ===== */
-#inputScreen, #inputScreen * { color-scheme: light !important; }
-#inputScreen { background:#ffffff !important; color:#000000 !important; color-scheme: light only !important; }
-#inputScreen .table-wrap { background:#ffffff !important; color-scheme: light !important; }
-#inputTable { background:#ffffff !important; color:#000000 !important; forced-color-adjust: none !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-#inputTable th, #inputTable td, #inputTable input { forced-color-adjust: none !important; }
-@media (prefers-color-scheme: dark) {
-  #inputScreen, #inputScreen .hdr, #inputScreen .top-bar, #inputScreen .table-wrap, #inputTable, #inputTable th, #inputTable td, #inputTable input { background-color: inherit !important; color: inherit !important; color-scheme: light !important; }
-  #inputTable tbody td.cb, #inputTable tbody td.cr { background:#f5f0db !important; }
-  #inputTable tbody td.db, #inputTable tbody td.dr { background:#e2ecf7 !important; }
-}
-
-
-/* ===== 하이라이트 기능 완전 제거 ===== */
-#inputTable tbody tr.hl-row td,
-#inputTable td.hl-row-cell,
-#inputTable td.hl-col,
-#inputTable th.hl-col-head,
-#inputTable input.hl-active,
-#inputTable tbody tr.hl-row,
-#inputTable input:focus.hl-active { background: inherit !important; outline: none !important; box-shadow: none !important; border: 1px solid #d4d4d4 !important; transform: none !important; }
-#inputTable input:focus { border:2px solid #000 !important; background:#ffffff !important; transform:none !important; box-shadow:none !important; }
-#inputTable input.hl-active { border:none !important; }
-
-
-/* ===== 삼성 인터넷 다크모드 완전 차단 - 최종 ===== */
-html, body { color-scheme: light dark !important; }
-#inputScreen, #inputScreen .hdr, #inputScreen .top-bar, #inputScreen .table-wrap, #inputTable {
-  color-scheme: light only !important;
-  forced-color-adjust: none !important;
-  -webkit-forced-color-adjust: none !important;
-  print-color-adjust: exact !important;
-  -webkit-print-color-adjust: exact !important;
-}
-#inputScreen {
-  background:#ffffff !important;
-  background-color:#ffffff !important;
-  filter:none !important;
-  -webkit-filter:none !important;
-}
-#inputScreen * {
-  filter:none !important;
-  -webkit-filter:none !important;
-  mix-blend-mode: normal !important;
-}
-
-/* 모든 이전 다크 배경 규칙 덮어쓰기 - ID 2개로 특이성 극대화 */
-html body #inputScreen #inputTable { background:#ffffff !important; background-color:#ffffff !important; }
-html body #inputScreen #inputTable thead th { background:#f2f2f2 !important; background-color:#f2f2f2 !important; color:#000 !important; }
-html body #inputScreen #inputTable thead th.group-sbox,
-html body #inputScreen #inputTable thead th.group-sresin { background:#e7e2cc !important; background-color:#e7e2cc !important; color:#000 !important; }
-html body #inputScreen #inputTable thead th.group-dbox,
-html body #inputScreen #inputTable thead th.group-dresin { background:#d2deef !important; background-color:#d2deef !important; color:#000 !important; }
-html body #inputScreen #inputTable tbody td { background:#ffffff !important; background-color:#ffffff !important; color:#000 !important; }
-html body #inputScreen #inputTable tbody td.td-seq { background:#f2f2f2 !important; background-color:#f2f2f2 !important; color:#000 !important; }
-html body #inputScreen #inputTable tbody td.td-name { background:#ffffff !important; background-color:#ffffff !important; color:#000 !important; }
-html body #inputScreen #inputTable tbody td.cb,
-html body #inputScreen #inputTable tbody td.cr,
-html body #inputScreen #inputTable tbody td.cb30,
-html body #inputScreen #inputTable tbody td.cr5 { background:#f5f0db !important; background-color:#f5f0db !important; color:#000 !important; }
-html body #inputScreen #inputTable tbody td.db,
-html body #inputScreen #inputTable tbody td.dr,
-html body #inputScreen #inputTable tbody td.db30,
-html body #inputScreen #inputTable tbody td.dr5 { background:#e2ecf7 !important; background-color:#e2ecf7 !important; color:#000 !important; }
-html body #inputScreen #inputTable input[type=number] { background:transparent !important; background-color:transparent !important; color:#000 !important; -webkit-text-fill-color:#000 !important; caret-color:#000 !important; }
-
-/* 삼성 인터넷이 prefers-color-scheme: dark 일때 강제로 라이트 재적용 */
-@media (prefers-color-scheme: dark) {
-  html body #inputScreen, html body #inputScreen .table-wrap, html body #inputScreen #inputTable { background:#ffffff !important; background-color:#ffffff !important; }
-  html body #inputScreen #inputTable tbody td { background:#ffffff !important; }
-  html body #inputScreen #inputTable tbody td.cb,
-  html body #inputScreen #inputTable tbody td.cr { background:#f5f0db !important; background-color:#f5f0db !important; }
-  html body #inputScreen #inputTable tbody td.db,
-  html body #inputScreen #inputTable tbody td.dr { background:#e2ecf7 !important; background-color:#e2ecf7 !important; }
-}
-
-/* 칸 크기 3자리 고정 - 재확인 */
-
-/* ===== 칸 크기 초소형 - 숫자 3자리 딱 맞게 ===== */
-#inputTable { table-layout: fixed !important; }
+/* 초소형 칸 - 3자리 딱 맞게 */
 #inputTable thead th:not(.th-seq):not(.th-name) { width:30px !important; min-width:30px !important; max-width:30px !important; padding:4px 0 !important; font-size:10px !important; }
-#inputTable tbody td:not(.td-seq):not(.td-name) { width:30px !important; min-width:30px !important; max-width:30px !important; height:24px !important; padding:0 !important; }
-#inputTable input[type=number] { width:28px !important; min-width:28px !important; max-width:28px !important; height:22px !important; line-height:22px !important; font-size:11px !important; letter-spacing:0 !important; padding:0 !important; margin:0 auto !important; display:block !important; }
-#inputTable thead th.th-seq { width:24px !important; min-width:24px !important; max-width:24px !important; }
-#inputTable tbody td.td-seq { width:24px !important; min-width:24px !important; max-width:24px !important; font-size:10px !important; }
-#inputTable thead th.th-name { width:110px !important; min-width:110px !important; max-width:110px !important; }
-#inputTable tbody td.td-name { width:110px !important; min-width:110px !important; max-width:110px !important; }
-#subHeaderRow th { width:30px !important; min-width:30px !important; max-width:30px !important; font-size:10px !important; padding:4px 0 !important; }
+#inputTable tbody td:not(.td-seq):not(.td-name) { width:30px !important; min-width:30px !important; max-width:30px !important; height:24px !important; }
+#inputTable input[type=number] { width:28px !important; min-width:28px !important; max-width:28px !important; height:22px !important; line-height:22px !important; font-size:11px !important; background:transparent !important; background-color:transparent !important; border:none !important; color:#000 !important; -webkit-text-fill-color:#000 !important; text-align:center !important; margin:0 auto !important; display:block !important; }
+#inputTable input[type=number]:focus { background:#ffffff !important; border:1.5px solid #000 !important; outline:none !important; }
+
+/* 하이라이트 완전 제거 */
+#inputTable tbody tr.hl-row td, #inputTable td.hl-col, #inputTable th.hl-col-head, #inputTable input.hl-active { background: inherit !important; box-shadow:none !important; transform:none !important; }
+
+/* 삼성 다크모드 차단 */
+#inputScreen, #inputScreen * { filter:none !important; -webkit-filter:none !important; forced-color-adjust: none !important; }
+@media (prefers-color-scheme: dark) {
+  #inputScreen, #inputScreen .table-wrap, #inputTable { background:#ffffff !important; background-color:#ffffff !important; }
+  #inputTable tbody td.cb, #inputTable tbody td.cb30 { background:#ede9de !important; background-color:#ede9de !important; }
+  #inputTable tbody td.cr, #inputTable tbody td.cr5 { background:#dfd9c9 !important; background-color:#dfd9c9 !important; }
+  #inputTable tbody td.db, #inputTable tbody td.db30 { background:#d9e3ec !important; background-color:#d9e3ec !important; }
+  #inputTable tbody td.dr, #inputTable tbody td.dr5 { background:#c7d8ec !important; background-color:#c7d8ec !important; }
+}
 
 </style>
 </head>
@@ -382,12 +271,12 @@ function renderSubHeader(){
   const tr=document.getElementById('subHeaderRow'); 
   const box=['4','12','30','50','63']; 
   const resin=['1','2','5','10','20']; 
-  const base='font-size:11px;padding:4px 1px;border-bottom:3px solid #999;font-weight:800;border-right:1px solid #444;'; 
+  const base='font-size:10px;padding:4px 0;border:1px solid #b5b5b5;border-bottom:2px solid #7a7a7a;font-weight:600;color:#000;'; 
   let html=''; 
-  box.forEach((s,i)=>{ html+='<th data-t="c" data-k="'+s+'L" data-group="sbox" style="top:28px;position:sticky;background:#2a1500 !important;color:#ff6a00;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); 
-  resin.forEach((s,i)=>{ html+='<th data-t="c" data-k="'+s+'L" data-group="sresin" style="top:28px;position:sticky;background:#2a1010 !important;color:#ff3a30;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); 
-  box.forEach((s,i)=>{ html+='<th data-t="d" data-k="'+s+'L" data-group="dbox" style="top:28px;position:sticky;background:#00152a !important;color:#2e8cff;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); 
-  resin.forEach((s,i)=>{ html+='<th data-t="d" data-k="'+s+'L" data-group="dresin" style="top:28px;position:sticky;background:#002a24 !important;color:#00c2a8;'+base+(i===0?'border-left:2.5px solid #aaa;':'')+'">'+s+'</th>'; }); 
+  box.forEach((s,i)=>{ html+='<th data-t="c" data-k="'+s+'L" data-group="sbox" style="top:28px;position:sticky;background:#ede9de !important;background-color:#ede9de !important;color:#000 !important;'+base+(i===0?'border-left:3px solid #7a7a7a;':'')+'">'+s+'</th>'; }); 
+  resin.forEach((s,i)=>{ html+='<th data-t="c" data-k="'+s+'L" data-group="sresin" style="top:28px;position:sticky;background:#dfd9c9 !important;background-color:#dfd9c9 !important;color:#000 !important;'+base+(i===0?'border-left:3px solid #7a7a7a;':'')+'">'+s+'</th>'; }); 
+  box.forEach((s,i)=>{ html+='<th data-t="d" data-k="'+s+'L" data-group="dbox" style="top:28px;position:sticky;background:#d9e3ec !important;background-color:#d9e3ec !important;color:#000 !important;'+base+(i===0?'border-left:3px solid #7a7a7a;':'')+'">'+s+'</th>'; }); 
+  resin.forEach((s,i)=>{ html+='<th data-t="d" data-k="'+s+'L" data-group="dresin" style="top:28px;position:sticky;background:#c7d8ec !important;background-color:#c7d8ec !important;color:#000 !important;'+base+(i===0?'border-left:3px solid #7a7a7a;':'')+'">'+s+'</th>'; }); 
   tr.innerHTML=html; 
 }
 window.openLoadCourseModal=async function(){ if(!courseList.length) await loadCourseList(); const el=document.getElementById('loadCourseList'); el.innerHTML=courseList.map(c=>`<div style="padding:12px;border-bottom:1px solid #444;cursor:pointer;display:flex;justify-content:space-between" onclick="loadCourse('${c.id}')"><span style="font-size:13px">${c.name}</span><span style="font-size:11px;color:#bbb">${c.clients.length}개</span></div>`).join(''); document.getElementById('loadCourseModal').classList.add('show'); };
@@ -619,16 +508,8 @@ function initInputScreenBase(){ document.getElementById('inputDate').value=today
 window.initInputScreen=async function(){ initInputScreenBase(); try{ const date=document.getElementById('inputDate').value||today(); const q=query(collection(db,'dailyTemp3'), where('userId','==',currentUser.userId), where('date','==',date)); const snap=await getDocs(q); if(!snap.empty){ const latest=snap.docs.sort((a,b)=>(b.data().updatedAt?.seconds||0)-(a.data().updatedAt?.seconds||0))[0]; if(confirm(`${date} 임시저장 ${snap.size}개가 있어요. 복구할까요?`)){ await recoverTemp(latest.id); } } }catch(e){} };
 function initInputScreen(){ return window.initInputScreen(); }
 
-
-// 하이라이트 기능 제거됨 - 엑셀 심플 버전에서는 사용 안함
-(function(){
-  window.showScreen = window.showScreen || function(id,push){
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const target = document.getElementById(id);
-    if(target) target.classList.add('active');
-  };
-})();
-
+// 하이라이트 제거 - 엑셀 심플
+(function(){ window.showScreen = window.showScreen || function(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); var t=document.getElementById(id); if(t) t.classList.add('active'); }; })();
 
 </script>
 <script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js', {scope: './'}).then(reg=>{ reg.update(); }).catch(()=>{}); }); }</script>
@@ -636,64 +517,39 @@ function initInputScreen(){ return window.initInputScreen(); }
 <script>let deferredPrompt=null; window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; const btn=document.getElementById('pwaInstallBtn'); if(btn) btn.style.display='flex'; }); window.installPWA=async function(){ if(!deferredPrompt){ alert('이미 설치되었거나 브라우저가 설치를 지원하지 않아요.'); return; } deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; const btn=document.getElementById('pwaInstallBtn'); if(btn) btn.style.display='none'; }; window.addEventListener('appinstalled', ()=>{ const btn=document.getElementById('pwaInstallBtn'); if(btn) btn.style.display='none'; });</script>
 
 <script>
-// 삼성 인터넷 다크모드 강제 해제 - 인라인 스타일로 최종 덮어쓰기
+// 최종 강제 라이트 - 두톤 + 초소형 + 삼성 차단
 (function(){
   function forceLight(){
-    var screen = document.getElementById('inputScreen');
-    if(!screen) return;
-    var table = document.getElementById('inputTable');
+    var table=document.getElementById('inputTable');
     if(!table) return;
-    // inputScreen 자체
-    screen.style.setProperty('background', '#ffffff', 'important');
-    screen.style.setProperty('background-color', '#ffffff', 'important');
-    screen.style.setProperty('color-scheme', 'light', 'important');
-    // 모든 td에 대해 강제
-    var tds = table.querySelectorAll('td');
-    tds.forEach(function(td){
-      if(td.classList.contains('td-seq')){
-        td.style.setProperty('background', '#f2f2f2', 'important');
-        td.style.setProperty('background-color', '#f2f2f2', 'important');
-      } else if(td.classList.contains('td-name')){
-        td.style.setProperty('background', '#ffffff', 'important');
-        td.style.setProperty('background-color', '#ffffff', 'important');
-      } else if(td.classList.contains('cb') || td.classList.contains('cr') || td.classList.contains('cb30') || td.classList.contains('cr5')){
-        td.style.setProperty('background', '#f5f0db', 'important');
-        td.style.setProperty('background-color', '#f5f0db', 'important');
-      } else if(td.classList.contains('db') || td.classList.contains('dr') || td.classList.contains('db30') || td.classList.contains('dr5')){
-        td.style.setProperty('background', '#e2ecf7', 'important');
-        td.style.setProperty('background-color', '#e2ecf7', 'important');
-      } else {
-        td.style.setProperty('background', '#ffffff', 'important');
-        td.style.setProperty('background-color', '#ffffff', 'important');
-      }
-      td.style.setProperty('color', '#000000', 'important');
-    });
-    var inputs = table.querySelectorAll('input');
-    inputs.forEach(function(inp){
-      inp.style.setProperty('background', 'transparent', 'important');
-      inp.style.setProperty('background-color', 'transparent', 'important');
-      inp.style.setProperty('color', '#000000', 'important');
-      inp.style.setProperty('-webkit-text-fill-color', '#000000', 'important');
+    // 헤더 강제
+    document.querySelectorAll('#inputTable th.group-sbox').forEach(function(th){ th.style.setProperty('background','#ede9de','important'); th.style.setProperty('background-color','#ede9de','important'); th.style.setProperty('color','#000','important'); });
+    document.querySelectorAll('#inputTable th.group-sresin').forEach(function(th){ th.style.setProperty('background','#dfd9c9','important'); th.style.setProperty('background-color','#dfd9c9','important'); th.style.setProperty('color','#000','important'); });
+    document.querySelectorAll('#inputTable th.group-dbox').forEach(function(th){ th.style.setProperty('background','#d9e3ec','important'); th.style.setProperty('background-color','#d9e3ec','important'); th.style.setProperty('color','#000','important'); });
+    document.querySelectorAll('#inputTable th.group-dresin').forEach(function(th){ th.style.setProperty('background','#c7d8ec','important'); th.style.setProperty('background-color','#c7d8ec','important'); th.style.setProperty('color','#000','important'); });
+    document.querySelectorAll('#subHeaderRow th[data-group="sbox"]').forEach(function(th){ th.style.setProperty('background','#ede9de','important'); th.style.setProperty('background-color','#ede9de','important'); th.style.setProperty('color','#000','important'); });
+    document.querySelectorAll('#subHeaderRow th[data-group="sresin"]').forEach(function(th){ th.style.setProperty('background','#dfd9c9','important'); th.style.setProperty('background-color','#dfd9c9','important'); th.style.setProperty('color','#000','important'); });
+    document.querySelectorAll('#subHeaderRow th[data-group="dbox"]').forEach(function(th){ th.style.setProperty('background','#d9e3ec','important'); th.style.setProperty('background-color','#d9e3ec','important'); th.style.setProperty('color','#000','important'); });
+    document.querySelectorAll('#subHeaderRow th[data-group="dresin"]').forEach(function(th){ th.style.setProperty('background','#c7d8ec','important'); th.style.setProperty('background-color','#c7d8ec','important'); th.style.setProperty('color','#000','important'); });
+    table.querySelectorAll('tbody td').forEach(function(td){
+      td.style.setProperty('color','#000','important');
+      if(td.classList.contains('td-seq')){ td.style.setProperty('background','#f2f2f2','important'); td.style.setProperty('background-color','#f2f2f2','important'); }
+      else if(td.classList.contains('td-name')){ td.style.setProperty('background','#ffffff','important'); td.style.setProperty('background-color','#ffffff','important'); }
+      else if(td.classList.contains('cb')||td.classList.contains('cb30')){ td.style.setProperty('background','#ede9de','important'); td.style.setProperty('background-color','#ede9de','important'); }
+      else if(td.classList.contains('cr')||td.classList.contains('cr5')){ td.style.setProperty('background','#dfd9c9','important'); td.style.setProperty('background-color','#dfd9c9','important'); }
+      else if(td.classList.contains('db')||td.classList.contains('db30')){ td.style.setProperty('background','#d9e3ec','important'); td.style.setProperty('background-color','#d9e3ec','important'); }
+      else if(td.classList.contains('dr')||td.classList.contains('dr5')){ td.style.setProperty('background','#c7d8ec','important'); td.style.setProperty('background-color','#c7d8ec','important'); }
+      else { td.style.setProperty('background','#ffffff','important'); td.style.setProperty('background-color','#ffffff','important'); }
     });
   }
-  // 화면 전환될 때마다 강제
-  var origShow = window.showScreen;
-  window.showScreen = function(id, push){
-    if(origShow) origShow(id, push);
-    else {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      var t = document.getElementById(id); if(t) t.classList.add('active');
-    }
-    if(id==='inputScreen'){
-      setTimeout(forceLight, 50);
-      setTimeout(forceLight, 300);
-    }
+  var origShow=window.showScreen;
+  window.showScreen=function(id,push){
+    if(origShow) origShow(id,push);
+    else { document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');}); var t=document.getElementById(id); if(t) t.classList.add('active'); }
+    if(id==='inputScreen'){ setTimeout(forceLight,50); setTimeout(forceLight,300); }
   };
-  // 주기적으로 체크 (삼성 다크모드가 뒤늦게 적용되는 경우)
-  setInterval(function(){
-    var s = document.getElementById('inputScreen');
-    if(s && s.classList.contains('active')) forceLight();
-  }, 1000);
+  setInterval(function(){ var s=document.getElementById('inputScreen'); if(s&&s.classList.contains('active')) forceLight(); }, 800);
+  document.addEventListener('DOMContentLoaded', forceLight);
 })();
 </script>
 
