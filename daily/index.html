@@ -390,8 +390,20 @@ html body #inputScreen #inputTable input[type=number] { background:transparent !
 #customKeypad .kp-btn.kp-done { background:#000; color:#fff; font-size:14px; }
 #customKeypad .kp-btn.kp-nav { background:#f0f0f0; font-size:14px; }
 
-/* 키패드 열렸을 때 테이블 여백 확보 */
-#inputScreen.kp-open .table-wrap { bottom:260px !important; }
+/* 키패드 열렸을 때 테이블 여백 확보 - 1~4번이 헤드 밑으로 들어가는 버그 수정 */
+#inputScreen.kp-open .table-wrap { 
+  flex: none !important;
+  height: calc(100dvh - 88px - 260px) !important;
+  max-height: calc(100dvh - 88px - 260px) !important;
+  min-height: calc(100dvh - 88px - 260px) !important;
+  overflow:auto !important;
+  padding-bottom:0 !important;
+  margin-bottom:0 !important;
+}
+#inputScreen.kp-open {
+  overflow:hidden !important;
+}
+
 
 /* 입력칸 포커스 스타일 */
 #inputTable input.custom-active {
@@ -400,6 +412,72 @@ html body #inputScreen #inputTable input[type=number] { background:transparent !
   font-weight:800 !important;
   box-shadow:0 0 0 2px #ffe600 !important;
 }
+
+
+/* ===== 엑셀 심플 강제 - 커스텀 키패드용 input=text도 흰바탕 ===== */
+#inputTable input,
+#inputTable input[type="text"],
+#inputTable input[type="number"],
+#inputTable td.cb input,
+#inputTable td.cr input,
+#inputTable td.db input,
+#inputTable td.dr input {
+  background:transparent !important;
+  background-color:transparent !important;
+  border:none !important;
+  border-color:transparent !important;
+  color:#000 !important;
+  -webkit-text-fill-color:#000 !important;
+  font-weight:500 !important;
+  font-size:12px !important;
+  text-align:center !important;
+  box-shadow:none !important;
+  transform:none !important;
+  border-radius:0 !important;
+  width:100% !important;
+  height:46px !important;
+  padding:0 !important;
+  outline:none !important;
+  -webkit-appearance:none !important;
+  appearance:none !important;
+}
+
+#inputTable input:focus,
+#inputTable input.hl-active,
+#inputTable input.custom-active {
+  background:#ffffff !important;
+  border:2px solid #000 !important;
+  font-weight:700 !important;
+  box-shadow:none !important;
+  transform:none !important;
+  border-radius:0 !important;
+  z-index:1 !important;
+}
+
+/* PWA 설치 버튼 - 키패드 열렸을 때 숨기기 */
+#pwaInstallBtn { z-index:50 !important; }
+#inputScreen.kp-open #pwaInstallBtn { display:none !important; }
+
+/* 테이블 td 높이 통일 */
+#inputTable tbody tr { height:48px !important; }
+#inputTable tbody td { height:48px !important; padding:0 !important; }
+
+
+/* 키패드 버튼은 inputTable 스타일 영향 안 받게 */
+#customKeypad .kp-btn {
+  background:#ffffff !important;
+  border:none !important;
+  border-radius:0 !important;
+  height:auto !important;
+  width:auto !important;
+  transform:none !important;
+  box-shadow:none !important;
+}
+#customKeypad .kp-btn.kp-del { background:#ffe0e0 !important; color:#c00 !important; }
+#customKeypad .kp-btn.kp-clear { background:#fff3cd !important; color:#856404 !important; }
+#customKeypad .kp-btn.kp-done { background:#000 !important; color:#fff !important; }
+#customKeypad .kp-btn.kp-nav { background:#f0f0f0 !important; }
+#customKeypad .kp-btn.kp-num { background:#ffffff !important; }
 
 </style>
 </head>
@@ -599,20 +677,30 @@ window.openKeypad = function(el, idx, clientName, sizeLabel){
   document.getElementById('kpValue').textContent = el.value || '0';
   document.getElementById('customKeypad').classList.add('show');
   document.getElementById('inputScreen').classList.add('kp-open');
-  // 해당 칸이 키패드에 가려지지 않게 테이블 스크롤
+  // 해당 칸이 키패드에 가려지지 않게 테이블 스크롤 - 1~4번 헤드 밑으로 들어가는 버그 수정: 이미 보이는 칸은 스크롤 안함
   setTimeout(()=>{
     var wrap=document.querySelector('#inputScreen .table-wrap');
-    if(wrap){
-      var rect = el.getBoundingClientRect();
-      var wrapRect = wrap.getBoundingClientRect();
-      var keypadHeight = 260;
-      var visibleBottom = window.innerHeight - keypadHeight - 20;
-      if(rect.bottom > visibleBottom){
-        var diff = rect.bottom - visibleBottom + 60;
-        wrap.scrollBy({top: diff, behavior:'smooth'});
-      }
+    if(!wrap) return;
+    var rect = el.getBoundingClientRect();
+    var wrapRect = wrap.getBoundingClientRect();
+    var keypadHeight = 260;
+    var visibleBottom = window.innerHeight - keypadHeight - 20;
+    var headerBottom = 88 + 64; // hdr+top-bar+thead 약 88+64
+    // 이미 화면 안에 있으면 스크롤 안함
+    if(rect.top >= headerBottom && rect.bottom <= visibleBottom){
+      return;
     }
-  }, 50);
+    // 아래에 가려졌으면 위로 스크롤
+    if(rect.bottom > visibleBottom){
+      var diff = rect.bottom - visibleBottom + 20;
+      wrap.scrollBy({top: diff, behavior:'smooth'});
+    }
+    // 위에 가려졌으면(헤드 밑으로) 아래로 스크롤 - 이게 1~4번 버그 핵심
+    if(rect.top < headerBottom){
+      var diff2 = headerBottom - rect.top + 10;
+      wrap.scrollBy({top: -diff2, behavior:'smooth'});
+    }
+  }, 100);
 };
 
 window.closeKeypad = function(){
