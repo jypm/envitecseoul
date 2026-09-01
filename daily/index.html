@@ -169,12 +169,12 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 #inputTable thead th { background:#f2f2f2 !important; color:#000 !important; border:1px solid #000000 !important; font-weight:600 !important; font-size:11px !important; padding:6px 2px !important; }
 #inputTable thead tr:first-child th { height:32px !important; border:1px solid #000000 !important; }
 #inputTable thead th.th-seq { background:#f2f2f2 !important; color:#000 !important; border:1px solid #000000 !important; left:0 !important; z-index:26 !important; width:28px !important; min-width:28px !important; max-width:28px !important; }
-#inputTable thead th.th-name { background:#f2f2f2 !important; color:#000 !important; border:1px solid #000000 !important; left:28px !important; z-index:25 !important; min-width:110px !important; max-width:110px !important; width:110px !important; }
+#inputTable thead th.th-name { background:#f2f2f2 !important; color:#000 !important; border:1px solid #000000 !important; left:28px !important; z-index:25 !important; min-width:80px !important; max-width:80px !important; width:80px !important; }
 
-#inputTable thead tr:first-child th.group-sbox,
-#inputTable thead tr:first-child th.group-sresin { background:#e7e2cc !important; color:#000 !important; border:1px solid #000000 !important; }
-#inputTable thead tr:first-child th.group-dbox,
-#inputTable thead tr:first-child th.group-dresin { background:#d2deef !important; color:#000 !important; border:1px solid #000000 !important; }
+#inputTable thead tr:first-child th.group-sbox { background:#e7e2cc !important; color:#000 !important; border:1px solid #000000 !important; border-left:1px solid #000000 !important; }
+#inputTable thead tr:first-child th.group-sresin { background:#e7e2cc !important; color:#000 !important; border:1px solid #000000 !important; border-left:2px solid #000000 !important; }
+#inputTable thead tr:first-child th.group-dbox { background:#d2deef !important; color:#000 !important; border:1px solid #000000 !important; border-left:2px solid #000000 !important; }
+#inputTable thead tr:first-child th.group-dresin { background:#d2deef !important; color:#000 !important; border:1px solid #000000 !important; border-left:2px solid #000000 !important; }
 
 /* 서브헤더 - 공백 제거 핵심: top을 32px로 정확히 붙이기, margin으로 겹치기 */
 #subHeaderRow { border-collapse:collapse !important; }
@@ -184,11 +184,17 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 #subHeaderRow th[data-group="dbox"],
 #subHeaderRow th[data-group="dresin"] { background:#d9e6f2 !important; color:#000 !important; }
 
+/* 그룹 구분선 2px - 수거박스|수거합성|납품박스|납품합성 */
+#subHeaderRow th:nth-child(6),
+#subHeaderRow th:nth-child(11),
+#subHeaderRow th:nth-child(16) { border-left:2px solid #000000 !important; }
+
+
 /* 바디 - 테두리 통일 1px, 3줄 높이 */
 #inputTable tbody td { background:#ffffff !important; border:1px solid #000000 !important; padding:0 !important; }
 #inputTable tbody tr { height:48px !important; }
 #inputTable tbody td.td-seq { background:#f2f2f2 !important; color:#000 !important; border:1px solid #000000 !important; left:0 !important; width:28px !important; min-width:28px !important; max-width:28px !important; font-size:11px !important; text-align:center !important; height:48px !important; }
-#inputTable tbody td.td-name { background:#ffffff !important; color:#000 !important; border:1px solid #000000 !important; left:28px !important; min-width:110px !important; max-width:110px !important; width:110px !important; padding:3px 6px !important; height:48px !important; min-height:48px !important; display:flex !important; flex-direction:column !important; justify-content:center !important; }
+#inputTable tbody td.td-name { background:#ffffff !important; color:#000 !important; border:1px solid #000000 !important; left:28px !important; min-width:80px !important; max-width:80px !important; width:80px !important; padding:3px 6px !important; height:48px !important; min-height:48px !important; display:flex !important; flex-direction:column !important; justify-content:center !important; }
 
 /* 거래처명 2줄 + 메모 1줄 = 3줄 고정 */
 #inputTable tbody td.td-name .cn { color:#000 !important; font-size:11px !important; font-weight:500 !important; line-height:13px !important; max-height:26px !important; display:-webkit-box !important; -webkit-line-clamp:2 !important; -webkit-box-orient:vertical !important; overflow:hidden !important; text-overflow:ellipsis !important; word-break:break-all !important; white-space:normal !important; }
@@ -205,8 +211,8 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 #inputTable tbody td.db30,
 #inputTable tbody td.dr5 { background:#b9cfe8 !important; }
 
-#inputTable tbody td.sep,
-#inputTable tbody td.sep-strong { border-left:1px solid #000000 !important; border-right:1px solid #000000 !important; }
+#inputTable tbody td.sep { border-left:1px solid #000000 !important; border-right:1px solid #000000 !important; }
+#inputTable tbody td.sep-strong { border-left:2px solid #000000 !important; border-right:1px solid #000000 !important; }
 
 /* 인풋 - 엑셀처럼 투명하고 셀 가득 */
 #inputTable input[type=number] { width:100% !important; height:46px !important; background:transparent !important; border:none !important; border-radius:0 !important; color:#000 !important; -webkit-text-fill-color:#000 !important; font-weight:500 !important; font-size:12px !important; text-align:center !important; box-shadow:none !important; padding:0 !important; }
