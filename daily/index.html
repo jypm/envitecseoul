@@ -992,10 +992,24 @@ window.kpNext = function(){
     btn.addEventListener('mouseup', stopDelRepeat);
     btn.addEventListener('mouseleave', stopDelRepeat);
   }
-  
-  // 키패드가 나타날 때마다 다시 설정
-  var origOpen = window.openKeypad;
-  window.saveMemo=function(){ try{ saveInputs(); }catch(e){} if(!inputCache[memoIdx]) inputCache[memoIdx]={collect:{},deliver:{},memo:''}; inputCache[memoIdx].memo=document.getElementById('memoInput').value.trim(); closeModal('memoModal'); renderInputTable(); };
+})();
+
+// 모든 키패드 버튼에 진동 추가
+(function(){
+  function addVibe(){
+    document.querySelectorAll('#customKeypad .kp-btn').forEach(btn=>{
+      if(btn._vibeAdded) return;
+      btn._vibeAdded = true;
+      btn.addEventListener('touchstart', ()=>{
+        if(navigator.vibrate && !btn.classList.contains('kp-del')) navigator.vibrate(15);
+      }, {passive:true});
+    });
+  }
+  document.addEventListener('touchstart', addVibe, {once:true});
+  setInterval(addVibe, 1000);
+})();
+
+window.saveMemo=function(){ try{ saveInputs(); }catch(e){} if(!inputCache[memoIdx]) inputCache[memoIdx]={collect:{},deliver:{},memo:''}; inputCache[memoIdx].memo=document.getElementById('memoInput').value.trim(); closeModal('memoModal'); renderInputTable(); };
 window.deleteMemo=function(){ try{ saveInputs(); }catch(e){} if(inputCache[memoIdx]) inputCache[memoIdx].memo=''; closeModal('memoModal'); renderInputTable(); };
 window.saveTmp=async function(){ saveInputs(); if(!tmpKey){ const date=document.getElementById('inputDate').value||today(); tmpKey=currentUser.userId+'_'+date+'_manual_'+Date.now(); } let curCar=''; try{ curCar=(currentUser?.cars&&currentUser.cars[0])?currentUser.cars[0]:(currentUser?.userId||''); }catch(e){} let curCourse=''; try{ curCourse=document.getElementById('inputTitle')?.textContent||''; }catch(e){} try{ await setDoc(doc(db,'dailyTemp3',tmpKey), {clients:inputClients,cache:inputCache,date:document.getElementById('inputDate').value||today(),userId:currentUser.userId,carNumber:curCar,courseName:curCourse,updatedAt:Timestamp.now()}); toast('임시저장 완료!'); }catch(e){ toast('실패', false); } };
 let pendingSend=false;
