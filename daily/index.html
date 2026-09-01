@@ -480,6 +480,106 @@ html body #inputScreen #inputTable input[type=number] { background:transparent !
 #customKeypad .kp-btn.kp-nav { background:#f0f0f0 !important; }
 #customKeypad .kp-btn.kp-num { background:#ffffff !important; }
 
+
+/* ===== 선택 표시 강화 + 깜빡이는 커서 ===== */
+#inputTable input.custom-active {
+  background:#fffbe6 !important;
+  background-color:#fffbe6 !important;
+  border:2px solid #000 !important;
+  font-weight:800 !important;
+  color:#000 !important;
+  -webkit-text-fill-color:#000 !important;
+  box-shadow:0 0 0 2px #ffe600 !important;
+  position:relative !important;
+}
+
+/* 선택된 셀 td에 깜빡이는 커서 표시 */
+#inputTable td.kp-focused {
+  position:relative !important;
+}
+#inputTable td.kp-focused::after {
+  content:'';
+  position:absolute;
+  right:6px;
+  top:50%;
+  transform:translateY(-50%);
+  width:2px;
+  height:20px;
+  background:#000;
+  animation:kp-blink 1s step-start infinite;
+  z-index:5;
+  pointer-events:none;
+}
+@keyframes kp-blink {
+  0%, 50% { opacity:1; }
+  51%, 100% { opacity:0; }
+}
+
+/* 모든 칸 - 연한색/진한색 구분 없이 선택 시 노란 배경 + 검정 테두리 확실히 */
+#inputTable tbody td.cb.custom-parent,
+#inputTable tbody td.cr.custom-parent,
+#inputTable tbody td.cb30.custom-parent,
+#inputTable tbody td.cr5.custom-parent,
+#inputTable tbody td.db.custom-parent,
+#inputTable tbody td.dr.custom-parent,
+#inputTable tbody td.db30.custom-parent,
+#inputTable tbody td.dr5.custom-parent {
+  background:#fffbe6 !important;
+  border:2px solid #000 !important;
+}
+
+/* ===== 달력 흰바탕 검정글자 검정테두리 + 상단 버튼 4개 동일 모양 ===== */
+#inputScreen .date-inp,
+#inputScreen .top-bar .date-inp {
+  background:#ffffff !important;
+  background-color:#ffffff !important;
+  color:#000000 !important;
+  border:1.5px solid #000000 !important;
+  border-radius:8px !important;
+  padding:6px 12px !important;
+  font-size:12px !important;
+  font-weight:700 !important;
+  color-scheme: light !important;
+}
+
+#inputScreen .top-bar .btn-ghost,
+#inputScreen .top-bar #totalCollectBadge,
+#inputScreen .hdr .btn-ghost,
+#inputScreen .hdr .btn-primary,
+#inputScreen .hdr .btn-secondary {
+  background:#ffffff !important;
+  background-color:#ffffff !important;
+  color:#000000 !important;
+  border:1.5px solid #000000 !important;
+  border-radius:8px !important;
+  padding:6px 12px !important;
+  font-size:12px !important;
+  font-weight:700 !important;
+  min-height:32px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+/* 수거개수 배지도 버튼과 동일 모양으로 */
+#totalCollectBadge {
+  background:#ffffff !important;
+  color:#000000 !important;
+  border:1.5px solid #000000 !important;
+  border-radius:8px !important;
+  padding:6px 12px !important;
+  font-weight:700 !important;
+}
+
+/* 전송 버튼도 동일 모양이지만 파란색 포인트 유지하고 싶으면 아래 주석 해제 */
+/* #inputScreen .hdr .btn-primary { background:#3D82F6 !important; color:#fff !important; border-color:#000 !important; } */
+
+/* 달력 아이콘도 검정으로 */
+#inputScreen .date-inp::-webkit-calendar-picker-indicator {
+  filter:invert(0) !important;
+  opacity:1 !important;
+}
+
 </style>
 </head>
 <body>
@@ -726,7 +826,11 @@ window.closeKeypad = function(){
   document.getElementById('inputScreen').classList.remove('kp-open');
   if(kpActiveInput){
     kpActiveInput.classList.remove('custom-active');
+    if(kpActiveInput.parentElement){
+      kpActiveInput.parentElement.classList.remove('kp-focused','custom-parent');
+    }
   }
+  document.querySelectorAll('#inputTable td.kp-focused').forEach(td=>td.classList.remove('kp-focused','custom-parent'));
   kpActiveInput = null;
   kpActiveIdx = -1;
   saveInputs();
