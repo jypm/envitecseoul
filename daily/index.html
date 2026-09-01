@@ -481,51 +481,6 @@ html body #inputScreen #inputTable input[type=number] { background:transparent !
 #customKeypad .kp-btn.kp-num { background:#ffffff !important; }
 
 
-/* ===== 선택 표시 강화 + 깜빡이는 커서 - 완전 수정 ===== */
-#inputTable input.custom-active {
-  background:#fffbe6 !important;
-  background-color:#fffbe6 !important;
-  border:3px solid #000 !important;
-  outline:3px solid #ffe600 !important;
-  outline-offset:-3px !important;
-  font-weight:900 !important;
-  color:#000 !important;
-  -webkit-text-fill-color:#000 !important;
-  box-shadow:inset 0 0 0 1px #000 !important;
-  position:relative !important;
-  z-index:10 !important;
-}
-
-/* 선택된 셀 td - overflow visible로 테두리 안 잘리게 */
-#inputTable td.kp-focused {
-  position:relative !important;
-  overflow:visible !important;
-  z-index:5 !important;
-  background:#fffbe6 !important;
-  background-color:#fffbe6 !important;
-  outline:3px solid #000 !important;
-  outline-offset:-1px !important;
-  border:2px solid #000 !important;
-}
-
-/* 깜빡이는 커서 - input 위에 뜨는 가짜 커서 */
-#fakeCursor {
-  position:fixed;
-  width:3px;
-  height:22px;
-  background:#000;
-  animation:kp-blink 1s step-start infinite;
-  z-index:10000;
-  pointer-events:none;
-  display:none;
-}
-#fakeCursor.show { display:block; }
-
-@keyframes kp-blink {
-  0%, 50% { opacity:1; }
-  51%, 100% { opacity:0; }
-}
-
 /* 모든 칸 - 연한색/진한색 구분 없이 선택 시 노란 배경 + 검정 테두리 확실히 */
 #inputTable tbody td.cb.custom-parent,
 #inputTable tbody td.cr.custom-parent,
@@ -609,32 +564,6 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
 }
 
 
-/* ===== 최종 선택 표시 - 모든 이전 규칙 덮어쓰기 ===== */
-#inputTable tbody td.kp-focused,
-#inputTable tbody td.custom-parent,
-#inputTable tbody td.cb.kp-focused,
-#inputTable tbody td.cr.kp-focused,
-#inputTable tbody td.cb30.kp-focused,
-#inputTable tbody td.cr5.kp-focused,
-#inputTable tbody td.db.kp-focused,
-#inputTable tbody td.dr.kp-focused,
-#inputTable tbody td.db30.kp-focused,
-#inputTable tbody td.dr5.kp-focused,
-#inputTable tbody td.cb.custom-parent,
-#inputTable tbody td.cr.custom-parent,
-#inputTable tbody td.cb30.custom-parent,
-#inputTable tbody td.cr5.custom-parent,
-#inputTable tbody td.db.custom-parent,
-#inputTable tbody td.dr.custom-parent,
-#inputTable tbody td.db30.custom-parent,
-#inputTable tbody td.dr5.custom-parent {
-  background:#fffbe6 !important;
-  background-color:#fffbe6 !important;
-  border:2px solid #000000 !important;
-  box-shadow:0 0 0 2px #ffe600, inset 0 0 0 1px #fff !important;
-  position:relative !important;
-}
-
 #inputTable input.custom-active,
 #inputTable tbody td.kp-focused input,
 #inputTable tbody td.custom-parent input,
@@ -652,21 +581,6 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
 }
 
 /* 깜빡이는 커서 - td 안에 가상 커서 */
-#inputTable td.kp-focused::after {
-  content:'';
-  position:absolute !important;
-  right:8px !important;
-  top:50% !important;
-  transform:translateY(-50%) !important;
-  width:3px !important;
-  height:24px !important;
-  background:#000000 !important;
-  animation:kp-blink 1s step-start infinite !important;
-  z-index:10 !important;
-  pointer-events:none !important;
-  display:block !important;
-}
-
 /* 포커스된 셀에 커서 텍스트도 추가 - 값이 있으면 끝에 */
 #inputTable td.kp-focused input.custom-active {
   padding-right:16px !important;
@@ -675,6 +589,75 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
 @keyframes kp-blink {
   0%, 50% { opacity:1; }
   51%, 100% { opacity:0; }
+}
+
+
+/* ===== 최종 선택 표시 + 깜빡이는 커서 - 확실하게 ===== */
+#inputTable tbody td.kp-focused,
+#inputTable tbody td.custom-parent {
+  background:#fffbe6 !important;
+  background-color:#fffbe6 !important;
+  border:2px solid #000 !important;
+  outline:3px solid #ffe600 !important;
+  outline-offset:-2px !important;
+  position:relative !important;
+  overflow:visible !important;
+  z-index:10 !important;
+}
+
+#inputTable input.custom-active {
+  background:transparent !important;
+  background-color:transparent !important;
+  border:none !important;
+  color:#000 !important;
+  -webkit-text-fill-color:#000 !important;
+  font-weight:900 !important;
+  font-size:16px !important;
+  text-align:center !important;
+  position:relative !important;
+  z-index:11 !important;
+}
+
+/* 깜빡이는 커서 - 진짜 보이는 커서 */
+#fakeCursor {
+  position:fixed;
+  width:3px;
+  height:24px;
+  background:#000;
+  animation:kp-blink 1s step-start infinite;
+  z-index:99999;
+  pointer-events:none;
+  display:none;
+  border-radius:1px;
+}
+#fakeCursor.show { display:block !important; }
+
+@keyframes kp-blink {
+  0%, 50% { opacity:1; }
+  51%, 100% { opacity:0; }
+}
+
+/* 선택된 칸에 커서 배경 효과 */
+#inputTable td.kp-focused::before {
+  content:'';
+  position:absolute;
+  right:4px;
+  top:50%;
+  transform:translateY(-50%);
+  width:3px;
+  height:22px;
+  background:#000;
+  animation:kp-blink 1s step-start infinite;
+  z-index:20;
+  pointer-events:none;
+}
+
+/* 달력 흰바탕 검정글자 */
+#inputScreen .date-inp {
+  background:#fff !important;
+  color:#000 !important;
+  border:1.5px solid #000 !important;
+  border-radius:8px !important;
 }
 
 </style>
@@ -887,36 +870,38 @@ function renderInputTable(){
 window.openKeypad = function(el, idx, clientName, sizeLabel){
   kpActiveInput = el;
   kpActiveIdx = idx;
-  // 기존 active 제거
   document.querySelectorAll('#inputTable input.custom-active').forEach(i=>i.classList.remove('custom-active'));
+  document.querySelectorAll('#inputTable td.kp-focused').forEach(td=>td.classList.remove('kp-focused','custom-parent'));
   el.classList.add('custom-active');
-  // 헤더 제거됨 - clientName, sizeLabel 표시 안함
+  if(el.parentElement){
+    el.parentElement.classList.add('kp-focused','custom-parent');
+  }
   document.getElementById('customKeypad').classList.add('show');
   document.getElementById('inputScreen').classList.add('kp-open');
-  // 해당 칸이 키패드에 가려지지 않게 테이블 스크롤 - 1~4번 헤드 밑으로 들어가는 버그 수정: 이미 보이는 칸은 스크롤 안함
+  var fc=document.getElementById('fakeCursor');
+  if(fc){
+    var rect=el.getBoundingClientRect();
+    var len=(el.value||'').length;
+    var offset = 12 + len*9;
+    if(offset>rect.width-6) offset=rect.width-6;
+    fc.style.left = (rect.left + offset) + 'px';
+    fc.style.top = (rect.top + rect.height/2 - 12) + 'px';
+    fc.classList.add('show');
+  }
   setTimeout(()=>{
     var wrap=document.querySelector('#inputScreen .table-wrap');
     if(!wrap) return;
     var rect = el.getBoundingClientRect();
-    var wrapRect = wrap.getBoundingClientRect();
-    var keypadHeight = 260;
-    var visibleBottom = window.innerHeight - keypadHeight - 20;
-    var headerBottom = 88 + 64; // hdr+top-bar+thead 약 88+64
-    // 이미 화면 안에 있으면 스크롤 안함
-    if(rect.top >= headerBottom && rect.bottom <= visibleBottom){
-      return;
-    }
-    // 아래에 가려졌으면 위로 스크롤
+    var keypadHeight = 210;
+    var visibleBottom = window.innerHeight - keypadHeight - 10;
+    var headerBottom = 88 + 64;
     if(rect.bottom > visibleBottom){
-      var diff = rect.bottom - visibleBottom + 20;
-      wrap.scrollBy({top: diff, behavior:'smooth'});
+      wrap.scrollBy({top: rect.bottom - visibleBottom + 20, behavior:'smooth'});
     }
-    // 위에 가려졌으면(헤드 밑으로) 아래로 스크롤 - 이게 1~4번 버그 핵심
     if(rect.top < headerBottom){
-      var diff2 = headerBottom - rect.top + 10;
-      wrap.scrollBy({top: -diff2, behavior:'smooth'});
+      wrap.scrollBy({top: -(headerBottom - rect.top + 10), behavior:'smooth'});
     }
-  }, 100);
+  }, 80);
 };
 
 window.closeKeypad = function(){
@@ -931,59 +916,55 @@ window.closeKeypad = function(){
     }
   }
   document.querySelectorAll('#inputTable td.kp-focused').forEach(td=>td.classList.remove('kp-focused','custom-parent'));
-  kpActiveInput = null;
-  kpActiveIdx = -1;
+  kpActiveInput=null;
+  kpActiveIdx=-1;
   saveInputs();
   updateTotal();
 };
 
 window.kpPress = function(digit){
   if(!kpActiveInput) return;
-  var cur = kpActiveInput.value || '';
-  var next = cur + digit;
-  if(next.length>1 && next[0]==='0' && !next.startsWith('00')){
-    if(next.startsWith('0') && digit!=='0'){
-      next = digit;
-    }
-  }
-  if(next.length>3) next = next.slice(0,3);
-  if(parseInt(next)>999) next = '999';
-  if(next==='00' || next==='000') next='0';
-  kpActiveInput.value = next;
-  // 커서 위치 업데이트
+  var cur=kpActiveInput.value||'';
+  var next=cur+digit;
+  if(next.length>1 && next[0]==='0' && digit!=='0'){ next=digit; }
+  if(next.length>3) next=next.slice(0,3);
+  if(parseInt(next)>999) next='999';
+  if(next==='00'||next==='000') next='0';
+  kpActiveInput.value=next;
   var fc=document.getElementById('fakeCursor');
   if(fc && kpActiveInput){
     var rect=kpActiveInput.getBoundingClientRect();
-    var textWidth = next.length * 8;
-    fc.style.left = (rect.left + Math.min(rect.width-8, 12 + textWidth)) + 'px';
+    var offset=12+next.length*9;
+    if(offset>rect.width-6) offset=rect.width-6;
+    fc.style.left=(rect.left+offset)+'px';
   }
-  saveInputs();
-  updateTotal();
+  saveInputs(); updateTotal();
 };
 
 window.kpDelete = function(){
   if(!kpActiveInput) return;
-  var cur = kpActiveInput.value || '';
-  if(cur.length>0){
-    cur = cur.slice(0,-1);
-  }
-  kpActiveInput.value = cur;
+  var cur=kpActiveInput.value||'';
+  if(cur.length>0) cur=cur.slice(0,-1);
+  kpActiveInput.value=cur;
   var fc=document.getElementById('fakeCursor');
   if(fc && kpActiveInput){
     var rect=kpActiveInput.getBoundingClientRect();
-    var textWidth = cur.length * 8;
-    fc.style.left = (rect.left + Math.min(rect.width-8, 12 + textWidth)) + 'px';
+    var offset=12+cur.length*9;
+    if(offset>rect.width-6) offset=rect.width-6;
+    fc.style.left=(rect.left+offset)+'px';
   }
-  saveInputs();
-  updateTotal();
+  saveInputs(); updateTotal();
 };
 
 window.kpClear = function(){
   if(!kpActiveInput) return;
-  kpActiveInput.value = '';
-  // kpValue 헤더 제거됨
-  saveInputs();
-  updateTotal();
+  kpActiveInput.value='';
+  var fc=document.getElementById('fakeCursor');
+  if(fc && kpActiveInput){
+    var rect=kpActiveInput.getBoundingClientRect();
+    fc.style.left=(rect.left+12)+'px';
+  }
+  saveInputs(); updateTotal();
 };
 
 window.kpMove = function(dir){
