@@ -611,18 +611,19 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
   border:none !important;
   color:#000 !important;
   -webkit-text-fill-color:#000 !important;
-  font-weight:900 !important;
-  font-size:16px !important;
+  font-weight:800 !important;
+  font-size:15px !important;
   text-align:center !important;
   position:relative !important;
   z-index:11 !important;
+  line-height:46px !important;
 }
 
-/* 깜빡이는 커서 - 진짜 보이는 커서 */
+/* 깜빡이는 커서 - 글자 크기에 맞춤 */
 #fakeCursor {
   position:fixed;
-  width:3px;
-  height:24px;
+  width:2px;
+  height:18px;
   background:#000;
   animation:kp-blink 1s step-start infinite;
   z-index:99999;
@@ -637,20 +638,8 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
   51%, 100% { opacity:0; }
 }
 
-/* 선택된 칸에 커서 배경 효과 */
-#inputTable td.kp-focused::before {
-  content:'';
-  position:absolute;
-  right:4px;
-  top:50%;
-  transform:translateY(-50%);
-  width:3px;
-  height:22px;
-  background:#000;
-  animation:kp-blink 1s step-start infinite;
-  z-index:20;
-  pointer-events:none;
-}
+/* 커서 중복 방지 - ::before 제거, fakeCursor만 사용 */
+#inputTable td.kp-focused::before { display:none !important; }
 
 /* 달력 흰바탕 검정글자 */
 #inputScreen .date-inp {
@@ -700,7 +689,7 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
     <button class="kp-btn kp-del" onclick="kpDelete()">⌫</button>
     <button class="kp-btn kp-clear" onclick="kpClear()">C</button>
     <button class="kp-btn kp-num" onclick="kpPress('0')">0</button>
-    <button class="kp-btn kp-num" onclick="kpPress('00')">00</button>
+    <button class="kp-btn kp-num" onclick="kpPress('.')">.</button>
     <button class="kp-btn kp-nav" onclick="kpNext()">다음 ▶</button>
   </div>
 </div>
@@ -926,15 +915,27 @@ window.kpPress = function(digit){
   if(!kpActiveInput) return;
   var cur=kpActiveInput.value||'';
   var next=cur+digit;
-  if(next.length>1 && next[0]==='0' && digit!=='0'){ next=digit; }
-  if(next.length>3) next=next.slice(0,3);
-  if(parseInt(next)>999) next='999';
+  // 점 처리
+  if(digit==='.'){
+    if(cur.includes('.')) return; // 점은 한번만
+    if(cur==='') next='0.';
+  } else {
+    if(next.length>1 && next[0]==='0' && next[1]!=='.' && digit!=='0'){ next=digit; }
+  }
+  // 길이 제한: 점 포함 4자리까지 (예: 99.9)
+  if(next.length>4) {
+    // 점 있으면 4자리, 없으면 3자리
+    if(!next.includes('.')) next=next.slice(0,3);
+    else next=next.slice(0,4);
+  }
+  // 점 없을 때만 999 제한
+  if(!next.includes('.') && parseInt(next)>999) next='999';
   if(next==='00'||next==='000') next='0';
   kpActiveInput.value=next;
   var fc=document.getElementById('fakeCursor');
   if(fc && kpActiveInput){
     var rect=kpActiveInput.getBoundingClientRect();
-    var offset=12+next.length*9;
+    var offset=12+next.length*8;
     if(offset>rect.width-6) offset=rect.width-6;
     fc.style.left=(rect.left+offset)+'px';
   }
