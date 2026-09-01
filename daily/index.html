@@ -815,9 +815,6 @@ async function loadMemoCache(){
   renderInputTable();
 }
 function saveInputs(){ inputClients.forEach((name,idx)=>{ const row=document.querySelector(`tr[data-idx="${idx}"]`); if(!row) return; if(!inputCache[idx]) inputCache[idx]={collect:{},deliver:{},memo:''}; else { if(!inputCache[idx].collect) inputCache[idx].collect={}; if(!inputCache[idx].deliver) inputCache[idx].deliver={}; if(typeof inputCache[idx].memo!=='string') inputCache[idx].memo=''; } SIZES.forEach(sz=>{ const c=row.querySelector(`[data-t="c"][data-k="${sz}"]`); const d=row.querySelector(`[data-t="d"][data-k="${sz}"]`); if(c) inputCache[idx].collect[sz]=c.value; if(d) inputCache[idx].deliver[sz]=d.value; }); }); }
-let kpActiveInput = null;
-let kpActiveIdx = -1;
-
 function renderInputTable(){
   const body=document.getElementById('inputBody');
   if(!inputClients.length){ body.innerHTML=`<tr><td colspan="22" style="padding:20px;text-align:center;color:#aaa">코스를 불러오거나 거래처를 추가하세요</td></tr>`; updateTotal(); return; }
@@ -839,27 +836,19 @@ function renderInputTable(){
   updateTotal();
 }
 
+
+let kpActiveInput = null;
+let kpActiveIdx = -1;
+
 window.openKeypad = function(el, idx, clientName, sizeLabel){
   kpActiveInput = el;
   kpActiveIdx = idx;
   document.querySelectorAll('#inputTable input.custom-active').forEach(i=>i.classList.remove('custom-active'));
   document.querySelectorAll('#inputTable td.kp-focused').forEach(td=>td.classList.remove('kp-focused','custom-parent'));
   el.classList.add('custom-active');
-  if(el.parentElement){
-    el.parentElement.classList.add('kp-focused','custom-parent');
-  }
+  if(el.parentElement) el.parentElement.classList.add('kp-focused','custom-parent');
   document.getElementById('customKeypad').classList.add('show');
   document.getElementById('inputScreen').classList.add('kp-open');
-  var fc=document.getElementById('fakeCursor');
-  if(fc){
-    var rect=el.getBoundingClientRect();
-    var len=(el.value||'').length;
-    var offset = 12 + len*9;
-    if(offset>rect.width-6) offset=rect.width-6;
-    fc.style.left = (rect.left + offset) + 'px';
-    fc.style.top = (rect.top + rect.height/2 - 12) + 'px';
-    fc.classList.add('show');
-  }
   setTimeout(()=>{
     var wrap=document.querySelector('#inputScreen .table-wrap');
     if(!wrap) return;
@@ -888,6 +877,18 @@ window.closeKeypad = function(){
   saveInputs(); updateTotal();
 };
 
+window.kpPress = function(digit){
+  if(!kpActiveInput) return;
+  if(navigator.vibrate) navigator.vibrate(15);
+  var cur=kpActiveInput.value||'';
+  var next=cur+digit;
+  if(next.length>1 && next[0]==='0'){ next=digit; }
+  if(next.length>3) next=next.slice(0,3);
+  if(parseInt(next)>999) next='999';
+  kpActiveInput.value=next;
+  saveInputs(); updateTotal();
+};
+
 window.kpDelete = function(){
   if(!kpActiveInput) return;
   if(navigator.vibrate) navigator.vibrate(15);
@@ -912,41 +913,22 @@ window.kpPrev = function(){
   if(idx>0){
     var target = allInputs[idx-1];
     var cIdx = parseInt(target.getAttribute('data-idx'));
-    var cName = inputClients[cIdx]||'';
-    var colPos = (idx-1) % 20;
-    var group='';
-    if(colPos<5) group='수거 박스';
-    else if(colPos<10) group='수거 합성';
-    else if(colPos<15) group='납품 박스';
-    else group='납품 합성';
-    openKeypad(target, cIdx, cName, group + ' ' + target.getAttribute('data-k'));
+    openKeypad(target, cIdx, inputClients[cIdx]||'', target.getAttribute('data-k'));
   }
 };
 
 window.kpMove = function(dir){
   if(!kpActiveInput) return;
   if(navigator.vibrate) navigator.vibrate(15);
-  // dir: -1 위, 1 아래 (같은 열에서 위아래 거래처 이동)
   var allInputs = Array.from(document.querySelectorAll('#inputBody input'));
   var idx = allInputs.indexOf(kpActiveInput);
   if(idx===-1) return;
-  var cols = 20; // 전체 열 수
+  var cols = 20;
   var targetIdx = idx + dir * cols;
   if(targetIdx>=0 && targetIdx < allInputs.length){
     var target = allInputs[targetIdx];
-    var t = target.getAttribute('data-t');
-    var k = target.getAttribute('data-k');
     var cIdx = parseInt(target.getAttribute('data-idx'));
-    var cName = inputClients[cIdx]||'';
-    var label = (t==='c' ? (k.includes('L') && (k.includes('20L')||k.includes('10L')||k.includes('5L')||k.includes('3L')||k.includes('1L') ? '' : '') ) : '') + '';
-    // 간단 라벨 재생성
-    var group = '';
-    var colPos = idx % cols;
-    if(colPos<5) group='수거 박스';
-    else if(colPos<10) group='수거 합성';
-    else if(colPos<15) group='납품 박스';
-    else group='납품 합성';
-    openKeypad(target, cIdx, cName, group + ' ' + k);
+    openKeypad(target, cIdx, inputClients[cIdx]||'', target.getAttribute('data-k'));
   }
 };
 
@@ -957,22 +939,12 @@ window.kpNext = function(){
   var idx = allInputs.indexOf(kpActiveInput);
   if(idx>=0 && idx < allInputs.length-1){
     var target = allInputs[idx+1];
-    var t = target.getAttribute('data-t');
-    var k = target.getAttribute('data-k');
     var cIdx = parseInt(target.getAttribute('data-idx'));
-    var cName = inputClients[cIdx]||'';
-    var colPos = (idx+1) % 20;
-    var group='';
-    if(colPos<5) group='수거 박스';
-    else if(colPos<10) group='수거 합성';
-    else if(colPos<15) group='납품 박스';
-    else group='납품 합성';
-    openKeypad(target, cIdx, cName, group + ' ' + k);
+    openKeypad(target, cIdx, inputClients[cIdx]||'', target.getAttribute('data-k'));
   } else {
     closeKeypad();
   }
 };
-
 
 
 // 지우기 길게 누르면 주루룩 삭제 + 진동
@@ -1023,56 +995,7 @@ window.kpNext = function(){
   
   // 키패드가 나타날 때마다 다시 설정
   var origOpen = window.openKeypad;
-  window.openKeypad = function(el, idx, name, size){
-    var result = origOpen ? origOpen.apply(this, arguments) : null;
-    setTimeout(setupDelBtn, 100);
-    return result;
-  };
-})();
-
-// 모든 키패드 버튼에 진동 추가
-(function(){
-  function addVibe(){
-    document.querySelectorAll('#customKeypad .kp-btn').forEach(btn=>{
-      if(btn._vibeAdded) return;
-      btn._vibeAdded = true;
-      btn.addEventListener('touchstart', ()=>{
-        if(navigator.vibrate && !btn.classList.contains('kp-del')) navigator.vibrate(15);
-      }, {passive:true});
-    });
-  }
-  document.addEventListener('touchstart', addVibe, {once:true});
-  setInterval(addVibe, 1000);
-})();
-
-
-window.limit3=function(el){
-  let v=el.value.replace(/[^0-9]/g,'');
-  if(v.length>3) v=v.slice(0,3);
-  if(parseInt(v)>999) v='999';
-  el.value=v;
-  updateTotal();
-}
-function updateTotal(){ let t=0; document.querySelectorAll('#inputBody input[data-t="c"]').forEach(inp=>{ t+=parseFloat(inp.value)||0; }); const el=document.getElementById('totalCollectBadge'); if(el) el.textContent=`수거 ${t}개`; }
-window.openMemo=function(idx){ 
-  try{ saveInputs(); }catch(e){} 
-  memoIdx=idx; 
-  const name=inputClients[idx]; 
-  document.getElementById('memoTitle').textContent=name; 
-  const prevMemo = memoCache[name] || '';
-  const todayMemo = (inputCache[idx] && inputCache[idx].memo) ? inputCache[idx].memo : '';
-  // v33: 오늘이랑 이전이 같으면 이전은 숨김 (오늘 입력한게 이전에 또 뜨는 현상 방지)
-  if(prevMemo && todayMemo && prevMemo.trim() === todayMemo.trim()){
-    document.getElementById('memoPrev').textContent = '이전 메모 없음 (오늘 메모와 동일)';
-    document.getElementById('memoPrev').style.color = '#666';
-  } else {
-    document.getElementById('memoPrev').textContent = prevMemo ? '이전: ' + prevMemo : '이전 메모 없음';
-    document.getElementById('memoPrev').style.color = prevMemo ? '#f0d060' : '#888';
-  }
-  document.getElementById('memoInput').value = todayMemo;
-  document.getElementById('memoModal').classList.add('show'); 
-};
-window.saveMemo=function(){ try{ saveInputs(); }catch(e){} if(!inputCache[memoIdx]) inputCache[memoIdx]={collect:{},deliver:{},memo:''}; inputCache[memoIdx].memo=document.getElementById('memoInput').value.trim(); closeModal('memoModal'); renderInputTable(); };
+  window.saveMemo=function(){ try{ saveInputs(); }catch(e){} if(!inputCache[memoIdx]) inputCache[memoIdx]={collect:{},deliver:{},memo:''}; inputCache[memoIdx].memo=document.getElementById('memoInput').value.trim(); closeModal('memoModal'); renderInputTable(); };
 window.deleteMemo=function(){ try{ saveInputs(); }catch(e){} if(inputCache[memoIdx]) inputCache[memoIdx].memo=''; closeModal('memoModal'); renderInputTable(); };
 window.saveTmp=async function(){ saveInputs(); if(!tmpKey){ const date=document.getElementById('inputDate').value||today(); tmpKey=currentUser.userId+'_'+date+'_manual_'+Date.now(); } let curCar=''; try{ curCar=(currentUser?.cars&&currentUser.cars[0])?currentUser.cars[0]:(currentUser?.userId||''); }catch(e){} let curCourse=''; try{ curCourse=document.getElementById('inputTitle')?.textContent||''; }catch(e){} try{ await setDoc(doc(db,'dailyTemp3',tmpKey), {clients:inputClients,cache:inputCache,date:document.getElementById('inputDate').value||today(),userId:currentUser.userId,carNumber:curCar,courseName:curCourse,updatedAt:Timestamp.now()}); toast('임시저장 완료!'); }catch(e){ toast('실패', false); } };
 let pendingSend=false;
