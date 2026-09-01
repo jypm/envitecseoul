@@ -37,13 +37,13 @@ html, body { height:100%; }
 .login-err { font-size:12px; color:#e74c3c; text-align:center; margin-top:8px; display:none; }
 
 
-#inputScreen { height:100vh; height:100dvh; height:100svh; overflow:hidden; display:none; flex-direction:column; } #inputScreen.active { display:flex; }
-#inputScreen .hdr { position:sticky; top:0; z-index:30; background:#111; }
+#inputScreen { height:100vh; height:100dvh; height:100svh; overflow:hidden; display:none; flex-direction:column; position:relative; } #inputScreen.active { display:flex; }
+#inputScreen .hdr { position:fixed; top:0; left:0; right:0; z-index:50; background:#111; height:44px; }
 #inputScreen .hdr-mid { display:flex; gap:6px; align-items:center; flex:1; justify-content:center; }
-#inputScreen .top-bar { position:sticky; top:45px; z-index:29; overflow-x:auto; scrollbar-width:none; background:#151515; border-bottom:2px solid #555; padding:8px 10px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:nowrap; }
+#inputScreen .top-bar { position:fixed; top:44px; left:0; right:0; z-index:49; overflow-x:auto; scrollbar-width:none; background:#151515; border-bottom:2px solid #555; padding:8px 10px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:nowrap; height:44px; }
 #inputScreen .top-bar::-webkit-scrollbar { display:none; }
 .date-inp { background:#1a1a1a; border:1px solid #555; border-radius:8px; padding:5px 10px; color:#f0f0f5; font-size:12px; outline:none; color-scheme: dark; flex-shrink:0; }
-#inputScreen .table-wrap { flex:1; min-height:0; overflow:auto; -webkit-overflow-scrolling:touch; position:relative; background:#080808; }
+#inputScreen .table-wrap { position:fixed; top:88px; left:0; right:0; bottom:0; overflow:auto; -webkit-overflow-scrolling:touch; background:#080808; z-index:1; }
 table { border-collapse:separate; border-spacing:0; min-width:max-content; }
 thead { position:sticky; top:0; z-index:20; }
 thead th { position:sticky; top:0; background:#1a1a1a !important; z-index:15; padding:6px 2px; font-size:10px; color:#ddd; border-bottom:3px solid #777; border-right:1px solid #333; white-space:nowrap; text-align:center; font-weight:800; }
@@ -156,12 +156,12 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 
 /* ===== EXCEL SIMPLE OVERRIDE - 2026-09-01 - 6개 수정 통합 ===== */
 #inputScreen { background:#ffffff !important; }
-#inputScreen .hdr { background:#f3f3f3 !important; border-bottom:1px solid #000000 !important; }
+#inputScreen .hdr { background:#f3f3f3 !important; border-bottom:1px solid #000000 !important; position:fixed !important; top:0 !important; left:0 !important; right:0 !important; z-index:50 !important; height:44px !important; }
 #inputScreen .hdr .hdr-title { color:#000 !important; }
 #inputScreen .hdr .hdr-sub { color:#555 !important; }
 #inputScreen .hdr .back-btn { color:#000 !important; }
-#inputScreen .top-bar { background:#efefef !important; border-bottom:1px solid #000000 !important; }
-#inputScreen .table-wrap { background:#ffffff !important; }
+#inputScreen .top-bar { background:#efefef !important; border-bottom:1px solid #000000 !important; position:fixed !important; top:44px !important; left:0 !important; right:0 !important; z-index:49 !important; height:44px !important; }
+#inputScreen .table-wrap { background:#ffffff !important; position:fixed !important; top:88px !important; left:0 !important; right:0 !important; bottom:0 !important; overflow:auto !important; z-index:1 !important; }
 
 #inputTable { border-collapse:collapse !important; border-spacing:0 !important; table-layout:fixed !important; background:#ffffff !important; }
 
@@ -633,6 +633,42 @@ function initInputScreen(){ return window.initInputScreen(); }
   };
 })();
 
+
+
+// 키패드 올라와도 고정 헤더 안 올라가게 고정 + 입력칸 포커스 시 스크롤 보정
+(function(){
+  function isInputScreenActive(){
+    var s=document.getElementById('inputScreen');
+    return s && s.classList.contains('active');
+  }
+  // visualViewport 리사이즈 시 헤더 강제 고정
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', function(){
+      if(!isInputScreenActive()) return;
+      var hdr=document.querySelector('#inputScreen .hdr');
+      var topbar=document.querySelector('#inputScreen .top-bar');
+      var wrap=document.querySelector('#inputScreen .table-wrap');
+      if(hdr){ hdr.style.top='0px'; hdr.style.position='fixed'; }
+      if(topbar){ topbar.style.top='44px'; topbar.style.position='fixed'; }
+      if(wrap){ wrap.style.top='88px'; }
+    });
+  }
+  // 인풋 포커스 시 헤더가 밀리지 않게 상단으로 스크롤 고정
+  document.addEventListener('focusin', function(e){
+    if(!isInputScreenActive()) return;
+    if(e.target && e.target.matches('#inputTable input')){
+      setTimeout(function(){
+        // 헤더를 다시 top에 고정
+        var hdr=document.querySelector('#inputScreen .hdr');
+        var topbar=document.querySelector('#inputScreen .top-bar');
+        if(hdr) hdr.style.transform='translateY(0)';
+        if(topbar) topbar.style.transform='translateY(0)';
+        // 현재 포커스된 셀이 키보드에 가려지지 않게 살짝 스크롤
+        try{ e.target.scrollIntoView({block:'center', inline:'center', behavior:'smooth'}); }catch(err){}
+      }, 100);
+    }
+  });
+})();
 
 </script>
 <script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js', {scope: './'}).then(reg=>{ reg.update(); }).catch(()=>{}); }); }</script>
