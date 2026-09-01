@@ -635,39 +635,137 @@ function initInputScreen(){ return window.initInputScreen(); }
 
 
 
-// 키패드 올라와도 고정 헤더 안 올라가게 고정 + 입력칸 포커스 시 스크롤 보정
+// 키패드 올라와도 고정 헤더 절대 안 올라가게 + 아래쪽 칸 터치 시 테이블 내부만 스크롤
 (function(){
   function isInputScreenActive(){
     var s=document.getElementById('inputScreen');
     return s && s.classList.contains('active');
   }
-  // visualViewport 리사이즈 시 헤더 강제 고정
+  var lastVVHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+  function adjustForKeyboard(){
+    if(!isInputScreenActive()) return;
+    var vv = window.visualViewport;
+    var vh = vv ? vv.height : window.innerHeight;
+    var vw = vv ? vv.width : window.innerWidth;
+    var hdr=document.querySelector('#inputScreen .hdr');
+    var topbar=document.querySelector('#inputScreen .top-bar');
+    var wrap=document.querySelector('#inputScreen .table-wrap');
+    var inputScreen=document.getElementById('inputScreen');
+    
+    // 전체 화면 높이를 visualViewport 높이에 맞춤 (키보드 올라오면 줄어듦)
+    if(inputScreen){
+      inputScreen.style.height = vh + 'px';
+      inputScreen.style.minHeight = vh + 'px';
+    }
+    // 헤더는 무조건 top 0,44에 고정
+    if(hdr){
+      hdr.style.position='fixed';
+      hdr.style.top='0px';
+      hdr.style.left='0px';
+      hdr.style.right='0px';
+      hdr.style.transform='none';
+    }
+    if(topbar){
+      topbar.style.position='fixed';
+      topbar.style.top='44px';
+      topbar.style.left='0px';
+      topbar.style.right='0px';
+      topbar.style.transform='none';
+    }
+    // 테이블 랩 높이를 키보드 제외한 영역으로
+    if(wrap){
+      wrap.style.position='fixed';
+      wrap.style.top='88px';
+      wrap.style.left='0px';
+      wrap.style.right='0px';
+      wrap.style.bottom='0px';
+      wrap.style.height = (vh - 88) + 'px';
+      wrap.style.maxHeight = (vh - 88) + 'px';
+    }
+    lastVVHeight = vh;
+  }
+
+  // visualViewport 리사이즈 = 키패드 올라옴/내려감
   if(window.visualViewport){
-    window.visualViewport.addEventListener('resize', function(){
+    window.visualViewport.addEventListener('resize', adjustForKeyboard);
+    window.visualViewport.addEventListener('scroll', function(){
+      // visualViewport scroll 시에도 헤더 고정
       if(!isInputScreenActive()) return;
       var hdr=document.querySelector('#inputScreen .hdr');
       var topbar=document.querySelector('#inputScreen .top-bar');
-      var wrap=document.querySelector('#inputScreen .table-wrap');
-      if(hdr){ hdr.style.top='0px'; hdr.style.position='fixed'; }
-      if(topbar){ topbar.style.top='44px'; topbar.style.position='fixed'; }
-      if(wrap){ wrap.style.top='88px'; }
+      if(hdr){ hdr.style.top='0px'; }
+      if(topbar){ topbar.style.top='44px'; }
     });
   }
-  // 인풋 포커스 시 헤더가 밀리지 않게 상단으로 스크롤 고정
+  window.addEventListener('resize', adjustForKeyboard);
+
+  // 인풋 포커스 시: 브라우저 기본 자동 스크롤 막고, 테이블 내부에서만 스크롤
   document.addEventListener('focusin', function(e){
     if(!isInputScreenActive()) return;
     if(e.target && e.target.matches('#inputTable input')){
+      var wrap=document.querySelector('#inputScreen .table-wrap');
+      var hdr=document.querySelector('#inputScreen .hdr');
+      var topbar=document.querySelector('#inputScreen .top-bar');
+      
+      // 헤더 강제 고정 (브라우저가 밀어올려도 다시 내림)
+      if(hdr){ hdr.style.top='0px'; hdr.style.transform='none'; }
+      if(topbar){ topbar.style.top='44px'; topbar.style.transform='none'; }
+      
+      // 윈도우 스크롤을 0으로 강제 (전체 페이지가 위로 올라가는 것 방지)
+      window.scrollTo(0,0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+
       setTimeout(function(){
-        // 헤더를 다시 top에 고정
-        var hdr=document.querySelector('#inputScreen .hdr');
-        var topbar=document.querySelector('#inputScreen .top-bar');
-        if(hdr) hdr.style.transform='translateY(0)';
-        if(topbar) topbar.style.transform='translateY(0)';
-        // 현재 포커스된 셀이 키보드에 가려지지 않게 살짝 스크롤
-        try{ e.target.scrollIntoView({block:'center', inline:'center', behavior:'smooth'}); }catch(err){}
-      }, 100);
+        window.scrollTo(0,0);
+        // 테이블 랩 내부에서만 해당 입력칸이 보이게 스크롤
+        if(wrap){
+          var rect = e.target.getBoundingClientRect();
+          var wrapRect = wrap.getBoundingClientRect();
+          // 입력칸이 wrap의 하단 40% 아래에 있으면 위로 스크롤
+          var visibleBottom = wrapRect.bottom - 20; // 키보드 바로 위 여유
+          if(rect.bottom > visibleBottom){
+            var diff = rect.bottom - visibleBottom + 80; // 80px 여유
+            wrap.scrollTop += diff;
+          }
+          // 입력칸이 헤더에 가려지면 아래로 스크롤
+          var visibleTop = wrapRect.top + 60; // 헤더+서브헤더 여유
+          if(rect.top < visibleTop){
+            var diff2 = visibleTop - rect.top + 20;
+            wrap.scrollTop -= diff2;
+          }
+        }
+        // 다시 한번 헤더 고정 확인
+        if(hdr){ hdr.style.top='0px'; }
+        if(topbar){ topbar.style.top='44px'; }
+      }, 50);
     }
   });
+
+  // focusout 시에도 헤더 고정 유지
+  document.addEventListener('focusout', function(){
+    if(!isInputScreenActive()) return;
+    setTimeout(function(){
+      window.scrollTo(0,0);
+      adjustForKeyboard();
+    }, 100);
+  });
+
+  // 초기 및 화면 전환 시 한번 적용
+  var origShow = window.showScreen;
+  window.showScreen = function(id, push){
+    if(origShow) origShow(id, push);
+    else {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      var t = document.getElementById(id); if(t) t.classList.add('active');
+    }
+    if(id==='inputScreen'){
+      setTimeout(adjustForKeyboard, 50);
+      setTimeout(adjustForKeyboard, 300);
+      setTimeout(adjustForKeyboard, 600);
+    }
+  };
 })();
 
 </script>
