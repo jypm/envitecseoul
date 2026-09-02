@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<!-- WHITE FINAL v20250902-59161 - Cache Busted -->
+
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-visual">
 <link rel="icon" type="image/png" sizes="32x32" href="icon_daily3.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icon_daily3-180.png">
@@ -10,7 +15,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#ffffff">
 <meta name="color-scheme" content="light">
-<title>수거 일지</title>
+<title>수거 일지 WHITE v20250902</title>
 <style>
 
 :root { color-scheme: light; } * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
@@ -121,6 +126,7 @@ import { getFirestore, collection, addDoc, doc, getDocs, query, where, getDoc, s
 const firebaseConfig = { apiKey: "AIzaSyCka6GbEUJBUf-5BFxvD0O-Hv9dS-T3Big", authDomain: "jypenvitec.firebaseapp.com", projectId: "jypenvitec", storageBucket: "jypenvitec.appspot.com", messagingSenderId: "760975820830", appId: "1:760975820830:web:8b20d40a3d1cf3a1f8e9de" };
 const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 const BOX=['4L','12L','30L','50L','63L']; const RESIN=['1L','2L','5L','10L','20L']; const SIZES=[...BOX,...RESIN];
+console.log("WHITE FINAL v20250902-59161 LOADED");
 let currentUser=null; let allClients=[]; let courseList=[]; let ceClients=[]; let ceCourseId=null; let inputClients=[]; let inputCache={}; let memoCache={}; let memoIdx=-1; let tmpKey=null; let histData=[]; let histDetailData=null;
 function escapeHTML(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function isSessionValid(s){ try{ const d=JSON.parse(s); const age=Date.now()-(d._savedAt||0); return age < 12*60*60*1000; }catch(e){ return false; } }
