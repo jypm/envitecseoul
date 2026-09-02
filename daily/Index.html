@@ -135,8 +135,8 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; justify-content:center; align-items:center; } .modal-bg.show { display:flex; } .modal { background:#111; border:1px solid #555; border-radius:16px; padding:20px; width:90%; max-width:360px; position:relative; } .modal-close { position:absolute; top:12px; right:14px; background:none; border:none; color:#bbb; font-size:20px; cursor:pointer; } .modal h3 { font-size:15px; margin-bottom:14px; } .modal textarea { width:100%; background:#1a1a1a; border:1px solid #555; border-radius:8px; padding:10px; color:#f0f0f5; font-size:14px; resize:none; outline:none; }
 .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1e1e2e; border:1px solid #666; border-radius:10px; padding:10px 20px; font-size:13px; z-index:200; display:none; white-space:nowrap; } .toast.show { display:block; }
 
-/* === INPUT SCREEN - CLEAN LIGHT THEME (2번 개선) === */
-#inputScreen { background:#ffffff !important; color:#000000 !important; color-scheme: light !important; }
+/* CLEAN LIGHT THEME */
+#inputScreen { background:#ffffff !important; color:#000000 !important; }
 #inputScreen .hdr { background:#f8f8f8 !important; border-bottom:1px solid #ddd !important; }
 #inputScreen .hdr .hdr-title { color:#000 !important; }
 #inputScreen .hdr .hdr-sub { color:#555 !important; }
@@ -145,19 +145,14 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 #inputScreen .table-wrap { background:#ffffff !important; }
 #inputScreen #inputTable { background:#ffffff !important; border-collapse:collapse !important; }
 #inputScreen #inputTable thead th { background:#f2f2f2 !important; color:#000 !important; border:1px solid #000 !important; }
-#inputScreen #inputTable thead th.group-sbox, #inputScreen #inputTable thead th.group-sresin { background:#e7e2cc !important; color:#000 !important; }
-#inputScreen #inputTable thead th.group-dbox, #inputScreen #inputTable thead th.group-dresin { background:#d2deef !important; color:#000 !important; }
 #inputScreen #inputTable tbody td { background:#ffffff !important; color:#000 !important; border:1px solid #000 !important; }
 #inputScreen #inputTable tbody td.td-seq { background:#f2f2f2 !important; }
-#inputScreen #inputTable tbody td.td-name { background:#ffffff !important; }
 #inputScreen #inputTable tbody td.cb, #inputScreen #inputTable tbody td.cr { background:#f5f0db !important; }
 #inputScreen #inputTable tbody td.cb30, #inputScreen #inputTable tbody td.cr5 { background:#e7dcc3 !important; }
 #inputScreen #inputTable tbody td.db, #inputScreen #inputTable tbody td.dr { background:#e2ecf7 !important; }
 #inputScreen #inputTable tbody td.db30, #inputScreen #inputTable tbody td.dr5 { background:#b9cfe8 !important; }
 #inputScreen #inputTable input { background:transparent !important; color:#000 !important; -webkit-text-fill-color:#000 !important; }
 #inputScreen .date-inp { background:#fff !important; color:#000 !important; border:1.5px solid #000 !important; }
-#inputScreen.kp-open .table-wrap { flex: none !important; height: calc(100dvh - 88px - 210px) !important; max-height: calc(100dvh - 88px - 210px) !important; }
-#inputScreen.kp-open { overflow:hidden !important; }
 
 </style>
 </head>
@@ -227,16 +222,12 @@ const BOX=['4L','12L','30L','50L','63L']; const RESIN=['1L','2L','5L','10L','20L
 let currentUser=null; let allClients=[]; let courseList=[]; let ceClients=[]; let ceCourseId=null; let inputClients=[]; let inputCache={}; let memoCache={}; let memoIdx=-1; let tmpKey=null; let histData=[]; let histDetailData=null;
 
 function isSessionValid(s){ try{ const d=JSON.parse(s); const age=Date.now()-(d._savedAt||0); return age < 12*60*60*1000; }catch(e){ return false; } }
-(function(){
-  try{
-    const raw=localStorage.getItem('d3_session');
-    if(raw && !isSessionValid(raw)){ localStorage.removeItem('d3_session'); localStorage.removeItem('envitec_session'); }
-  }catch(e){}
-})();
+(function(){ try{ const raw=localStorage.getItem('d3_session'); if(raw && !isSessionValid(raw)){ localStorage.removeItem('d3_session'); localStorage.removeItem('envitec_session'); } }catch(e){} })();
+let _backBlocking=false;
+let _exitModalOpen=false;
 
 function today(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function escapeHTML(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-function escapeAttr(s){ return String(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
 function toast(msg, ok=true){ const el=document.getElementById('toast'); el.textContent=msg; el.style.borderColor=ok?'#27ae60':'#e74c3c'; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2500); }
 let isPopNav=false; function getActiveScreenId(){ const el=document.querySelector('.screen.active'); return el?el.id:'mainScreen'; }
 window.showScreen=function(id, push=true){ 
@@ -250,9 +241,6 @@ window.showScreen=function(id, push=true){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); 
   const t=document.getElementById(id); 
   if(t) t.classList.add('active'); 
-  if(currentUser && push && !isPopNav){ 
-    history.pushState({screen:id, _t:Date.now()}, '', location.href); 
-  } 
 };
 window.goBackFromInput=function(){
   var kp=document.getElementById('customKeypad');
@@ -267,9 +255,9 @@ window.openExitModal=function(){ document.getElementById('exitModal').classList.
 const CS='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'; function getCS(str){ return [...str].map(c=>{ const n=c.charCodeAt(0); return (n>=0xAC00 && n<=0xD7A3) ? CS[Math.floor((n-0xAC00)/(21*28))] : c; }).join(''); }
 function acSearch(list,val){ if(!val) return []; const isCS=[...val].every(c=>c>='ㄱ'&&c<='ㅎ'); return list.filter(item=>isCS?getCS(item).includes(val):item.includes(val)||getCS(item).includes(val)).slice(0,10); }
 window.doLogin=async function(){ const id=document.getElementById('loginId').value.trim(); const pw=document.getElementById('loginPw').value.trim(); document.getElementById('loginErr').style.display='none'; try{ const adminSnap=await getDoc(doc(db,'adminConfig','auth')); if(id==='admin' && adminSnap.exists() && adminSnap.data().password===pw){ currentUser={type:'admin',name:'관리자',userId:'admin',cars:[]}; afterLogin(); return; } const snap=await getDocs(query(collection(db,'users'), where('userId','==',id))); for(const ud of snap.docs){ if(ud.data().password===pw){ const udata=ud.data(); let carsRaw=udata.cars||udata.carNumbers||udata.carNumber||[]; if(typeof carsRaw==='string') carsRaw=[carsRaw]; if(!Array.isArray(carsRaw)) carsRaw=[]; carsRaw=carsRaw.map(c=>String(c).trim()).filter(Boolean); const perms=udata.permissions||{lockCollectInput:true,lockCollectQuery:true,lockLoadingInput:true,lockLoadingQuery:true}; currentUser={type:'vehicle',userId:id,name:udata.name||'',docId:ud.id,cars:carsRaw,permissions:perms,raw:udata}; afterLogin(); return; } } }catch(e){ console.error(e); } document.getElementById('loginErr').style.display='block'; };
-async function afterLogin(){ if(document.getElementById('saveIdChk').checked) localStorage.setItem('d3_savedId', currentUser.userId); else localStorage.removeItem('d3_savedId'); const sess={...currentUser, _savedAt: Date.now()}; localStorage.setItem('d3_session', JSON.stringify(sess)); localStorage.setItem('envitec_session', JSON.stringify(sess)); document.getElementById('mainSub').textContent=currentUser.name||currentUser.userId; try{ const snap=await getDocs(collection(db,'clients')); allClients=snap.docs.map(d=>d.data().name).filter(Boolean).sort(); }catch(e){ allClients=[]; } try{ await loadCourseList(); }catch(e){} showScreen('mainScreen', false); history.replaceState({screen:'mainScreen', _t:Date.now()}, '', location.href); history.pushState({screen:'mainScreen', _t:Date.now()}, '', location.href); history.pushState({screen:'mainScreen', _t:Date.now()}, '', location.href); }
+async function afterLogin(){ if(document.getElementById('saveIdChk').checked) localStorage.setItem('d3_savedId', currentUser.userId); else localStorage.removeItem('d3_savedId'); const sess={...currentUser, _savedAt: Date.now()}; localStorage.setItem('d3_session', JSON.stringify(sess)); localStorage.setItem('envitec_session', JSON.stringify(sess)); document.getElementById('mainSub').textContent=currentUser.name||currentUser.userId; try{ const snap=await getDocs(collection(db,'clients')); allClients=snap.docs.map(d=>d.data().name).filter(Boolean).sort(); }catch(e){ allClients=[]; } try{ await loadCourseList(); }catch(e){} showScreen('mainScreen', false); history.pushState(null, '', location.href); history.pushState(null, '', location.href); }
 document.getElementById('loginId').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('loginPw').focus(); }); document.getElementById('loginPw').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
-window.confirmLogout=function(){ currentUser=null; localStorage.removeItem('d3_session'); closeModal('exitModal'); history.replaceState(null,'',location.pathname); window.showScreen('loginScreen', false); history.replaceState({screen:'loginScreen'}, '', location.pathname); };
+window.confirmLogout=function(){ currentUser=null; localStorage.removeItem('d3_session'); localStorage.removeItem('envitec_session'); closeExitModal(); history.replaceState(null,'',location.pathname); window.showScreen('loginScreen', false); };
 async function loadCourseList(){ courseList=[]; try{ const snap=await getDocs(query(collection(db,'courses3'), where('userId','==',currentUser.userId))); snap.docs.forEach(d=>{ courseList.push({id:d.id,name:d.data().name||'이름없음',type:d.data().type||'custom',clients:d.data().clients||[]}); }); courseList.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ko')); }catch(e){} renderCourseList(); }
 function renderCourseList(){ const wrap=document.getElementById('courseListWrap'); let html='<button class="add-btn-row" onclick="openAddCourseModal()">+ 코스 추가</button>'; if(courseList.length===0){ html+='<div style="text-align:center;color:#888;padding:40px 20px">등록된 코스가 없어요</div>'; }else{ courseList.forEach(c=>{ html+=`<div class="course-row" onclick="openCourseEdit('${c.id}')"><div style="flex:1"><div class="course-row-name">${escapeHTML(c.name)}</div><div class="course-row-count">${c.clients.length}개 거래처</div></div><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteCourse('${c.id}')">삭제</button></div>`; }); } wrap.innerHTML=html; }
 window.openAddCourseModal=function(){ document.getElementById('newCourseName').value=''; document.getElementById('addCourseModal').classList.add('show'); };
@@ -313,11 +301,8 @@ window.acFilter=function(){ const val=document.getElementById('acSearch').value.
 window.acSelect=async function(name){
   closeModal('addClientModal');
   const trimmed=String(name||'').trim();
-  if(!trimmed){ return; }
-  if(inputClients.includes(trimmed)){
-    toast('이미 추가된 거래처예요', false);
-    return;
-  }
+  if(!trimmed) return;
+  if(inputClients.includes(trimmed)){ toast('이미 추가된 거래처예요', false); return; }
   inputClients.push(trimmed);
   renderInputTable();
   try{
@@ -326,7 +311,7 @@ window.acSelect=async function(name){
       const data=snap.docs[0].data();
       if(data && data.memo && String(data.memo).trim()!==''){ memoCache[trimmed]=data.memo; renderInputTable(); }
     }
-  }catch(e){ console.warn('acSelect memo fail', e); }
+  }catch(e){}
   try{ saveInputs(); }catch(e){}
 };
 
@@ -341,18 +326,16 @@ async function loadMemoCache(){
       const promises=chunk.map(name=> 
         getDocs(query(collection(db,'일지db'), where('clientName','==',name), orderBy('timestamp','desc'), limit(1)))
           .then(snap=>({name, snap}))
-          .catch(e=>{ console.warn('memo fail', name, e); return {name, snap:null}; })
+          .catch(e=>({name, snap:null}))
       );
       const results=await Promise.all(promises);
       for(const {name, snap} of results){
         if(!snap || snap.empty) continue;
         const data=snap.docs[0].data();
-        if(data && data.memo && String(data.memo).trim()!==''){
-          memoCache[name]=data.memo;
-        }
+        if(data && data.memo && String(data.memo).trim()!==''){ memoCache[name]=data.memo; }
       }
     }
-  }catch(e){ console.warn('loadMemoCache error', e); }
+  }catch(e){}
   renderInputTable();
 }
 
@@ -564,13 +547,8 @@ async function sendDataCore(){
   const isEditMode=window.editingOriginalDocIds&&window.editingOriginalDocIds.length>0;
   let carNumber='';
   if(isEditMode){ date=window.editingOriginalDate; carNumber=window.editingOriginalCar||currentUser.cars?.[0]||''; document.getElementById('inputDate').value=date; }else{ carNumber=currentUser.cars?.[0]||''; }
-  let count=0; const sent=[]; const base=Date.now();
   const batch=writeBatch(db);
-  if(isEditMode){
-    for(const docId of window.editingOriginalDocIds){
-      try{ batch.delete(doc(db,'일지db',docId)); }catch(e){}
-    }
-  }
+  if(isEditMode){ for(const docId of window.editingOriginalDocIds){ try{ batch.delete(doc(db,'일지db',docId)); }catch(e){} } }
   const docsToAdd=[];
   for(let idx=0; idx<inputClients.length; idx++){
     const name=inputClients[idx];
@@ -585,19 +563,11 @@ async function sendDataCore(){
     docsToAdd.push(name);
   }
   if(!docsToAdd.length){ toast('입력된 데이터가 없어요', false); return; }
-  try{
-    await batch.commit();
-    count=docsToAdd.length;
-    sent.push(...docsToAdd);
-  }catch(e){
-    console.error('batch commit fail', e);
-    toast('전송 실패: '+e.message, false);
-    return;
-  }
+  try{ await batch.commit(); }catch(e){ toast('전송 실패: '+e.message, false); return; }
   if(tmpKey) try{ await deleteDoc(doc(db,'dailyTemp3',tmpKey)); }catch(e){}
   window.editingOriginalDocIds=null; window.editingOriginalDate=null; window.editingOriginalCar=null;
-  document.getElementById('doneCount').textContent=isEditMode?`${date} ${count}건 수정 완료!`:`${count}건 전송됐어요`;
-  document.getElementById('doneList').innerHTML=sent.map((n,i)=>`<div style="padding:3px 0;border-bottom:1px solid #555">${i+1}. ${escapeHTML(n)}</div>`).join('');
+  document.getElementById('doneCount').textContent=isEditMode?`${date} ${docsToAdd.length}건 수정 완료!`:`${docsToAdd.length}건 전송됐어요`;
+  document.getElementById('doneList').innerHTML=docsToAdd.map((n,i)=>`<div style="padding:3px 0;border-bottom:1px solid #555">${i+1}. ${escapeHTML(n)}</div>`).join('');
   document.getElementById('doneModal').classList.add('show');
   inputClients=[]; inputCache={}; tmpKey=null; renderInputTable();
 }
@@ -666,37 +636,68 @@ window.editHistDetail=async function(){
   showScreen('inputScreen'); 
   toast('코스 순서로 정렬했어요: '+date); 
 };
-window.addEventListener('popstate', (e)=>{ 
+window.addEventListener('popstate', function(){
+  if(!currentUser) return;
+  if(_backBlocking) return;
+  _backBlocking=true;
+  history.go(1);
+  setTimeout(function(){ _backBlocking=false; }, 150);
+
   var kp=document.getElementById('customKeypad');
   if(kp && kp.classList.contains('show')){
     closeKeypad();
-    history.pushState({screen:getActiveScreenId(), _t:Date.now()}, '', location.href);
     return;
   }
-  if(!currentUser) return; 
-  const openedModal=document.querySelector('.modal-bg.show'); 
-  if(openedModal){ 
-    openedModal.classList.remove('show'); 
-    history.pushState({screen:getActiveScreenId(), _t:Date.now()}, '', location.href); 
-    return; 
-  } 
+
+  const openedModal=document.querySelector('.modal-bg.show');
+  if(openedModal){
+    if(openedModal.id==='exitModal'){
+      closeModal('exitModal');
+      _exitModalOpen=false;
+    }else{
+      openedModal.classList.remove('show');
+    }
+    return;
+  }
+
+  if(_exitModalOpen){
+    closeModal('exitModal');
+    _exitModalOpen=false;
+    return;
+  }
+
   const cur=getActiveScreenId();
+  if(cur==='mainScreen'){
+    document.getElementById('exitModal').classList.add('show');
+    _exitModalOpen=true;
+    return;
+  }
+
   let target='mainScreen';
   if(cur==='courseEditScreen') target='courseScreen';
   else if(cur==='histDetailScreen') target='historyScreen';
   else if(cur==='courseScreen' || cur==='inputScreen' || cur==='historyScreen') target='mainScreen';
-  else if(cur==='mainScreen'){
-    document.getElementById('exitModal').classList.add('show');
-    history.pushState({screen:'mainScreen', _t:Date.now()}, '', location.href);
-    return;
-  }
-  isPopNav=true;
+
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const t=document.getElementById(target);
   if(t) t.classList.add('active');
-  history.pushState({screen:target, _t:Date.now()}, '', location.href);
-  setTimeout(()=>{ isPopNav=false; }, 100);
 });
+
+window.addEventListener('pageshow', function(e){
+  if(e.persisted && currentUser){
+    history.go(1);
+  }
+});
+
+window.openExitModal=function(){
+  _exitModalOpen=true;
+  document.getElementById('exitModal').classList.add('show');
+};
+window.closeExitModal=function(){
+  _exitModalOpen=false;
+  document.getElementById('exitModal').classList.remove('show');
+};
+
 (async function(){ const savedId=localStorage.getItem('d3_savedId'); if(savedId){ document.getElementById('loginId').value=savedId; document.getElementById('saveIdChk').checked=true; } const session=localStorage.getItem('d3_session'); if(session){ try{ currentUser=JSON.parse(session); await afterLogin(); }catch(e){ localStorage.removeItem('d3_session'); history.replaceState({screen:'loginScreen'}, '', location.pathname); } }else{ history.replaceState({screen:'loginScreen'}, '', location.pathname); } })();
 let emptyIdxsCache=[]; function findEmptyClients(){ saveInputs(); const empties=[]; inputClients.forEach((name,idx)=>{ const cache=inputCache[idx]||{collect:{},deliver:{},memo:''}; let hasData=false; SIZES.forEach(sz=>{ if((parseInt(cache.collect[sz])||0) || (parseInt(cache.deliver[sz])||0)) hasData=true; }); if((cache.memo||'').trim()) hasData=true; if(!hasData) empties.push({idx,name}); }); return empties; }
 function openEmptyCheck(empties){ emptyIdxsCache=empties.map(e=>e.idx).sort((a,b)=>b-a); const wrap=document.getElementById('emptyList'); let h=''; empties.forEach(e=>{ h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:#1a1a1a;border:1px solid #444;border-radius:8px;margin-bottom:6px"><span style="font-size:13px">${e.idx+1}. ${e.name}</span><span style="display:flex;gap:4px"><button class="btn btn-sm" style="background:#1e1e2a;border:1px solid #666;color:#ddd;font-size:11px" onclick="closeModal('emptyCheckModal'); openMemo(${e.idx})">사유입력</button><button class="btn btn-sm" style="background:#2a1a1a;border:1px solid #633;color:#e88;font-size:11px" onclick="deleteSingleEmpty(${e.idx})">삭제</button></span></div>`; }); wrap.innerHTML=h; document.getElementById('emptyCheckModal').classList.add('show'); }
