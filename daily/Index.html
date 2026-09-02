@@ -608,8 +608,9 @@ window.acSelect=async function(name){
     if(!snap.empty){
       const docs=snap.docs.map(d=>d.data()).sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
       const todayStr = today();
-      const prev = docs.find(d=>d.date !== todayStr && d.memo && String(d.memo).trim()!=='');
-      if(prev && prev.memo && String(prev.memo).trim()!==''){ memoCache[name]=prev.memo; renderInputTable(); }
+      const sorted = docs.sort((a,b)=>(b.date||'').localeCompare(a.date||'') || (b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+      const latest = sorted.find(d=>d.date !== todayStr);
+      if(latest && latest.memo && String(latest.memo).trim()!==''){ memoCache[name]=latest.memo; renderInputTable(); }
     }
   }catch(e){}
 };
@@ -633,12 +634,9 @@ async function loadMemoCache(){
           byName[d.clientName].push(d);
         });
         Object.keys(byName).forEach(name=>{
-          const docs=byName[name].sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0) || (b.date||'').localeCompare(a.date||''));
-          let prev = docs.find(d=>d.date !== todayStr && d.memo && String(d.memo).trim()!=='');
-          if(!prev){
-            prev = docs.find(d=>d.memo && String(d.memo).trim()!=='' && d.date !== todayStr);
-          }
-          if(prev && prev.memo && String(prev.memo).trim()!==''){ memoCache[name]=prev.memo; }
+          const docs=byName[name].sort((a,b)=>(b.date||'').localeCompare(a.date||'') || (b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+          const latest = docs.find(d=>d.date !== todayStr);
+          if(latest && latest.memo && String(latest.memo).trim()!==''){ memoCache[name]=latest.memo; }
         });
       }catch(e){ console.warn('memo batch fail', e); }
     }
