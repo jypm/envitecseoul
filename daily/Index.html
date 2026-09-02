@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<!-- WHITE FINAL v20250902-59161 - Cache Busted -->
-
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -15,7 +13,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#ffffff">
 <meta name="color-scheme" content="light">
-<title>수거 일지 WHITE v20250902</title>
+<title>수거 일지</title>
 <style>
 
 :root { color-scheme: light; } * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
@@ -126,7 +124,7 @@ import { getFirestore, collection, addDoc, doc, getDocs, query, where, getDoc, s
 const firebaseConfig = { apiKey: "AIzaSyCka6GbEUJBUf-5BFxvD0O-Hv9dS-T3Big", authDomain: "jypenvitec.firebaseapp.com", projectId: "jypenvitec", storageBucket: "jypenvitec.appspot.com", messagingSenderId: "760975820830", appId: "1:760975820830:web:8b20d40a3d1cf3a1f8e9de" };
 const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 const BOX=['4L','12L','30L','50L','63L']; const RESIN=['1L','2L','5L','10L','20L']; const SIZES=[...BOX,...RESIN];
-console.log("WHITE FINAL v20250902-59161 LOADED");
+console.log("WHITE FINAL v20250902-59161 FIXED SW");
 let currentUser=null; let allClients=[]; let courseList=[]; let ceClients=[]; let ceCourseId=null; let inputClients=[]; let inputCache={}; let memoCache={}; let memoIdx=-1; let tmpKey=null; let histData=[]; let histDetailData=null;
 function escapeHTML(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function isSessionValid(s){ try{ const d=JSON.parse(s); const age=Date.now()-(d._savedAt||0); return age < 12*60*60*1000; }catch(e){ return false; } }
@@ -642,7 +640,26 @@ function updateTotal(){ try{ saveInputs(); let c=0; Object.values(inputCache).fo
   });
 })();
 </script>
-<script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js', {scope: './'}).then(reg=>{ reg.update(); }).catch(()=>{}); }); }</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        for (let key of keys) {
+          if (!key.includes('white-v20250902')) {
+            await caches.delete(key);
+          }
+        }
+      }
+      const reg = await navigator.serviceWorker.register('sw.js?v=white20250902', {scope: './'});
+      reg.update();
+      if (reg.waiting) reg.waiting.postMessage({type: 'SKIP_WAITING'});
+    } catch(e) {}
+  });
+  navigator.serviceWorker.addEventListener('controllerchange', () => { window.location.reload(); });
+}
+</script>
 <div id="pwaInstallBtn" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3D82F6;color:#fff;padding:12px 20px;border-radius:30px;box-shadow:0 4px 20px rgba(61,130,246,0.5);z-index:9999;cursor:pointer;font-weight:700;font-size:13px;align-items:center;gap:8px;" onclick="installPWA()"><span>📲</span> 앱으로 설치하기</div>
 <script>let deferredPrompt=null; window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; const btn=document.getElementById('pwaInstallBtn'); if(btn) btn.style.display='flex'; }); window.installPWA=async function(){ if(!deferredPrompt){ alert('이미 설치되었거나 브라우저가 설치를 지원하지 않아요.'); return; } deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; const btn=document.getElementById('pwaInstallBtn'); if(btn) btn.style.display='none'; }; window.addEventListener('appinstalled', ()=>{ const btn=document.getElementById('pwaInstallBtn'); if(btn) btn.style.display='none'; });</script>
 
