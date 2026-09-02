@@ -606,10 +606,10 @@ window.acSelect=async function(name){
   try{
     const snap=await getDocs(query(collection(db,'일지db'), where('clientName','==',name)));
     if(!snap.empty){
-      const docs=snap.docs.map(d=>d.data()).sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0) || (b.date||'').localeCompare(a.date||''));
+      const docs=snap.docs.map(d=>d.data()).sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
       const todayStr = today();
-      const latest = docs.find(d=>d.date !== todayStr);
-      if(latest && latest.memo && String(latest.memo).trim()!==''){ memoCache[name]=latest.memo; renderInputTable(); }
+      const prev = docs.find(d=>d.date !== todayStr && d.memo && String(d.memo).trim()!=='');
+      if(prev && prev.memo && String(prev.memo).trim()!==''){ memoCache[name]=prev.memo; renderInputTable(); }
     }
   }catch(e){}
 };
@@ -634,8 +634,11 @@ async function loadMemoCache(){
         });
         Object.keys(byName).forEach(name=>{
           const docs=byName[name].sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0) || (b.date||'').localeCompare(a.date||''));
-          const latest = docs.find(d=>d.date !== todayStr);
-          if(latest && latest.memo && String(latest.memo).trim()!==''){ memoCache[name]=latest.memo; }
+          let prev = docs.find(d=>d.date !== todayStr && d.memo && String(d.memo).trim()!=='');
+          if(!prev){
+            prev = docs.find(d=>d.memo && String(d.memo).trim()!=='' && d.date !== todayStr);
+          }
+          if(prev && prev.memo && String(prev.memo).trim()!==''){ memoCache[name]=prev.memo; }
         });
       }catch(e){ console.warn('memo batch fail', e); }
     }
@@ -817,7 +820,7 @@ window.kpNext = function(){
   document.addEventListener('touchstart', addVibe, {once:true});
   setInterval(addVibe, 1000);
 })();
-window.openMemo=function(idx){ memoIdx=idx; const name=inputClients[idx]||''; const cache=inputCache[idx]||{}; document.getElementById('memoTitle').textContent=name; document.getElementById('memoPrev').textContent=memoCache[name]?('이전 메모: '+memoCache[name]):''; document.getElementById('memoInput').value=cache.memo||''; document.getElementById('memoModal').classList.add('show'); };
+window.openMemo=function(idx){ memoIdx=idx; const name=inputClients[idx]||''; const cache=inputCache[idx]||{}; document.getElementById('memoTitle').textContent=name; document.getElementById('memoPrev').textContent=memoCache[name]?('이전 메모: '+memoCache[name]):'이전 메모 없음'; document.getElementById('memoInput').value=cache.memo||''; document.getElementById('memoModal').classList.add('show'); };
 window.saveMemo=function(){ try{ saveInputs(); }catch(e){} if(!inputCache[memoIdx]) inputCache[memoIdx]={collect:{},deliver:{},memo:''}; inputCache[memoIdx].memo=document.getElementById('memoInput').value.trim(); closeModal('memoModal'); renderInputTable(); };
 window.deleteMemo=function(){ try{ saveInputs(); }catch(e){} if(inputCache[memoIdx]) inputCache[memoIdx].memo=''; closeModal('memoModal'); renderInputTable(); };
 window.saveTmp=async function(){ saveInputs(); if(!tmpKey){ const date=document.getElementById('inputDate').value||today(); tmpKey=currentUser.userId+'_'+date+'_manual_'+Date.now(); } let curCar=''; try{ curCar=(currentUser?.cars&&currentUser.cars[0])?currentUser.cars[0]:(currentUser?.userId||''); }catch(e){} let curCourse=''; try{ curCourse=document.getElementById('inputTitle')?.textContent||''; }catch(e){} try{ await setDoc(doc(db,'dailyTemp3',tmpKey), {clients:inputClients,cache:inputCache,date:document.getElementById('inputDate').value||today(),userId:currentUser.userId,carNumber:curCar,courseName:curCourse,updatedAt:Timestamp.now()}); toast('임시저장 완료!'); }catch(e){ console.error(e); toast('실패: '+e.message, false); } };
