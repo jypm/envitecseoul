@@ -614,35 +614,32 @@ window.acSelect=async function(name){
     }
   }catch(e){}
 };
+
 async function loadMemoCache(){
   memoCache={};
-  const todayStr = today();
   const uniq=[...new Set(inputClients)];
   if(!uniq.length){ renderInputTable(); return; }
-  const chunks=[];
-  for(let i=0;i<uniq.length;i+=10) chunks.push(uniq.slice(i,i+10));
   try{
-    for(const batch of chunks){
+    for(const name of uniq){
       try{
-        const snap=await getDocs(query(collection(db,'일지db'), where('clientName','in',batch)));
+        const snap=await getDocs(query(collection(db,'일지db'), where('clientName','==',name)));
         if(snap.empty) continue;
-        const byName={};
-        snap.docs.forEach(doc=>{
-          const d=doc.data();
-          if(!d.clientName) return;
-          if(!byName[d.clientName]) byName[d.clientName]=[];
-          byName[d.clientName].push(d);
+        const docs=snap.docs.map(d=>d.data());
+        docs.sort((a,b)=>{
+          const ta=a.timestamp?.toMillis?.() ?? (a.timestamp?.seconds ? a.timestamp.seconds*1000 : 0);
+          const tb=b.timestamp?.toMillis?.() ?? (b.timestamp?.seconds ? b.timestamp.seconds*1000 : 0);
+          return tb-ta;
         });
-        Object.keys(byName).forEach(name=>{
-          const docs=byName[name].sort((a,b)=>(b.date||'').localeCompare(a.date||'') || (b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
-          const latest = docs.find(d=>d.date !== todayStr);
-          if(latest && latest.memo && String(latest.memo).trim()!==''){ memoCache[name]=latest.memo; }
-        });
-      }catch(e){ console.warn('memo batch fail', e); }
+        const latest=docs[0];
+        if(latest && latest.memo && String(latest.memo).trim()!==''){
+          memoCache[name]=latest.memo;
+        }
+      }catch(e){ console.warn('memo fail', name, e); }
     }
   }catch(e){ console.warn('loadMemoCache error', e); }
   renderInputTable();
 }
+
 function saveInputs(){ inputClients.forEach((name,idx)=>{ const row=document.querySelector(`tr[data-idx="${idx}"]`); if(!row) return; if(!inputCache[idx]) inputCache[idx]={collect:{},deliver:{},memo:''}; else { if(!inputCache[idx].collect) inputCache[idx].collect={}; if(!inputCache[idx].deliver) inputCache[idx].deliver={}; if(typeof inputCache[idx].memo!=='string') inputCache[idx].memo=''; } SIZES.forEach(sz=>{ const c=row.querySelector(`[data-t="c"][data-k="${sz}"]`); const d=row.querySelector(`[data-t="d"][data-k="${sz}"]`); if(c) inputCache[idx].collect[sz]=c.value; if(d) inputCache[idx].deliver[sz]=d.value; }); }); }
 function renderInputTable(){
   const body=document.getElementById('inputBody');
