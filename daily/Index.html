@@ -9,22 +9,20 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0e0e0e">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="light">
 <title>수거 일지</title>
 <style>
 
-:root { color-scheme: light dark; } * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html, body { height:100%; background:#0e0e0e !important; color:#f0f0f5; font-family:-apple-system,'Noto Sans KR',sans-serif; font-size:14px; overflow:hidden; color-scheme: light !important; }
-.screen { display:none; flex-direction:column; height:100vh; overflow:hidden; } .screen.active { display:flex; }
-.hdr { background:#111; border-bottom:2px solid #444; padding:8px 10px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; gap:8px; }
-.hdr-left { display:flex; align-items:center; gap:10px; flex-shrink:0; } .back-btn { background:none; border:none; color:#3D82F6; font-size:14px; cursor:pointer; padding:4px 0; } .hdr-title { font-size:15px; font-weight:700; white-space:nowrap; } .hdr-sub { font-size:11px; color:#aaa; margin-top:2px; }
-.btn { border:none; border-radius:8px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; } .btn-primary { background:#3D82F6; color:#fff; } .btn-secondary { background:#1e1e2a; color:#aaa; border:1px solid #444; } .btn-danger { background:#c0392b; color:#fff; } .btn-sm { padding:5px 10px; font-size:12px; border-radius:6px; } .btn-ghost { background:none; border:1px solid #555; color:#ddd; border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; font-weight:600; white-space:nowrap; }
-#loginScreen { justify-content:center; align-items:center; } #mainScreen .scroll { flex:1; overflow-y:auto; padding:16px; min-height:0; } .main-card { background:#111; border:1px solid #444; border-radius:14px; padding:20px; margin-bottom:12px; display:flex; align-items:center; gap:16px; cursor:pointer; }
-#courseScreen .scroll { flex:1; overflow-y:auto; padding:12px; min-height:0; } .course-row { background:#111; border:1px solid #444; border-radius:10px; padding:14px; margin-bottom:8px; display:flex; align-items:center; gap:10px; cursor:pointer; } .course-row-name { flex:1; font-size:14px; font-weight:600; } .course-row-count { font-size:11px; color:#ccc; font-weight:600; } .add-btn-row { background:none; border:1px dashed #555; border-radius:10px; padding:14px; display:flex; align-items:center; justify-content:center; gap:8px; color:#bbb; font-size:13px; cursor:pointer; margin-bottom:8px; width:100%; }
-#courseEditScreen .scroll { flex:1; overflow-y:auto; padding:12px; min-height:0; } .edit-client-row { background:#111; border:1px solid #333; border-radius:8px; padding:12px; margin-bottom:6px; display:flex; align-items:center; gap:10px; } .edit-client-seq { font-size:11px; color:#999; min-width:20px; } .edit-client-name { flex:1; font-size:13px; color:#ddd; } .edit-client-del { background:none; border:none; color:#bbb; font-size:16px; cursor:pointer; padding:4px; } .drag-ghost { position:fixed; background:#3D82F6; color:#fff; padding:10px 16px; border-radius:10px; font-size:13px; z-index:9999; pointer-events:none; box-shadow:0 4px 20px rgba(0,0,0,0.5); left:10%; width:80%; } .ac-wrap { position:relative; margin-bottom:10px; } .ac-list { display:none; position:absolute; top:100%; left:0; right:0; background:#1e1e28; border:1px solid #555; border-radius:8px; z-index:50; max-height:180px; overflow-y:auto; margin-top:3px; } .ac-item { padding:10px 12px; font-size:13px; cursor:pointer; border-bottom:1px solid #333; color:#ddd; }
-html, body { height:100%; }
-.screen { height:100vh; height:100dvh; }
-#loginScreen { height:100vh; height:100dvh; justify-content:center; align-items:center; padding:20px; box-sizing:border-box; }
+:root { color-scheme: light; } * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; background:#ffffff !important; color:#000000 !important; font-family:-apple-system,'Noto Sans KR',sans-serif; font-size:14px; overflow:hidden; color-scheme: light !important; }
+.screen { display:none; flex-direction:column; height:100vh; overflow:hidden; background:#ffffff !important; color:#000000 !important; } .screen.active { display:flex; }
+.hdr { background:#f8f8f8 !important; border-bottom:1px solid #ddd !important; padding:8px 10px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; gap:8px; }
+.hdr-left { display:flex; align-items:center; gap:10px; flex-shrink:0; } .back-btn { background:none; border:none; color:#3D82F6; font-size:14px; cursor:pointer; padding:4px 0; } .hdr-title { font-size:15px; font-weight:700; white-space:nowrap; color:#000 !important; } .hdr-sub { font-size:11px; color:#666 !important; margin-top:2px; }
+.btn { border:none; border-radius:8px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; } .btn-primary { background:#3D82F6; color:#fff; } .btn-secondary { background:#f2f2f2 !important; color:#333 !important; border:1px solid #ddd !important; } .btn-danger { background:#c0392b; color:#fff; } .btn-sm { padding:5px 10px; font-size:12px; border-radius:6px; } .btn-ghost { background:#fff !important; border:1px solid #ccc !important; color:#333 !important; border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; font-weight:600; white-space:nowrap; }
+#loginScreen { justify-content:center; align-items:center; background:#ffffff !important; } #mainScreen .scroll { flex:1; overflow-y:auto; padding:16px; min-height:0; background:#ffffff !important; } .main-card { background:#ffffff !important; border:1px solid #ddd !important; border-radius:14px; padding:20px; margin-bottom:12px; display:flex; align-items:center; gap:16px; cursor:pointer; color:#000 !important; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+#courseScreen .scroll { flex:1; overflow-y:auto; padding:12px; min-height:0; background:#fff !important; } .course-row { background:#fff !important; border:1px solid #ddd !important; border-radius:10px; padding:14px; margin-bottom:8px; display:flex; align-items:center; gap:10px; cursor:pointer; color:#000 !important; } .course-row-name { flex:1; font-size:14px; font-weight:600; color:#000 !important; } .course-row-count { font-size:11px; color:#666 !important; font-weight:600; } .add-btn-row { background:#f9f9f9 !important; border:1px dashed #ccc !important; border-radius:10px; padding:14px; display:flex; align-items:center; justify-content:center; gap:8px; color:#666 !important; font-size:13px; cursor:pointer; margin-bottom:8px; width:100%; }
+#courseEditScreen .scroll { flex:1; overflow-y:auto; padding:12px; min-height:0; background:#fff !important; } .edit-client-row { background:#f9f9f9 !important; border:1px solid #ddd !important; border-radius:8px; padding:12px; margin-bottom:6px; display:flex; align-items:center; gap:10px; } .edit-client-seq { font-size:11px; color:#888 !important; min-width:20px; } .edit-client-name { flex:1; font-size:13px; color:#000 !important; } .edit-client-del { background:none; border:none; color:#888 !important; font-size:16px; cursor:pointer; padding:4px; } .drag-ghost { position:fixed; background:#3D82F6; color:#fff; padding:10px 16px; border-radius:10px; font-size:13px; z-index:9999; pointer-events:none; box-shadow:0 4px 20px rgba(0,0,0,0.2); }
+
 .login-box { width:90%; max-width:320px; background:#111; border:1px solid #333; border-radius:16px; padding:32px 24px; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
 .login-logo { font-size:32px; text-align:center; margin-bottom:8px; }
 .login-title { font-size:18px; font-weight:700; text-align:center; margin-bottom:4px; }
@@ -39,7 +37,7 @@ html, body { height:100%; }
 #inputScreen .hdr-mid { display:flex; gap:6px; align-items:center; flex:1; justify-content:center; }
 #inputScreen .top-bar { position:sticky; top:45px; z-index:29; overflow-x:auto; scrollbar-width:none; background:#151515; border-bottom:2px solid #555; padding:8px 10px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:nowrap; }
 #inputScreen .top-bar::-webkit-scrollbar { display:none; }
-.date-inp { background:#1a1a1a; border:1px solid #555; border-radius:8px; padding:5px 10px; color:#f0f0f5; font-size:12px; outline:none; color-scheme: dark; flex-shrink:0; }
+.date-inp { background:#1a1a1a; border:1px solid #555; border-radius:8px; padding:5px 10px; color:#f0f0f5; font-size:12px; outline:none; color-scheme: light; flex-shrink:0; }
 #inputScreen .table-wrap { flex:1; min-height:0; overflow:auto; -webkit-overflow-scrolling:touch; position:relative; background:#080808; }
 table { border-collapse:separate; border-spacing:0; min-width:max-content; }
 thead { position:sticky; top:0; z-index:20; }
@@ -135,24 +133,44 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; justify-content:center; align-items:center; } .modal-bg.show { display:flex; } .modal { background:#111; border:1px solid #555; border-radius:16px; padding:20px; width:90%; max-width:360px; position:relative; } .modal-close { position:absolute; top:12px; right:14px; background:none; border:none; color:#bbb; font-size:20px; cursor:pointer; } .modal h3 { font-size:15px; margin-bottom:14px; } .modal textarea { width:100%; background:#1a1a1a; border:1px solid #555; border-radius:8px; padding:10px; color:#f0f0f5; font-size:14px; resize:none; outline:none; }
 .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1e1e2e; border:1px solid #666; border-radius:10px; padding:10px 20px; font-size:13px; z-index:200; display:none; white-space:nowrap; } .toast.show { display:block; }
 
-/* === CLEAN LIGHT THEME FINAL === */
-#inputScreen { background:#ffffff !important; color:#000000 !important; }
-#inputScreen .hdr { background:#f8f8f8 !important; border-bottom:1px solid #ddd !important; }
-#inputScreen .hdr .hdr-title { color:#000 !important; }
-#inputScreen .hdr .hdr-sub { color:#555 !important; }
-#inputScreen .hdr .back-btn { color:#000 !important; }
-#inputScreen .top-bar { background:#efefef !important; border-bottom:1px solid #ddd !important; }
-#inputScreen .table-wrap { background:#ffffff !important; }
-#inputScreen #inputTable { background:#ffffff !important; border-collapse:collapse !important; }
-#inputScreen #inputTable thead th { background:#f2f2f2 !important; color:#000 !important; border:1px solid #000 !important; }
-#inputScreen #inputTable tbody td { background:#ffffff !important; color:#000 !important; border:1px solid #000 !important; }
-#inputScreen #inputTable tbody td.td-seq { background:#f2f2f2 !important; }
-#inputScreen #inputTable tbody td.cb, #inputScreen #inputTable tbody td.cr { background:#f5f0db !important; }
-#inputScreen #inputTable tbody td.cb30, #inputScreen #inputTable tbody td.cr5 { background:#e7dcc3 !important; }
-#inputScreen #inputTable tbody td.db, #inputScreen #inputTable tbody td.dr { background:#e2ecf7 !important; }
-#inputScreen #inputTable tbody td.db30, #inputScreen #inputTable tbody td.dr5 { background:#b9cfe8 !important; }
-#inputScreen #inputTable input { background:transparent !important; color:#000 !important; -webkit-text-fill-color:#000 !important; }
-#inputScreen .date-inp { background:#fff !important; color:#000 !important; border:1.5px solid #000 !important; }
+
+
+/* === FULL WHITE THEME OVERRIDES === */
+html, body, .screen, #loginScreen, #mainScreen, #courseScreen, #courseEditScreen, #historyScreen, #histDetailScreen, #inputScreen {
+  background:#ffffff !important; color:#000000 !important;
+}
+.login-box { background:#ffffff !important; border:1px solid #ddd !important; box-shadow:0 8px 32px rgba(0,0,0,0.1) !important; color:#000 !important; }
+#loginScreen .inp { background:#ffffff !important; border:1px solid #ddd !important; color:#000 !important; }
+#loginScreen .inp::placeholder { color:#999 !important; }
+.hdr { background:#f8f8f8 !important; border-bottom:1px solid #ddd !important; }
+.top-bar { background:#f2f2f2 !important; border-bottom:1px solid #ddd !important; color:#000 !important; }
+.table-wrap { background:#ffffff !important; }
+#inputTable { background:#ffffff !important; }
+#inputTable thead th { background:#f2f2f2 !important; color:#000 !important; border:1px solid #ccc !important; }
+#inputTable thead th.group-sbox, #inputTable thead th.group-sresin { background:#e7e2cc !important; color:#000 !important; }
+#inputTable thead th.group-dbox, #inputTable thead th.group-dresin { background:#d2deef !important; color:#000 !important; }
+#inputTable tbody td { background:#ffffff !important; color:#000 !important; border:1px solid #ccc !important; }
+#inputTable tbody td.td-seq { background:#f2f2f2 !important; }
+#inputTable tbody td.td-name { background:#ffffff !important; }
+#inputTable tbody td.cb, #inputTable tbody td.cr { background:#f5f0db !important; }
+#inputTable tbody td.cb30, #inputTable tbody td.cr5 { background:#e7dcc3 !important; }
+#inputTable tbody td.db, #inputTable tbody td.dr { background:#e2ecf7 !important; }
+#inputTable tbody td.db30, #inputTable tbody td.dr5 { background:#b9cfe8 !important; }
+#inputTable input { background:transparent !important; color:#000 !important; -webkit-text-fill-color:#000 !important; }
+.date-inp { background:#fff !important; color:#000 !important; border:1px solid #ccc !important; color-scheme: light !important; }
+#subHeaderRow th { background:#e8e8e8 !important; color:#000 !important; border-bottom:2px solid #ccc !important; }
+#historyScreen .scroll { background:#fff !important; }
+.hist-item { background:#fff !important; border:1px solid #ddd !important; color:#000 !important; }
+.hist-item .hist-date { color:#000 !important; }
+.hist-item .hist-car { color:#666 !important; }
+.modal-bg { background:rgba(0,0,0,0.4) !important; }
+.modal { background:#ffffff !important; border:1px solid #ddd !important; color:#000 !important; box-shadow:0 8px 32px rgba(0,0,0,0.15) !important; }
+.modal .modal-title { color:#000 !important; }
+#customKeypad { background:#f2f2f2 !important; border-top:1px solid #ddd !important; }
+#customKeypad .kp-btn { background:#fff !important; border:1px solid #ddd !important; color:#000 !important; }
+#customKeypad .kp-btn.kp-del { background:#f8f8f8 !important; }
+#customKeypad .kp-btn.kp-ok { background:#3D82F6 !important; color:#fff !important; }
+.toast { background:#333 !important; color:#fff !important; border:1px solid #555 !important; }
 
 </style>
 </head>
