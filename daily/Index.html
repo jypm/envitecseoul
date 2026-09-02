@@ -251,9 +251,7 @@ window.showScreen=function(id, push=true){
   const t=document.getElementById(id); 
   if(t) t.classList.add('active'); 
   if(currentUser && push && !isPopNav){ 
-    if(history.state?.screen!==id){ 
-      history.pushState({screen:id}, '', '#'+id); 
-    } 
+    history.pushState({screen:id, _t:Date.now()}, '', location.href); 
   } 
 };
 window.goBackFromInput=function(){
@@ -269,7 +267,7 @@ window.openExitModal=function(){ document.getElementById('exitModal').classList.
 const CS='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'; function getCS(str){ return [...str].map(c=>{ const n=c.charCodeAt(0); return (n>=0xAC00 && n<=0xD7A3) ? CS[Math.floor((n-0xAC00)/(21*28))] : c; }).join(''); }
 function acSearch(list,val){ if(!val) return []; const isCS=[...val].every(c=>c>='ㄱ'&&c<='ㅎ'); return list.filter(item=>isCS?getCS(item).includes(val):item.includes(val)||getCS(item).includes(val)).slice(0,10); }
 window.doLogin=async function(){ const id=document.getElementById('loginId').value.trim(); const pw=document.getElementById('loginPw').value.trim(); document.getElementById('loginErr').style.display='none'; try{ const adminSnap=await getDoc(doc(db,'adminConfig','auth')); if(id==='admin' && adminSnap.exists() && adminSnap.data().password===pw){ currentUser={type:'admin',name:'관리자',userId:'admin',cars:[]}; afterLogin(); return; } const snap=await getDocs(query(collection(db,'users'), where('userId','==',id))); for(const ud of snap.docs){ if(ud.data().password===pw){ const udata=ud.data(); let carsRaw=udata.cars||udata.carNumbers||udata.carNumber||[]; if(typeof carsRaw==='string') carsRaw=[carsRaw]; if(!Array.isArray(carsRaw)) carsRaw=[]; carsRaw=carsRaw.map(c=>String(c).trim()).filter(Boolean); const perms=udata.permissions||{lockCollectInput:true,lockCollectQuery:true,lockLoadingInput:true,lockLoadingQuery:true}; currentUser={type:'vehicle',userId:id,name:udata.name||'',docId:ud.id,cars:carsRaw,permissions:perms,raw:udata}; afterLogin(); return; } } }catch(e){ console.error(e); } document.getElementById('loginErr').style.display='block'; };
-async function afterLogin(){ if(document.getElementById('saveIdChk').checked) localStorage.setItem('d3_savedId', currentUser.userId); else localStorage.removeItem('d3_savedId'); const sess={...currentUser, _savedAt: Date.now()}; localStorage.setItem('d3_session', JSON.stringify(sess)); localStorage.setItem('envitec_session', JSON.stringify(sess)); document.getElementById('mainSub').textContent=currentUser.name||currentUser.userId; try{ const snap=await getDocs(collection(db,'clients')); allClients=snap.docs.map(d=>d.data().name).filter(Boolean).sort(); }catch(e){ allClients=[]; } try{ await loadCourseList(); }catch(e){} showScreen('mainScreen', false); history.replaceState({screen:'mainScreen'}, '', '#mainScreen'); history.pushState({screen:'mainScreen'}, '', '#mainScreen'); }
+async function afterLogin(){ if(document.getElementById('saveIdChk').checked) localStorage.setItem('d3_savedId', currentUser.userId); else localStorage.removeItem('d3_savedId'); const sess={...currentUser, _savedAt: Date.now()}; localStorage.setItem('d3_session', JSON.stringify(sess)); localStorage.setItem('envitec_session', JSON.stringify(sess)); document.getElementById('mainSub').textContent=currentUser.name||currentUser.userId; try{ const snap=await getDocs(collection(db,'clients')); allClients=snap.docs.map(d=>d.data().name).filter(Boolean).sort(); }catch(e){ allClients=[]; } try{ await loadCourseList(); }catch(e){} showScreen('mainScreen', false); history.replaceState({screen:'mainScreen', _t:Date.now()}, '', location.href); history.pushState({screen:'mainScreen', _t:Date.now()}, '', location.href); history.pushState({screen:'mainScreen', _t:Date.now()}, '', location.href); }
 document.getElementById('loginId').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('loginPw').focus(); }); document.getElementById('loginPw').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 window.confirmLogout=function(){ currentUser=null; localStorage.removeItem('d3_session'); closeModal('exitModal'); history.replaceState(null,'',location.pathname); window.showScreen('loginScreen', false); history.replaceState({screen:'loginScreen'}, '', location.pathname); };
 async function loadCourseList(){ courseList=[]; try{ const snap=await getDocs(query(collection(db,'courses3'), where('userId','==',currentUser.userId))); snap.docs.forEach(d=>{ courseList.push({id:d.id,name:d.data().name||'이름없음',type:d.data().type||'custom',clients:d.data().clients||[]}); }); courseList.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ko')); }catch(e){} renderCourseList(); }
@@ -672,12 +670,16 @@ window.addEventListener('popstate', (e)=>{
   var kp=document.getElementById('customKeypad');
   if(kp && kp.classList.contains('show')){
     closeKeypad();
-    history.pushState({screen:getActiveScreenId()}, '', location.href);
+    history.pushState({screen:getActiveScreenId(), _t:Date.now()}, '', location.href);
     return;
   }
   if(!currentUser) return; 
   const openedModal=document.querySelector('.modal-bg.show'); 
-  if(openedModal){ openedModal.classList.remove('show'); history.pushState({screen:getActiveScreenId()}, '', location.href); return; } 
+  if(openedModal){ 
+    openedModal.classList.remove('show'); 
+    history.pushState({screen:getActiveScreenId(), _t:Date.now()}, '', location.href); 
+    return; 
+  } 
   const cur=getActiveScreenId();
   let target='mainScreen';
   if(cur==='courseEditScreen') target='courseScreen';
@@ -685,15 +687,14 @@ window.addEventListener('popstate', (e)=>{
   else if(cur==='courseScreen' || cur==='inputScreen' || cur==='historyScreen') target='mainScreen';
   else if(cur==='mainScreen'){
     document.getElementById('exitModal').classList.add('show');
-    history.pushState({screen:'mainScreen'}, '', '#mainScreen');
+    history.pushState({screen:'mainScreen', _t:Date.now()}, '', location.href);
     return;
   }
   isPopNav=true;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const t=document.getElementById(target);
   if(t) t.classList.add('active');
-  // 부모로 이동 후 다시 push해서 뒤로가기 트랩 유지
-  history.pushState({screen:target}, '', '#'+target);
+  history.pushState({screen:target, _t:Date.now()}, '', location.href);
   setTimeout(()=>{ isPopNav=false; }, 100);
 });
 (async function(){ const savedId=localStorage.getItem('d3_savedId'); if(savedId){ document.getElementById('loginId').value=savedId; document.getElementById('saveIdChk').checked=true; } const session=localStorage.getItem('d3_session'); if(session){ try{ currentUser=JSON.parse(session); await afterLogin(); }catch(e){ localStorage.removeItem('d3_session'); history.replaceState({screen:'loginScreen'}, '', location.pathname); } }else{ history.replaceState({screen:'loginScreen'}, '', location.pathname); } })();
