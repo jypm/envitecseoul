@@ -678,13 +678,23 @@ window.addEventListener('popstate', (e)=>{
   if(!currentUser) return; 
   const openedModal=document.querySelector('.modal-bg.show'); 
   if(openedModal){ openedModal.classList.remove('show'); history.pushState({screen:getActiveScreenId()}, '', location.href); return; } 
-  const state=e.state; 
-  if(!state||!state.screen){ history.pushState({screen:'mainScreen'}, '', '#mainScreen'); document.getElementById('exitModal').classList.add('show'); return; } 
-  isPopNav=true; 
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); 
-  const target=document.getElementById(state.screen); 
-  if(target) target.classList.add('active'); 
-  setTimeout(()=>isPopNav=false,100); 
+  const cur=getActiveScreenId();
+  let target='mainScreen';
+  if(cur==='courseEditScreen') target='courseScreen';
+  else if(cur==='histDetailScreen') target='historyScreen';
+  else if(cur==='courseScreen' || cur==='inputScreen' || cur==='historyScreen') target='mainScreen';
+  else if(cur==='mainScreen'){
+    document.getElementById('exitModal').classList.add('show');
+    history.pushState({screen:'mainScreen'}, '', '#mainScreen');
+    return;
+  }
+  isPopNav=true;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const t=document.getElementById(target);
+  if(t) t.classList.add('active');
+  // 부모로 이동 후 다시 push해서 뒤로가기 트랩 유지
+  history.pushState({screen:target}, '', '#'+target);
+  setTimeout(()=>{ isPopNav=false; }, 100);
 });
 (async function(){ const savedId=localStorage.getItem('d3_savedId'); if(savedId){ document.getElementById('loginId').value=savedId; document.getElementById('saveIdChk').checked=true; } const session=localStorage.getItem('d3_session'); if(session){ try{ currentUser=JSON.parse(session); await afterLogin(); }catch(e){ localStorage.removeItem('d3_session'); history.replaceState({screen:'loginScreen'}, '', location.pathname); } }else{ history.replaceState({screen:'loginScreen'}, '', location.pathname); } })();
 let emptyIdxsCache=[]; function findEmptyClients(){ saveInputs(); const empties=[]; inputClients.forEach((name,idx)=>{ const cache=inputCache[idx]||{collect:{},deliver:{},memo:''}; let hasData=false; SIZES.forEach(sz=>{ if((parseInt(cache.collect[sz])||0) || (parseInt(cache.deliver[sz])||0)) hasData=true; }); if((cache.memo||'').trim()) hasData=true; if(!hasData) empties.push({idx,name}); }); return empties; }
