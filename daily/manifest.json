@@ -1,13 +1,23 @@
 {
   "name": "수거 일지",
   "short_name": "수거일지",
-  "id": "/envitecseoul/daily/",
-  "start_url": "/envitecseoul/daily/",
-  "scope": "/envitecseoul/daily/",
+  "description": "엔비텍코리아 서울지점 수거 일지",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0e0e0e",
-  "theme_color": "#0e0e0e",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "portrait",
   "icons": [
+    {
+      "src": "icon_daily3.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_daily3-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
     {
       "src": "icon_daily3-192.png",
       "sizes": "192x192",
