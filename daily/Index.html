@@ -135,7 +135,7 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; justify-content:center; align-items:center; } .modal-bg.show { display:flex; } .modal { background:#111; border:1px solid #555; border-radius:16px; padding:20px; width:90%; max-width:360px; position:relative; } .modal-close { position:absolute; top:12px; right:14px; background:none; border:none; color:#bbb; font-size:20px; cursor:pointer; } .modal h3 { font-size:15px; margin-bottom:14px; } .modal textarea { width:100%; background:#1a1a1a; border:1px solid #555; border-radius:8px; padding:10px; color:#f0f0f5; font-size:14px; resize:none; outline:none; }
 .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1e1e2e; border:1px solid #666; border-radius:10px; padding:10px 20px; font-size:13px; z-index:200; display:none; white-space:nowrap; } .toast.show { display:block; }
 
-/* CLEAN LIGHT THEME */
+/* === CLEAN LIGHT THEME FINAL === */
 #inputScreen { background:#ffffff !important; color:#000000 !important; }
 #inputScreen .hdr { background:#f8f8f8 !important; border-bottom:1px solid #ddd !important; }
 #inputScreen .hdr .hdr-title { color:#000 !important; }
@@ -548,6 +548,7 @@ async function sendDataCore(){
   let carNumber='';
   if(isEditMode){ date=window.editingOriginalDate; carNumber=window.editingOriginalCar||currentUser.cars?.[0]||''; document.getElementById('inputDate').value=date; }else{ carNumber=currentUser.cars?.[0]||''; }
   const batch=writeBatch(db);
+  const base=Date.now();
   if(isEditMode){ for(const docId of window.editingOriginalDocIds){ try{ batch.delete(doc(db,'일지db',docId)); }catch(e){} } }
   const docsToAdd=[];
   for(let idx=0; idx<inputClients.length; idx++){
