@@ -606,13 +606,17 @@ window.acSelect=async function(name){
   try{
     const snap=await getDocs(query(collection(db,'일지db'), where('clientName','==',name)));
     if(!snap.empty){
-      const docs=snap.docs.map(d=>d.data()).sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
-      const todayStr = today();
-      const sorted = docs.sort((a,b)=>(b.date||'').localeCompare(a.date||'') || (b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
-      const latest = sorted.find(d=>d.date !== todayStr);
+      const docs=snap.docs.map(d=>d.data());
+      docs.sort((a,b)=>{
+        const ta=a.timestamp?.toMillis?.() ?? (a.timestamp?.seconds ? a.timestamp.seconds*1000 : 0);
+        const tb=b.timestamp?.toMillis?.() ?? (b.timestamp?.seconds ? b.timestamp.seconds*1000 : 0);
+        return tb-ta;
+      });
+      const latest=docs[0];
       if(latest && latest.memo && String(latest.memo).trim()!==''){ memoCache[name]=latest.memo; renderInputTable(); }
     }
-  }catch(e){}
+  }catch(e){ console.warn('acSelect memo fail', e); }
+  try{ saveInputs(); }catch(e){}
 };
 
 async function loadMemoCache(){
@@ -639,6 +643,7 @@ async function loadMemoCache(){
   }catch(e){ console.warn('loadMemoCache error', e); }
   renderInputTable();
 }
+
 
 function saveInputs(){ inputClients.forEach((name,idx)=>{ const row=document.querySelector(`tr[data-idx="${idx}"]`); if(!row) return; if(!inputCache[idx]) inputCache[idx]={collect:{},deliver:{},memo:''}; else { if(!inputCache[idx].collect) inputCache[idx].collect={}; if(!inputCache[idx].deliver) inputCache[idx].deliver={}; if(typeof inputCache[idx].memo!=='string') inputCache[idx].memo=''; } SIZES.forEach(sz=>{ const c=row.querySelector(`[data-t="c"][data-k="${sz}"]`); const d=row.querySelector(`[data-t="d"][data-k="${sz}"]`); if(c) inputCache[idx].collect[sz]=c.value; if(d) inputCache[idx].deliver[sz]=d.value; }); }); }
 function renderInputTable(){
