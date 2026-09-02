@@ -159,8 +159,8 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 #subHeaderRow th:nth-child(11),
 #subHeaderRow th:nth-child(16) { border-left:2px solid #000000 !important; }
 #inputTable tbody td { background:#ffffff !important; border:1px solid #000000 !important; padding:0 !important; }
-#inputTable tbody tr { height:32px !important; }
-#inputTable tbody td.td-seq { background:#f2f2f2 !important; color:#000 !important; border:1px solid #000000 !important; left:0 !important; width:28px !important; min-width:28px !important; max-width:28px !important; font-size:11px !important; text-align:center !important; height:32px !important; }
+#inputTable tbody tr { height:48px !important; }
+#inputTable tbody td.td-seq { background:#f2f2f2 !important; color:#000 !important; border:1px solid #000000 !important; left:0 !important; width:28px !important; min-width:28px !important; max-width:28px !important; font-size:11px !important; text-align:center !important; height:48px !important; }
 #inputTable tbody td.td-name { background:#ffffff !important; color:#000 !important; border:1px solid #000000 !important; left:28px !important; min-width:80px !important; max-width:80px !important; width:80px !important; padding:3px 6px !important; height:32px !important; min-height:32px !important; display:flex !important; flex-direction:column !important; justify-content:center !important; }
 #inputTable tbody td.td-name .cn { color:#000 !important; font-size:11px !important; font-weight:500 !important; line-height:13px !important; max-height:26px !important; display:-webkit-box !important; -webkit-line-clamp:2 !important; -webkit-box-orient:vertical !important; overflow:hidden !important; text-overflow:ellipsis !important; word-break:break-all !important; white-space:normal !important; }
 #inputTable tbody td.td-name .cn.has-memo { color:#0b5d1e !important; font-weight:700 !important; }
@@ -336,8 +336,8 @@ html body #inputScreen #inputTable input[type=number] { background:transparent !
 }
 #pwaInstallBtn { z-index:50 !important; }
 #inputScreen.kp-open #pwaInstallBtn { display:none !important; }
-#inputTable tbody tr { height:32px !important; }
-#inputTable tbody td { height:32px !important; padding:0 !important; }
+#inputTable tbody tr { height:48px !important; }
+#inputTable tbody td { height:48px !important; padding:0 !important; }
 #customKeypad .kp-btn { background:#ffffff !important; border:none !important; border-radius:0 !important; height:auto !important; width:auto !important; transform:none !important; box-shadow:none !important; }
 #customKeypad .kp-btn.kp-del { background:#ffe0e0 !important; color:#c00 !important; }
 #customKeypad .kp-btn.kp-clear { background:#fff3cd !important; color:#856404 !important; }
@@ -458,20 +458,17 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
   border-radius:8px !important;
 }
 
-/* === Excel-style memo indicators - FIXED: keep sticky === */
-#inputTable tbody td.td-name { position:sticky !important; left:28px !important; overflow:visible !important; }
-#inputTable tbody td.td-seq { position:sticky !important; left:0 !important; }
-#inputTable tbody td.td-name .cn { color:#000 !important; font-size:11px !important; font-weight:500 !important; line-height:13px !important; max-height:26px !important; display:-webkit-box !important; -webkit-line-clamp:2 !important; -webkit-box-orient:vertical !important; overflow:hidden !important; }
-#inputTable tbody td.td-name .cn.has-memo { color:#000 !important; font-weight:500 !important; }
+/* === Memo Excel-style indicators - FINAL FIX === */
+#inputTable tbody td.td-name .cn { position:relative !important; overflow:visible !important; padding-right:12px !important; }
 #inputTable tbody td.td-name .today-memo { display:none !important; }
-.memo-ind { position:absolute; width:0; height:0; pointer-events:none; z-index:2; }
-.memo-ind.prev { top:-1px; right:-1px; border-top:9px solid #e74c3c; border-left:9px solid transparent; }
-.memo-ind.today { top:-1px; right:-1px; border-top:9px solid #3498db; border-left:9px solid transparent; }
-.memo-ind.today.both { top:8px; right:-1px; border-top:9px solid #3498db; border-left:9px solid transparent; }
+#inputTable tbody td.td-name .cn.has-memo { color:#000 !important; font-weight:500 !important; }
+.memo-ind { position:absolute; width:0; height:0; pointer-events:none; z-index:3; }
+.memo-ind.prev { top:-3px; right:-3px; border-top:8px solid #e74c3c; border-left:8px solid transparent; }
+.memo-ind.today { top:-3px; right:-3px; border-top:8px solid #3498db; border-left:8px solid transparent; }
+.memo-ind.today.both { top:5px; right:-3px; border-top:8px solid #3498db; border-left:8px solid transparent; }
 #inputTable tbody td.td-seq { height:32px !important; min-height:32px !important; }
-#inputTable tbody td.td-name { height:32px !important; min-height:32px !important; padding:3px 12px 3px 6px !important; }
-#inputTable tbody td:not(.td-seq):not(.td-name) { height:32px !important; min-height:32px !important; } /* all cells same height */
-
+#inputTable tbody td.td-name { height:32px !important; min-height:32px !important; }
+#inputTable tbody td:not(.td-seq):not(.td-name) { height:32px !important; min-height:32px !important; }
 </style>
 </head>
 <body>
@@ -671,11 +668,11 @@ function renderInputTable(){
     const hasPrev=!!memoCache[name];
     h+=`<tr data-idx="${idx}"><td class="td-seq">${idx+1}</td>`;
     const hasToday=!!(cache.memo && cache.memo.trim());
-    h+=`<td class="td-name" onclick="openMemo(${idx})"><div class="cn">${escapeHTML(name)}</div>`;
-    if(hasPrev && hasToday){ h+=`<span class="memo-ind prev"></span><span class="memo-ind today both"></span>`; }
-    else if(hasPrev){ h+=`<span class="memo-ind prev"></span>`; }
-    else if(hasToday){ h+=`<span class="memo-ind today"></span>`; }
-    h+=`</td>`;
+    let ind='';
+    if(hasPrev && hasToday){ ind='<span class="memo-ind prev"></span><span class="memo-ind today both"></span>'; }
+    else if(hasPrev){ ind='<span class="memo-ind prev"></span>'; }
+    else if(hasToday){ ind='<span class="memo-ind today"></span>'; }
+    h+=`<td class="td-name" onclick="openMemo(${idx})"><div class="cn">${escapeHTML(name)}${ind}</div></td>`;
     BOX.forEach((sz,i)=>{ const v=cache.collect[sz]||''; const cls=(sz==='30L'?'cb30':'cb'); h+=`<td class="${cls}${i===0?' sep-strong':''}"><input type="text" inputmode="none" readonly data-t="c" data-k="${sz}" data-idx="${idx}" value="${v}" onclick="openKeypad(this, ${idx}, '${name}', '수거 박스 ${sz}')" onfocus="openKeypad(this, ${idx}, '${name}', '수거 박스 ${sz}')"></td>`; });
     RESIN.forEach((sz,i)=>{ const v=cache.collect[sz]||''; const cls=(sz==='5L'?'cr5':'cr'); h+=`<td class="${cls}${i===0?' sep-strong':''}"><input type="text" inputmode="none" readonly data-t="c" data-k="${sz}" data-idx="${idx}" value="${v}" onclick="openKeypad(this, ${idx}, '${name}', '수거 합성 ${sz}')" onfocus="openKeypad(this, ${idx}, '${name}', '수거 합성 ${sz}')"></td>`; });
     BOX.forEach((sz,i)=>{ const v=cache.deliver[sz]||''; const cls=(sz==='30L'?'db30':'db'); h+=`<td class="${cls}${i===0?' sep-strong':''}"><input type="text" inputmode="none" readonly data-t="d" data-k="${sz}" data-idx="${idx}" value="${v}" onclick="openKeypad(this, ${idx}, '${name}', '납품 박스 ${sz}')" onfocus="openKeypad(this, ${idx}, '${name}', '납품 박스 ${sz}')"></td>`; });
