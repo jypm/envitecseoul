@@ -606,31 +606,45 @@ window.acSelect=async function(name){
   try{
     const snap=await getDocs(query(collection(db,'일지db'), where('clientName','==',name)));
     if(!snap.empty){
-      const docs=snap.docs.map(d=>d.data()).sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
-      const todayStr = today();
-      const prev = docs.find(d=>d.date !== todayStr && d.memo && String(d.memo).trim()!=='');
-      if(prev && prev.memo && String(prev.memo).trim()!==''){ memoCache[name]=prev.memo; renderInputTable(); }
+      const docs=snap.docs.map(d=>d.data());
+      docs.sort((a,b)=>{
+        const ta=a.timestamp?.toMillis?.() ?? (a.timestamp?.seconds ? a.timestamp.seconds*1000 : 0);
+        const tb=b.timestamp?.toMillis?.() ?? (b.timestamp?.seconds ? b.timestamp.seconds*1000 : 0);
+        return tb-ta;
+      });
+      const latest=docs[0];
+      if(latest && latest.memo && String(latest.memo).trim()!==''){ memoCache[name]=latest.memo; renderInputTable(); }
     }
-  }catch(e){}
+  }catch(e){ console.warn('acSelect memo fail', e); }
+  try{ saveInputs(); }catch(e){}
 };
+
 async function loadMemoCache(){
   memoCache={};
-  const todayStr = today();
-  for(const name of inputClients){
-    try{
-      const snap=await getDocs(query(collection(db,'일지db'), where('clientName','==',name)));
-      if(!snap.empty){
-        const docs=snap.docs.map(d=>d.data()).sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0) || (b.date||'').localeCompare(a.date||''));
-        let prev = docs.find(d=>d.date !== todayStr && d.memo && String(d.memo).trim()!=='');
-        if(!prev){
-          prev = docs.find(d=>d.memo && String(d.memo).trim()!=='' && d.date !== todayStr);
+  const uniq=[...new Set(inputClients)];
+  if(!uniq.length){ renderInputTable(); return; }
+  try{
+    for(const name of uniq){
+      try{
+        const snap=await getDocs(query(collection(db,'일지db'), where('clientName','==',name)));
+        if(snap.empty) continue;
+        const docs=snap.docs.map(d=>d.data());
+        docs.sort((a,b)=>{
+          const ta=a.timestamp?.toMillis?.() ?? (a.timestamp?.seconds ? a.timestamp.seconds*1000 : 0);
+          const tb=b.timestamp?.toMillis?.() ?? (b.timestamp?.seconds ? b.timestamp.seconds*1000 : 0);
+          return tb-ta;
+        });
+        const latest=docs[0];
+        if(latest && latest.memo && String(latest.memo).trim()!==''){
+          memoCache[name]=latest.memo;
         }
-        if(prev && prev.memo && String(prev.memo).trim()!==''){ memoCache[name]=prev.memo; }
-      }
-    }catch(e){}
-  }
+      }catch(e){ console.warn('memo fail', name, e); }
+    }
+  }catch(e){ console.warn('loadMemoCache error', e); }
   renderInputTable();
 }
+
+
 function saveInputs(){ inputClients.forEach((name,idx)=>{ const row=document.querySelector(`tr[data-idx="${idx}"]`); if(!row) return; if(!inputCache[idx]) inputCache[idx]={collect:{},deliver:{},memo:''}; else { if(!inputCache[idx].collect) inputCache[idx].collect={}; if(!inputCache[idx].deliver) inputCache[idx].deliver={}; if(typeof inputCache[idx].memo!=='string') inputCache[idx].memo=''; } SIZES.forEach(sz=>{ const c=row.querySelector(`[data-t="c"][data-k="${sz}"]`); const d=row.querySelector(`[data-t="d"][data-k="${sz}"]`); if(c) inputCache[idx].collect[sz]=c.value; if(d) inputCache[idx].deliver[sz]=d.value; }); }); }
 function renderInputTable(){
   const body=document.getElementById('inputBody');
@@ -806,7 +820,7 @@ window.kpNext = function(){
   document.addEventListener('touchstart', addVibe, {once:true});
   setInterval(addVibe, 1000);
 })();
-window.openMemo=function(idx){ memoIdx=idx; const name=inputClients[idx]||''; const cache=inputCache[idx]||{}; document.getElementById('memoTitle').textContent=name; document.getElementById('memoPrev').textContent=memoCache[name]?('이전 메모: '+memoCache[name]):''; document.getElementById('memoInput').value=cache.memo||''; document.getElementById('memoModal').classList.add('show'); };
+window.openMemo=function(idx){ memoIdx=idx; const name=inputClients[idx]||''; const cache=inputCache[idx]||{}; document.getElementById('memoTitle').textContent=name; document.getElementById('memoPrev').textContent=memoCache[name]?('이전 메모: '+memoCache[name]):'이전 메모 없음'; document.getElementById('memoInput').value=cache.memo||''; document.getElementById('memoModal').classList.add('show'); };
 window.saveMemo=function(){ try{ saveInputs(); }catch(e){} if(!inputCache[memoIdx]) inputCache[memoIdx]={collect:{},deliver:{},memo:''}; inputCache[memoIdx].memo=document.getElementById('memoInput').value.trim(); closeModal('memoModal'); renderInputTable(); };
 window.deleteMemo=function(){ try{ saveInputs(); }catch(e){} if(inputCache[memoIdx]) inputCache[memoIdx].memo=''; closeModal('memoModal'); renderInputTable(); };
 window.saveTmp=async function(){ saveInputs(); if(!tmpKey){ const date=document.getElementById('inputDate').value||today(); tmpKey=currentUser.userId+'_'+date+'_manual_'+Date.now(); } let curCar=''; try{ curCar=(currentUser?.cars&&currentUser.cars[0])?currentUser.cars[0]:(currentUser?.userId||''); }catch(e){} let curCourse=''; try{ curCourse=document.getElementById('inputTitle')?.textContent||''; }catch(e){} try{ await setDoc(doc(db,'dailyTemp3',tmpKey), {clients:inputClients,cache:inputCache,date:document.getElementById('inputDate').value||today(),userId:currentUser.userId,carNumber:curCar,courseName:curCourse,updatedAt:Timestamp.now()}); toast('임시저장 완료!'); }catch(e){ console.error(e); toast('실패: '+e.message, false); } };
@@ -859,7 +873,7 @@ async function sendDataCore(){
   inputClients=[]; inputCache={}; tmpKey=null; renderInputTable();
 }
 window.closeDone=function(){ closeModal('doneModal'); showScreen('mainScreen'); };
-async function loadHistoryList(){ const wrap=document.getElementById('historyWrap'); const from=document.getElementById('histFrom')?.value; const to=document.getElementById('histTo')?.value; const selCar=document.getElementById('histCar')?.value||""; const summary=document.getElementById('histSummary'); if(!from||!to){ toast('날짜를 선택해주세요', false); return; } wrap.innerHTML='<div style="text-align:center;color:#888;padding:20px">불러오는 중...</div>'; if(summary) summary.textContent=''; try{ const snap=await getDocs(query(collection(db,'일지db'))); const groups={}; const myCars=currentUser?.cars||[]; const perms=currentUser?.permissions||currentUser?.raw?.permissions||{}; const lockQuery=perms.lockCollectQuery!==false; snap.docs.forEach(d=>{ const data=d.data(); if(!data.date) return; if(data.date<from||data.date>to) return; if(currentUser?.type!=='admin'){ if(selCar){ if(data.carNumber && data.carNumber!==selCar) return; }else{ if(lockQuery){ if(myCars.length && data.carNumber && !myCars.includes(data.carNumber)) return; } } }else{ if(selCar && data.carNumber && data.carNumber!==selCar) return; } if(!groups[data.date]) groups[data.date]=[]; groups[data.date].push({...data,docId:d.id}); }); const dates=Object.keys(groups).sort((a,b)=>b.localeCompare(a)); histData=groups; if(!dates.length){ wrap.innerHTML='<div style="text-align:center;color:#888;padding:20px">해당 기간 데이터가 없어요</div>'; if(summary) summary.textContent=from+' ~ '+to+' : 0건'; return; } let totalClients=0,totalCollect=0; dates.forEach(date=>{ const items=groups[date]; totalClients+=items.length; items.forEach(it=>{ SIZES.forEach(sz=>{ totalCollect+=parseInt(it['collect'+sz]||0)||0; }); }); }); if(summary) summary.textContent=from+' ~ '+to+' : '+dates.length+'일 / '+totalClients+'거래처 / 수거 '+totalCollect+'개'; let h=''; dates.forEach(date=>{ const items=groups[date].sort((a,b)=>(a.seq||0)-(b.seq||0)); let dayCollect=0; items.forEach(it=>{ SIZES.forEach(sz=>{ dayCollect+=parseInt(it['collect'+sz]||0)||0; }); }); const firstName=items[0]?.clientName||'거래처'; const cnt=items.length; const dObj=new Date(date); const yo=isNaN(dObj)?'':['일','월','화','수','목','금','토'][dObj.getDay()]; const carLabel=items[0]?.carNumber||(items.some(i=>i.carNumber)?(selCar||'혼합'):'미지정'); h+=`<div class="hist-date-group"><div class="hist-item" onclick="openHistDetail('${date}')" style="padding:14px"><div style="flex:1"><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700">${date}</span><span style="font-size:11px;color:#888">(${yo})</span><span style="font-size:10px;background:#1e1e2a;border:1px solid #666;border-radius:4px;padding:2px 5px;color:#aaa">${carLabel}</span></div><div style="font-size:12px;color:#bbb;margin-top:4px">${firstName} 외 ${cnt-1}건 · ${cnt}개 거래처</div><div style="font-size:11px;color:#ff6a00;margin-top:2px">수거 ${dayCollect}개</div></div><div style="color:#555;font-size:18px">›</div></div></div>`; }); wrap.innerHTML=h; }catch(e){ console.error(e); wrap.innerHTML='<div style="text-align:center;color:#e74c3c;padding:20px">불러오기 실패: '+e.message+'</div>'; } }
+async function loadHistoryList(){ const wrap=document.getElementById('historyWrap'); const from=document.getElementById('histFrom')?.value; const to=document.getElementById('histTo')?.value; const selCar=document.getElementById('histCar')?.value||""; const summary=document.getElementById('histSummary'); if(!from||!to){ toast('날짜를 선택해주세요', false); return; } wrap.innerHTML='<div style="text-align:center;color:#888;padding:20px">불러오는 중...</div>'; if(summary) summary.textContent=''; try{ const snap=await getDocs(query(collection(db,'일지db'), where('date','>=',from), where('date','<=',to), orderBy('date','desc'))); const groups={}; const myCars=currentUser?.cars||[]; const perms=currentUser?.permissions||currentUser?.raw?.permissions||{}; const lockQuery=perms.lockCollectQuery!==false; snap.docs.forEach(d=>{ const data=d.data(); if(!data.date) return; if(data.date<from||data.date>to) return; if(currentUser?.type!=='admin'){ if(selCar){ if(data.carNumber && data.carNumber!==selCar) return; }else{ if(lockQuery){ if(myCars.length && data.carNumber && !myCars.includes(data.carNumber)) return; } } }else{ if(selCar && data.carNumber && data.carNumber!==selCar) return; } if(!groups[data.date]) groups[data.date]=[]; groups[data.date].push({...data,docId:d.id}); }); const dates=Object.keys(groups).sort((a,b)=>b.localeCompare(a)); histData=groups; if(!dates.length){ wrap.innerHTML='<div style="text-align:center;color:#888;padding:20px">해당 기간 데이터가 없어요</div>'; if(summary) summary.textContent=from+' ~ '+to+' : 0건'; return; } let totalClients=0,totalCollect=0; dates.forEach(date=>{ const items=groups[date]; totalClients+=items.length; items.forEach(it=>{ SIZES.forEach(sz=>{ totalCollect+=parseInt(it['collect'+sz]||0)||0; }); }); }); if(summary) summary.textContent=from+' ~ '+to+' : '+dates.length+'일 / '+totalClients+'거래처 / 수거 '+totalCollect+'개'; let h=''; dates.forEach(date=>{ const items=groups[date].sort((a,b)=>(a.seq||0)-(b.seq||0)); let dayCollect=0; items.forEach(it=>{ SIZES.forEach(sz=>{ dayCollect+=parseInt(it['collect'+sz]||0)||0; }); }); const firstName=items[0]?.clientName||'거래처'; const cnt=items.length; const dObj=new Date(date); const yo=isNaN(dObj)?'':['일','월','화','수','목','금','토'][dObj.getDay()]; const carLabel=items[0]?.carNumber||(items.some(i=>i.carNumber)?(selCar||'혼합'):'미지정'); h+=`<div class="hist-date-group"><div class="hist-item" onclick="openHistDetail('${date}')" style="padding:14px"><div style="flex:1"><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700">${date}</span><span style="font-size:11px;color:#888">(${yo})</span><span style="font-size:10px;background:#1e1e2a;border:1px solid #666;border-radius:4px;padding:2px 5px;color:#aaa">${carLabel}</span></div><div style="font-size:12px;color:#bbb;margin-top:4px">${firstName} 외 ${cnt-1}건 · ${cnt}개 거래처</div><div style="font-size:11px;color:#ff6a00;margin-top:2px">수거 ${dayCollect}개</div></div><div style="color:#555;font-size:18px">›</div></div></div>`; }); wrap.innerHTML=h; }catch(e){ console.error(e); wrap.innerHTML='<div style="text-align:center;color:#e74c3c;padding:20px">불러오기 실패: '+e.message+'</div>'; } }
 window.loadHistoryList=loadHistoryList;
 async function initHistoryFilter(){ try{ const now=new Date(); const toStr=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`; const fromDate=new Date(now); fromDate.setDate(now.getDate()-6); const fromStr=`${fromDate.getFullYear()}-${String(fromDate.getMonth()+1).padStart(2,'0')}-${String(fromDate.getDate()).padStart(2,'0')}`; const fromEl=document.getElementById('histFrom'); const toEl=document.getElementById('histTo'); const carEl=document.getElementById('histCar'); const badgeEl=document.getElementById('histCarBadge'); if(fromEl && !fromEl.value) fromEl.value=fromStr; if(toEl && !toEl.value) toEl.value=toStr; if(!carEl) return; let myCars=[]; try{ myCars=currentUser?.cars||[]; }catch(e){} let perms={}; try{ perms=currentUser?.permissions||currentUser?.raw?.permissions||{}; }catch(e){} const lockQuery=perms.lockCollectQuery!==false; let allCars=[]; try{ const vSnap=await getDocs(collection(db,'vehicles')); allCars=vSnap.docs.map(d=>d.data().carNumber).filter(Boolean).map(c=>String(c).trim()).sort(); }catch(e){} if(myCars.length===0 && allCars.length===0){ try{ const snap=await getDocs(collection(db,'일지db')); const set=new Set(); snap.docs.forEach(d=>{ const cn=d.data().carNumber; if(cn) set.add(String(cn).trim()); }); allCars=Array.from(set).sort(); if(allCars.length===1) myCars=allCars; }catch(e){} } if(allCars.length===0 && myCars.length>0) allCars=myCars; if(allCars.length===0) allCars=['9471']; if(currentUser?.type==='admin'){ carEl.innerHTML='<option value="">전체 차량</option>'+allCars.map(c=>`<option value="${c}">${c}</option>`).join(''); carEl.style.display=''; if(badgeEl) badgeEl.style.display='none'; }else{ if(lockQuery){ if(myCars.length===0){ carEl.innerHTML='<option value="">전체 차량</option>'+allCars.map(c=>`<option value="${c}">${c}</option>`).join(''); carEl.style.display=''; if(badgeEl) badgeEl.style.display='none'; }else if(myCars.length===1){ if(badgeEl){ badgeEl.textContent='🚛 '+myCars[0]+' (내 차량)'; badgeEl.style.display=''; } carEl.innerHTML=`<option value="${myCars[0]}">${myCars[0]}</option>`; carEl.value=myCars[0]; carEl.disabled=true; carEl.style.display=''; carEl.style.opacity='0.6'; }else{ carEl.innerHTML='<option value="">전체 차량</option>'+myCars.map(c=>`<option value="${c}">${c}</option>`).join(''); carEl.style.display=''; if(badgeEl) badgeEl.style.display='none'; } }else{ carEl.innerHTML='<option value="">전체 차량</option>'+allCars.map(c=>`<option value="${c}">${c}</option>`).join(''); carEl.style.display=''; if(badgeEl) badgeEl.style.display='none'; if(myCars.length===1) carEl.value=myCars[0]; } } }catch(e){} }
 window.initHistoryFilter=initHistoryFilter; window.loadCourseList=loadCourseList;
