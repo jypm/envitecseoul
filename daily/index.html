@@ -36,8 +36,9 @@ html, body { height:100%; }
 #inputScreen { height:100vh; height:100dvh; height:100svh; overflow:hidden; display:none; flex-direction:column; } #inputScreen.active { display:flex; }
 #inputScreen .hdr { position:sticky; top:0; z-index:30; background:#f5f5f5; }
 #inputScreen .hdr-mid { display:flex; gap:6px; align-items:center; flex:1; justify-content:center; }
-#inputScreen .top-bar { position:sticky; top:28px; z-index:29; overflow-x:auto; scrollbar-width:none; background:#efefef; border-bottom:2px solid #ccc; padding:4px 10px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:nowrap; }
+#inputScreen .top-bar { position:sticky; z-index:29; overflow-x:auto; scrollbar-width:none; background:#efefef; border-bottom:1px solid #ccc; padding:4px 10px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:nowrap; }
 #inputScreen .top-bar::-webkit-scrollbar { display:none; }
+#carBar { position:sticky; z-index:28; background:#efefef; border-bottom:2px solid #ccc; padding:4px 10px; display:flex; gap:8px; align-items:center; flex-shrink:0; }
 .date-inp { background:#ffffff; border:1px solid #ccc; border-radius:8px; padding:5px 8px; color:#111; font-size:12px; outline:none; color-scheme: light; flex-shrink:0; text-align:left !important; }
 #inputScreen .table-wrap { flex:1; min-height:0; overflow:auto; -webkit-overflow-scrolling:touch; position:relative; background:#ffffff; }
 table { border-collapse:separate; border-spacing:0; min-width:max-content; }
@@ -452,7 +453,8 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
 .memo-ind.today.both { top:5px; right:-3px; border-top:8px solid #3498db; border-left:8px solid transparent; }
 #inputTable tbody td.td-seq, #inputTable tbody td.td-name, #inputTable tbody td:not(.td-seq):not(.td-name), #inputTable tbody tr { height:32px !important; min-height:32px !important; }
 #inputScreen .hdr { padding:2px 8px !important; }
-#inputScreen .top-bar { padding:2px 8px !important; top:28px !important; }
+#inputScreen .top-bar { padding:2px 8px !important; top:32px !important; }
+#carBar { top:64px !important; padding:2px 8px !important; }
 </style>
 </head>
 <body>
@@ -466,21 +468,21 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
     <button class="back-btn" onclick="goBackFromInput()" style="white-space:nowrap;">← 뒤로</button>
     <div class="hdr-title" id="inputTitle" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;">수거 입력</div>
   </div>
-  <div class="hdr-mid" style="flex-shrink:0;gap:4px;">
-    <button class="btn-ghost" style="background:#ffcccc;border:1px solid #e00;color:#a00;font-size:12px;padding:4px 10px;font-weight:700;border-radius:8px;white-space:nowrap;" onclick="sendData()">전송</button>
+  <div class="hdr-mid" style="flex-shrink:0;gap:4px;display:flex;align-items:center;">
+    <button class="btn-ghost" style="background:#ffcccc;border:1px solid #e00;color:#a00;font-size:12px;padding:4px 10px;font-weight:700;border-radius:8px;white-space:nowrap;margin-right:8px;" onclick="sendData()">전송</button>
     <button class="btn-ghost" style="background:#fffde7;border:1px solid #f0c000;color:#856400;font-size:12px;padding:4px 10px;font-weight:700;border-radius:8px;white-space:nowrap;" onclick="openTempRecover()">복구</button>
     <button class="btn-ghost" style="background:#cce5ff;border:1px solid #007bff;color:#004085;font-size:12px;padding:4px 10px;font-weight:700;border-radius:8px;white-space:nowrap;" onclick="saveTmp()">저장</button>
   </div>
 </div>
 <div class="top-bar">
   <input type="date" id="inputDate" class="date-inp" style="text-align:left !important;min-width:128px">
-  <button class="btn-ghost" style="background:#ffffff;border:1px solid #666;color:#000;font-size:12px;padding:4px 10px;font-weight:700;border-radius:8px;white-space:nowrap;" onclick="openLoadCourseModal()">+ 코스</button>
+  <button class="btn-ghost" style="background:#ffffff;border:1px solid #666;color:#000;font-size:12px;padding:4px 10px;font-weight:700;border-radius:8px;white-space:nowrap;margin-left:auto;" onclick="openLoadCourseModal()">+ 코스</button>
   <button class="btn-ghost" style="background:#ffffff;border:1px solid #666;color:#000;font-size:12px;padding:4px 10px;font-weight:700;border-radius:8px;white-space:nowrap;" onclick="addExtraClient()">+ 추가</button>
-  <span id="totalCollectBadge" style="margin-left:auto;">수거 0개</span>
 </div>
 <div class="top-bar" id="carBar" style="border-top:1px solid #ddd;">
   <span style="font-size:12px;font-weight:700;color:#555;white-space:nowrap;">🚛 차량</span>
   <select id="inputCar" class="date-inp" style="flex:1;max-width:160px;"></select>
+  <span id="totalCollectBadge" style="margin-left:auto;">수거 0개</span>
 </div>
 <div class="table-wrap"><table id="inputTable"><thead><tr><th class="th-seq" rowspan="2">#</th><th class="th-name" rowspan="2">거래처</th><th class="group-sbox" colspan="5" style="border-left:4px solid #aaa">수거 박스</th><th class="group-sresin" colspan="5" style="border-left:4px solid #aaa">수거 합성</th><th class="group-dbox" colspan="5" style="border-left:4px solid #aaa">납품 박스</th><th class="group-dresin" colspan="5" style="border-left:4px solid #aaa">납품 합성</th></tr><tr id="subHeaderRow"></tr></thead><tbody id="inputBody"></tbody></table></div>
 <div id="customKeypad">
