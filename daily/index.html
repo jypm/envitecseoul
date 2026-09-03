@@ -1052,15 +1052,30 @@ window.openTempRecover=async function(){
       const course=data.courseName||'수동저장';
       const cnt=(data.clients||[]).length;
       const time=data.updatedAt?new Date(data.updatedAt.seconds*1000).toLocaleString('ko-KR'):'';
-      h+=`<div style="padding:12px;border:1px solid #ddd;border-radius:8px;margin-bottom:6px;cursor:pointer;background:#f9f9f9" onclick="recoverTemp('${data.id}')">
-        <div style="font-size:13px;font-weight:600;color:#111">${date} · ${course}</div>
-        <div style="font-size:11px;color:#666">${cnt}개 거래처 · ${time}</div>
+      h+=`<div style="display:flex;align-items:center;gap:8px;border:1px solid #ddd;border-radius:8px;margin-bottom:6px;background:#f9f9f9;overflow:hidden;">
+        <div style="flex:1;padding:12px;cursor:pointer;" onclick="recoverTemp('${data.id}')">
+          <div style="font-size:13px;font-weight:600;color:#111">${date} · ${course}</div>
+          <div style="font-size:11px;color:#666">${cnt}개 거래처 · ${time}</div>
+        </div>
+        <button onclick="deleteTempItem('${data.id}')" style="background:#fde8e8;border:none;border-left:1px solid #ddd;color:#c00;font-size:12px;font-weight:700;padding:0 14px;height:100%;min-height:56px;cursor:pointer;flex-shrink:0;">삭제</button>
       </div>`;
     });
     wrap.innerHTML=h;
   }catch(e){
     console.error('openTempRecover error', e);
     wrap.innerHTML=`<div style="text-align:center;color:#e74c3c;padding:20px">조회 실패: ${e.message}<br><span style="font-size:11px;color:#888">콘솔(F12) 확인 필요</span></div>`;
+  }
+};
+
+window.deleteTempItem=async function(docId){
+  if(!confirm('이 임시저장을 삭제하시겠습니까?')) return;
+  try{
+    await deleteDoc(doc(db,'dailyTemp3',docId));
+    toast('삭제됐어요!');
+    await openTempRecover();
+  }catch(e){
+    console.error('deleteTempItem error', e);
+    toast('삭제 실패: '+e.message, false);
   }
 };
 
