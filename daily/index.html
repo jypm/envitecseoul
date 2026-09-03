@@ -464,7 +464,7 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
 <div class="screen" id="courseEditScreen"><div class="hdr"><div class="hdr-left"><button class="back-btn" onclick="showScreen('courseScreen');loadCourseList()">← 뒤로</button><div class="hdr-title" id="courseEditTitle" onclick="openCourseNameEdit()" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">코스 편집</div><button class="btn-ghost" style="margin-left:6px;font-size:11px" onclick="openCourseNameEdit()">제목수정</button></div><button class="btn btn-primary btn-sm" onclick="saveCourseEdit()">저장</button></div><div style="padding:10px 12px;border-bottom:1px solid #ccc;flex-shrink:0"><div class="ac-wrap"><input id="ceSearch" class="inp" type="text" placeholder="거래처 검색 (초성 가능)" autocomplete="off" oninput="ceAcFilter()" style="margin-bottom:0"><div class="ac-list" id="ceAcList"></div></div><div style="font-size:11px;color:#999;margin-top:4px">꾹 눌러서 순서 변경</div></div><div class="scroll" id="ceClientList" style="padding:8px 12px"></div></div>
 <div class="screen" id="inputScreen">
 <div class="hdr">
-  <div class="hdr-left" style="min-width:0;flex:1;overflow:hidden;">
+  <div class="hdr-left" style="min-width:0;overflow:hidden;flex-shrink:1;">
     <button class="back-btn" onclick="goBackFromInput()" style="white-space:nowrap;">← 뒤로</button>
     <div class="hdr-title" id="inputTitle" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;">수거 입력</div>
   </div>
