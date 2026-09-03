@@ -494,22 +494,22 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
 <div class="table-wrap"><table id="inputTable"><thead><tr><th class="th-seq" rowspan="2">#</th><th class="th-name" rowspan="2">거래처</th><th class="group-sbox" colspan="5" style="border-left:4px solid #aaa">수거 박스</th><th class="group-sresin" colspan="5" style="border-left:4px solid #aaa">수거 합성</th><th class="group-dbox" colspan="5" style="border-left:4px solid #aaa">납품 박스</th><th class="group-dresin" colspan="5" style="border-left:4px solid #aaa">납품 합성</th></tr><tr id="subHeaderRow"></tr></thead><tbody id="inputBody"></tbody></table></div>
 <div id="customKeypad">
   <div class="kp-grid">
-    <button class="kp-btn kp-num" onclick="kpPress('1')">1</button>
-    <button class="kp-btn kp-num" onclick="kpPress('2')">2</button>
-    <button class="kp-btn kp-num" onclick="kpPress('3')">3</button>
-    <button class="kp-btn kp-nav" onclick="kpMove(-1)">▲</button>
-    <button class="kp-btn kp-num" onclick="kpPress('4')">4</button>
-    <button class="kp-btn kp-num" onclick="kpPress('5')">5</button>
-    <button class="kp-btn kp-num" onclick="kpPress('6')">6</button>
-    <button class="kp-btn kp-nav" onclick="kpMove(1)">▼</button>
-    <button class="kp-btn kp-num" onclick="kpPress('7')">7</button>
-    <button class="kp-btn kp-num" onclick="kpPress('8')">8</button>
-    <button class="kp-btn kp-num" onclick="kpPress('9')">9</button>
-    <button class="kp-btn kp-del" onclick="kpDelete()">⌫</button>
-    <button class="kp-btn kp-clear" onclick="kpClear()">C</button>
-    <button class="kp-btn kp-num" onclick="kpPress('0')">0</button>
-    <button class="kp-btn kp-nav" onclick="kpPrev()">◀</button>
-    <button class="kp-btn kp-nav" onclick="kpNext()">▶</button>
+    <button type="button" class="kp-btn kp-num" onclick="kpPress('1')">1</button>
+    <button type="button" class="kp-btn kp-num" onclick="kpPress('2')">2</button>
+    <button type="button" class="kp-btn kp-num" onclick="kpPress('3')">3</button>
+    <button type="button" class="kp-btn kp-nav" onclick="kpMove(-1)">▲</button>
+    <button type="button" class="kp-btn kp-num" onclick="kpPress('4')">4</button>
+    <button type="button" class="kp-btn kp-num" onclick="kpPress('5')">5</button>
+    <button type="button" class="kp-btn kp-num" onclick="kpPress('6')">6</button>
+    <button type="button" class="kp-btn kp-nav" onclick="kpMove(1)">▼</button>
+    <button type="button" class="kp-btn kp-num" onclick="kpPress('7')">7</button>
+    <button type="button" class="kp-btn kp-num" onclick="kpPress('8')">8</button>
+    <button type="button" class="kp-btn kp-num" onclick="kpPress('9')">9</button>
+    <button type="button" class="kp-btn kp-del" onclick="kpDelete()">⌫</button>
+    <button type="button" class="kp-btn kp-clear" onclick="kpClear()">C</button>
+    <button type="button" class="kp-btn kp-num" onclick="kpPress('0')">0</button>
+    <button type="button" class="kp-btn kp-nav" onclick="kpPrev()">◀</button>
+    <button type="button" class="kp-btn kp-nav" onclick="kpNext()">▶</button>
   </div>
 </div>
 <div id="fakeCursor" style="display:none !important;"></div>
@@ -738,57 +738,95 @@ window.closeKeypad = function(){
   saveInputs(); updateTotal();
 };
 window.kpPress = function(digit){
-  if(!kpActiveInput) return;
-  if(navigator.vibrate) navigator.vibrate(15);
-  var cur=kpActiveInput.value||'';
-  var next=cur+digit;
-  if(next.length>1 && next[0]==='0'){ next=digit; }
-  if(next.length>3) next=next.slice(0,3);
-  if(parseInt(next)>999) next='999';
-  kpActiveInput.value=next;
-  saveInputs(); updateTotal();
+  try{
+    if(!kpActiveInput){
+      var foc = document.querySelector('#inputBody input.custom-active');
+      if(foc) kpActiveInput = foc;
+      else return;
+    }
+    if(navigator.vibrate) navigator.vibrate(15);
+    var cur=(kpActiveInput.value||'').toString();
+    var next=cur+digit;
+    if(next.length>1 && next[0]==='0'){ next=digit; }
+    if(next.length>3) next=next.slice(0,3);
+    if(parseInt(next)>999) next='999';
+    kpActiveInput.value=next;
+    kpActiveInput.dispatchEvent(new Event('input', {bubbles:true}));
+    saveInputs(); updateTotal();
+  }catch(e){ console.error('kpPress error', e); }
 };
 window.kpDelete = function(){
-  if(!kpActiveInput) return;
-  if(navigator.vibrate) navigator.vibrate(15);
-  var cur=kpActiveInput.value||'';
-  if(cur.length>0) cur=cur.slice(0,-1);
-  kpActiveInput.value=cur;
-  saveInputs(); updateTotal();
+  try{
+    if(!kpActiveInput) {
+      var foc = document.querySelector('#inputBody input.custom-active');
+      if(foc) kpActiveInput = foc;
+      else return;
+    }
+    if(navigator.vibrate) navigator.vibrate(15);
+    var cur=(kpActiveInput.value||'').toString();
+    if(cur.length>0) cur=cur.slice(0,-1);
+    kpActiveInput.value=cur;
+    // input event 강제
+    kpActiveInput.dispatchEvent(new Event('input', {bubbles:true}));
+    saveInputs(); updateTotal();
+  }catch(e){ console.error('kpDelete error', e); }
 };
 window.kpClear = function(){
-  if(!kpActiveInput) return;
-  if(navigator.vibrate) navigator.vibrate(25);
-  kpActiveInput.value='';
-  saveInputs(); updateTotal();
+  try{
+    if(!kpActiveInput) {
+      var foc = document.querySelector('#inputBody input.custom-active');
+      if(foc) kpActiveInput = foc;
+      else return;
+    }
+    if(navigator.vibrate) navigator.vibrate(25);
+    kpActiveInput.value='';
+    kpActiveInput.dispatchEvent(new Event('input', {bubbles:true}));
+    saveInputs(); updateTotal();
+  }catch(e){ console.error('kpClear error', e); }
 };
 window.kpPrev = function(){
-  if(!kpActiveInput) return;
-  if(navigator.vibrate) navigator.vibrate(15);
-  var allInputs = Array.from(document.querySelectorAll('#inputBody input'));
-  var idx = allInputs.indexOf(kpActiveInput);
-  if(idx>0){
-    var target = allInputs[idx-1];
-    var cIdx = parseInt(target.getAttribute('data-idx'));
-    openKeypad(target, cIdx, inputClients[cIdx]||'', target.getAttribute('data-k'));
-  }
+  try{
+    if(!kpActiveInput){
+      var foc = document.querySelector('#inputBody input.custom-active');
+      if(foc) kpActiveInput = foc;
+      else return;
+    }
+    if(navigator.vibrate) navigator.vibrate(15);
+    var allInputs = Array.from(document.querySelectorAll('#inputBody input'));
+    var idx = allInputs.indexOf(kpActiveInput);
+    if(idx>0){
+      var target = allInputs[idx-1];
+      var cIdx = parseInt(target.getAttribute('data-idx'));
+      openKeypad(target, cIdx, inputClients[cIdx]||'', target.getAttribute('data-k'));
+    }
+  }catch(e){ console.error('kpPrev error', e); }
 };
 window.kpMove = function(dir){
-  if(!kpActiveInput) return;
-  if(navigator.vibrate) navigator.vibrate(15);
-  var allInputs = Array.from(document.querySelectorAll('#inputBody input'));
-  var idx = allInputs.indexOf(kpActiveInput);
-  if(idx===-1) return;
-  var cols = 20;
-  var targetIdx = idx + dir * cols;
-  if(targetIdx>=0 && targetIdx < allInputs.length){
-    var target = allInputs[targetIdx];
-    var cIdx = parseInt(target.getAttribute('data-idx'));
-    openKeypad(target, cIdx, inputClients[cIdx]||'', target.getAttribute('data-k'));
-  }
+  try{
+    if(!kpActiveInput){
+      var foc = document.querySelector('#inputBody input.custom-active');
+      if(foc) kpActiveInput = foc;
+      else return;
+    }
+    if(navigator.vibrate) navigator.vibrate(15);
+    var allInputs = Array.from(document.querySelectorAll('#inputBody input'));
+    var idx = allInputs.indexOf(kpActiveInput);
+    if(idx===-1) return;
+    var cols = 20;
+    var targetIdx = idx + dir * cols;
+    if(targetIdx>=0 && targetIdx < allInputs.length){
+      var target = allInputs[targetIdx];
+      var cIdx = parseInt(target.getAttribute('data-idx'));
+      openKeypad(target, cIdx, inputClients[cIdx]||'', target.getAttribute('data-k'));
+    }
+  }catch(e){ console.error('kpMove error', e); }
 };
 window.kpNext = function(){
-  if(!kpActiveInput) return;
+  if(!kpActiveInput){
+    var foc = document.querySelector('#inputBody input.custom-active');
+    if(foc) kpActiveInput = foc;
+    else return;
+  }
   if(navigator.vibrate) navigator.vibrate(15);
   var allInputs = Array.from(document.querySelectorAll('#inputBody input'));
   var idx = allInputs.indexOf(kpActiveInput);
@@ -800,6 +838,15 @@ window.kpNext = function(){
     closeKeypad();
   }
 };
+// 전역 별칭 (inline onclick용)
+window.kpPress = window.kpPress;
+window.kpDelete = window.kpDelete;
+window.kpClear = window.kpClear;
+window.kpPrev = window.kpPrev;
+window.kpMove = window.kpMove;
+window.kpNext = window.kpNext;
+if(typeof kpPress !== 'undefined') window.kpPress = window.kpPress;
+
 (function(){
   var delBtn = null;
   var delInterval = null;
