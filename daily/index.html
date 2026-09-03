@@ -42,9 +42,9 @@ html, body { height:100%; }
 #inputScreen .table-wrap { flex:1; min-height:0; overflow:auto; -webkit-overflow-scrolling:touch; position:relative; background:#080808; }
 table { border-collapse:separate; border-spacing:0; min-width:max-content; }
 thead { position:sticky; top:0; z-index:20; }
-thead th { position:sticky; top:0; background:#1a1a1a !important; z-index:15; padding:6px 2px; font-size:10px; color:#ddd; border-bottom:3px solid #777; border-right:1px solid #333; white-space:nowrap; text-align:center; font-weight:800; }
-thead th.th-seq { position:sticky; top:0; left:0; z-index:26; background:#1a1a1a !important; padding:6px 2px; width:22px; min-width:22px; max-width:22px; color:#aaa; font-size:10px; border-right:2.5px solid #666; }
-thead th.th-name { position:sticky; top:0; left:22px; z-index:25; background:#1a1a1a !important; padding:6px 6px; min-width:84px; max-width:84px; width:84px; border-right:2.5px solid #666; }
+thead th { position:sticky; top:0; background:#1a1a1a !important; z-index:15; padding:2px 2px; font-size:10px; color:#ddd; border-bottom:3px solid #777; border-right:1px solid #333; white-space:nowrap; text-align:center; font-weight:800; }
+thead th.th-seq { position:sticky; top:0; left:0; z-index:26; background:#1a1a1a !important; padding:2px 2px; width:22px; min-width:22px; max-width:22px; color:#aaa; font-size:10px; border-right:2.5px solid #666; }
+thead th.th-name { position:sticky; top:0; left:22px; z-index:25; background:#1a1a1a !important; padding:2px 6px; min-width:84px; max-width:84px; width:84px; border-right:2.5px solid #666; }
 #subHeaderRow th { position:sticky; top:28px; background:#222 !important; z-index:14; border-bottom:3px solid #999; color:#fff !important; font-size:11px !important; }
 td { border-bottom:1.5px solid #444 !important; border-right:1px solid #2a2a2a; padding:2px 1px; text-align:center; vertical-align:middle; background:#0d0d0d !important; }
 td.td-seq { position:sticky; left:0; background:#151515 !important; z-index:6; padding:5px 1px; width:22px; min-width:22px; max-width:22px; text-align:center; font-size:10px; color:#aaa; border-right:2.5px solid #666 !important; border-bottom:1.5px solid #555 !important; }
@@ -141,8 +141,8 @@ td.dr input { border-color:#00c2a8 !important; background:#002a24 !important; }
 #inputScreen .top-bar { background:#efefef !important; border-bottom:1px solid #000000 !important; }
 #inputScreen .table-wrap { background:#ffffff !important; }
 #inputTable { border-collapse:collapse !important; border-spacing:0 !important; table-layout:fixed !important; background:#ffffff !important; }
-#inputTable thead th { background:#f2f2f2 !important; color:#000 !important; border:1px solid #000000 !important; font-weight:600 !important; font-size:11px !important; padding:6px 2px !important; }
-#inputTable thead tr:first-child th { height:32px !important; border:1px solid #000000 !important; }
+#inputTable thead th { background:#f2f2f2 !important; color:#000 !important; border:1px solid #000000 !important; font-weight:600 !important; font-size:11px !important; padding:2px 2px !important; }
+#inputTable thead tr:first-child th { height:21px !important; border:1px solid #000000 !important; }
 #inputTable thead th.th-seq { background:#f2f2f2 !important; color:#000 !important; border:1px solid #000000 !important; left:0 !important; z-index:26 !important; width:28px !important; min-width:28px !important; max-width:28px !important; }
 #inputTable thead th.th-name { background:#f2f2f2 !important; color:#000 !important; border:1px solid #000000 !important; left:28px !important; z-index:25 !important; min-width:80px !important; max-width:80px !important; width:80px !important; }
 #inputTable thead tr:first-child th.group-sbox { background:#e7e2cc !important; color:#000 !important; border:1px solid #000000 !important; border-left:1px solid #000000 !important; }
@@ -590,12 +590,24 @@ function renderSubHeader(){
   const tr=document.getElementById('subHeaderRow'); 
   const box=['4','12','30','50','63']; 
   const resin=['1','2','5','10','20']; 
-  const base='font-size:11px;padding:4px 1px;font-weight:700;border:1px solid #000000;background:#ffffff;'; 
+  const base='font-size:11px;padding:2px 1px;font-weight:700;border:1px solid #000000;background:#ffffff;height:21px;'; 
   let html=''; 
-  box.forEach((s,i)=>{ html+='<th data-t="c" data-k="'+s+'L" data-group="sbox" style="top:32px;position:sticky;background:#efe9d6 !important;color:#000000 !important;'+base+'">'+s+'</th>'; }); 
-  resin.forEach((s,i)=>{ html+='<th data-t="c" data-k="'+s+'L" data-group="sresin" style="top:32px;position:sticky;background:#efe9d6 !important;color:#000000 !important;'+base+'">'+s+'</th>'; }); 
-  box.forEach((s,i)=>{ html+='<th data-t="d" data-k="'+s+'L" data-group="dbox" style="top:32px;position:sticky;background:#d9e6f2 !important;color:#000000 !important;'+base+'">'+s+'</th>'; }); 
-  resin.forEach((s,i)=>{ html+='<th data-t="d" data-k="'+s+'L" data-group="dresin" style="top:32px;position:sticky;background:#d9e6f2 !important;color:#000000 !important;'+base+'">'+s+'</th>'; }); 
+  box.forEach((s,i)=>{ 
+    var bg = (s==='30') ? '#e7dcc3' : '#efe9d6';
+    html+='<th data-t="c" data-k="'+s+'L" data-group="sbox" style="top:21px;position:sticky;background:'+bg+' !important;color:#000000 !important;'+base+'">'+s+'</th>'; 
+  }); 
+  resin.forEach((s,i)=>{ 
+    var bg = (s==='5') ? '#e7dcc3' : '#efe9d6';
+    html+='<th data-t="c" data-k="'+s+'L" data-group="sresin" style="top:21px;position:sticky;background:'+bg+' !important;color:#000000 !important;'+base+'">'+s+'</th>'; 
+  }); 
+  box.forEach((s,i)=>{ 
+    var bg = (s==='30') ? '#b9cfe8' : '#d9e6f2';
+    html+='<th data-t="d" data-k="'+s+'L" data-group="dbox" style="top:21px;position:sticky;background:'+bg+' !important;color:#000000 !important;'+base+'">'+s+'</th>'; 
+  }); 
+  resin.forEach((s,i)=>{ 
+    var bg = (s==='5') ? '#b9cfe8' : '#d9e6f2';
+    html+='<th data-t="d" data-k="'+s+'L" data-group="dresin" style="top:21px;position:sticky;background:'+bg+' !important;color:#000000 !important;'+base+'">'+s+'</th>'; 
+  }); 
   tr.innerHTML=html; 
 }
 window.openLoadCourseModal=async function(){ if(!courseList.length) await loadCourseList(); const el=document.getElementById('loadCourseList'); el.innerHTML=courseList.map(c=>`<div style="padding:12px;border-bottom:1px solid #444;cursor:pointer;display:flex;justify-content:space-between" onclick="loadCourse('${c.id}')"><span style="font-size:13px">${escapeHTML(c.name)}</span><span style="font-size:11px;color:#bbb">${c.clients.length}개</span></div>`).join(''); document.getElementById('loadCourseModal').classList.add('show'); };
