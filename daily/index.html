@@ -505,7 +505,7 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
     <button type="button" class="kp-btn kp-num" onclick="kpPress('7')">7</button>
     <button type="button" class="kp-btn kp-num" onclick="kpPress('8')">8</button>
     <button type="button" class="kp-btn kp-num" onclick="kpPress('9')">9</button>
-    <button type="button" class="kp-btn kp-del" onclick="kpDelete()">⌫</button>
+    <button type="button" class="kp-btn kp-del" onclick="kpDelete()" ontouchstart="event.preventDefault();kpDelete()">⌫</button>
     <button type="button" class="kp-btn kp-clear" onclick="kpClear()">C</button>
     <button type="button" class="kp-btn kp-num" onclick="kpPress('0')">0</button>
     <button type="button" class="kp-btn kp-nav" onclick="kpPrev()">◀</button>
