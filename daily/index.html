@@ -691,16 +691,28 @@ window.openKeypad = function(el, idx, clientName, sizeLabel){
     var wrap=document.querySelector('#inputScreen .table-wrap');
     if(!wrap) return;
     var rect = el.getBoundingClientRect();
-    var keypadHeight = 210;
+    var kp = document.getElementById('customKeypad');
+    var keypadHeight = kp ? kp.offsetHeight : 210;
     var visibleBottom = window.innerHeight - keypadHeight - 10;
-    var headerBottom = 88 + 64;
+    var hdr = document.querySelector('#inputScreen .hdr');
+    var topBar = document.querySelector('#inputScreen .top-bar');
+    var headerBottom = (hdr ? hdr.offsetHeight : 40) + (topBar ? topBar.offsetHeight : 34) + 10;
+    // 세로 스크롤
     if(rect.bottom > visibleBottom){
-      wrap.scrollBy({top: rect.bottom - visibleBottom + 20, behavior:'smooth'});
+      wrap.scrollBy({top: rect.bottom - visibleBottom + 24, behavior:'auto'});
     }
     if(rect.top < headerBottom){
-      wrap.scrollBy({top: -(headerBottom - rect.top + 10), behavior:'smooth'});
+      wrap.scrollBy({top: rect.top - headerBottom - 12, behavior:'auto'});
     }
-  }, 80);
+    // 가로 스크롤 (sticky 거래처 108px 고려)
+    var stickyLeft = 108;
+    if(rect.left < stickyLeft + 8){
+      wrap.scrollBy({left: rect.left - stickyLeft - 16, behavior:'auto'});
+    }
+    if(rect.right > window.innerWidth - 8){
+      wrap.scrollBy({left: rect.right - window.innerWidth + 24, behavior:'auto'});
+    }
+  }, 50);
 };
 window.closeKeypad = function(){
   document.getElementById('customKeypad').classList.remove('show');
