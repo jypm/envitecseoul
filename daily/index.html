@@ -374,7 +374,7 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
   background:#ffffff !important;
   background-color:#ffffff !important;
   color:#000000 !important;
-  border:1.5px solid #000000 !important;
+  border:1px solid #000000 !important;
   border-radius:8px !important;
   padding:4px 10px !important;
   font-size:12px !important;
@@ -389,7 +389,7 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
   background:#ffffff !important;
   background-color:#ffffff !important;
   color:#000000 !important;
-  border:1.5px solid #000000 !important;
+  border:1px solid #000000 !important;
   border-radius:8px !important;
   padding:4px 10px !important;
   font-size:12px !important;
@@ -483,15 +483,15 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
     <div class="hdr-title" id="inputTitle" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;">수거 입력</div>
   </div>
   <div class="hdr-mid" style="flex-shrink:0;gap:4px;">
-    <button class="btn btn-primary btn-sm" style="padding:4px 10px !important;background:#ffcccc !important;color:#a00 !important;border:1.5px solid #e00 !important;font-weight:700" onclick="sendData()">전송</button>
+    <button class="btn btn-primary btn-sm" style="padding:4px 10px !important;background:#ffcccc !important;color:#a00 !important;border:1px solid #e00 !important;font-weight:700" onclick="sendData()">전송</button>
     <button class="btn-ghost" style="background:#fffde7;border-color:#f0c000;color:#856400;font-size:11px;padding:4px 8px" onclick="openTempRecover()">복구</button>
-    <button class="btn btn-secondary btn-sm" style="background:#cce5ff !important;color:#004085 !important;border:1.5px solid #007bff !important;font-weight:700 !important;padding:4px 10px !important" onclick="saveTmp()">저장</button>
+    <button class="btn btn-secondary btn-sm" style="background:#cce5ff !important;color:#004085 !important;border:1px solid #007bff !important;font-weight:700 !important;padding:4px 10px !important" onclick="saveTmp()">저장</button>
   </div>
 </div>
 <div class="top-bar">
   <input type="date" id="inputDate" class="date-inp" style="text-align:left !important;min-width:128px">
-  <button class="btn-ghost" style="background:#ffffff !important;color:#000 !important;border:1.5px solid #666 !important;font-weight:700 !important" onclick="openLoadCourseModal()">+ 코스</button>
-  <button class="btn-ghost" style="background:#ffffff !important;color:#000 !important;border:1.5px solid #666 !important;font-weight:700 !important" onclick="addExtraClient()">+ 추가</button>
+  <button class="btn-ghost" style="background:#ffffff !important;color:#000 !important;border:1px solid #666 !important;font-weight:700 !important" onclick="openLoadCourseModal()">+ 코스</button>
+  <button class="btn-ghost" style="background:#ffffff !important;color:#000 !important;border:1px solid #666 !important;font-weight:700 !important" onclick="addExtraClient()">+ 추가</button>
   <span id="totalCollectBadge" style="margin-left:auto;background:#d4edda !important;border:1px solid #666;border-radius:8px;padding:4px 8px;font-size:12px;color:#155724 !important;white-space:nowrap;font-weight:700">수거 0개</span>
 </div>
 <div class="table-wrap"><table id="inputTable"><thead><tr><th class="th-seq" rowspan="2">#</th><th class="th-name" rowspan="2">거래처</th><th class="group-sbox" colspan="5" style="border-left:4px solid #aaa">수거 박스</th><th class="group-sresin" colspan="5" style="border-left:4px solid #aaa">수거 합성</th><th class="group-dbox" colspan="5" style="border-left:4px solid #aaa">납품 박스</th><th class="group-dresin" colspan="5" style="border-left:4px solid #aaa">납품 합성</th></tr><tr id="subHeaderRow"></tr></thead><tbody id="inputBody"></tbody></table></div>
