@@ -35,7 +35,7 @@ html, body { height:100%; }
 .login-err { font-size:12px; color:#e74c3c; text-align:center; margin-top:8px; display:none; }
 #inputScreen { height:100vh; height:100dvh; height:100svh; overflow:hidden; display:none; flex-direction:column; } #inputScreen.active { display:flex; }
 #inputScreen .hdr { position:sticky; top:0; z-index:30; background:#f5f5f5; }
-#inputScreen .hdr-mid { display:flex; gap:6px; align-items:center; flex:1; justify-content:center; }
+#inputScreen .hdr-mid { display:flex; gap:6px; align-items:center; flex:1; justify-content:flex-end; }
 #inputScreen .top-bar { position:sticky; z-index:29; overflow-x:auto; scrollbar-width:none; background:#efefef; border-bottom:1px solid #ccc; padding:4px 10px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:nowrap; }
 #inputScreen .top-bar::-webkit-scrollbar { display:none; }
 #carBar { position:sticky; z-index:28; background:#efefef; border-bottom:2px solid #ccc; padding:4px 10px; display:flex; gap:8px; align-items:center; flex-shrink:0; }
@@ -468,7 +468,7 @@ html body #inputScreen #inputTable tbody td.dr5.custom-parent {
     <button class="back-btn" onclick="goBackFromInput()" style="white-space:nowrap;">← 뒤로</button>
     <div class="hdr-title" id="inputTitle" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;">수거 입력</div>
   </div>
-  <div class="hdr-mid" style="flex-shrink:0;gap:4px;display:flex;align-items:center;">
+  <div class="hdr-mid">
     <button class="btn-ghost" style="background:#ffcccc;border:1px solid #e00;color:#a00;font-size:12px;padding:4px 10px;font-weight:700;border-radius:8px;white-space:nowrap;margin-right:8px;" onclick="sendData()">전송</button>
     <button class="btn-ghost" style="background:#fffde7;border:1px solid #f0c000;color:#856400;font-size:12px;padding:4px 10px;font-weight:700;border-radius:8px;white-space:nowrap;" onclick="openTempRecover()">복구</button>
     <button class="btn-ghost" style="background:#cce5ff;border:1px solid #007bff;color:#004085;font-size:12px;padding:4px 10px;font-weight:700;border-radius:8px;white-space:nowrap;" onclick="saveTmp()">저장</button>
