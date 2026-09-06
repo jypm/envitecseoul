@@ -614,6 +614,9 @@ function renderSubHeader(){
 window.openLoadCourseModal=async function(){ if(!courseList.length) await loadCourseList(); const el=document.getElementById('loadCourseList'); el.innerHTML=courseList.map(c=>`<div style="padding:12px;border-bottom:1px solid #444;cursor:pointer;display:flex;justify-content:space-between" onclick="loadCourse('${c.id}')"><span style="font-size:13px">${escapeHTML(c.name)}</span><span style="font-size:11px;color:#bbb">${c.clients.length}개</span></div>`).join(''); document.getElementById('loadCourseModal').classList.add('show'); };
 window.loadCourse=async function(id){
   closeModal('loadCourseModal'); const c=courseList.find(c=>c.id===id); if(!c) return;
+  window.editingOriginalDocIds=null;
+  window.editingOriginalDate=null;
+  window.editingOriginalCar=null;
   inputClients=[...c.clients]; inputCache={}; memoCache={};
   const date=document.getElementById('inputDate').value||today();
   tmpKey=currentUser.userId+'_'+date+'_'+id;
@@ -1197,6 +1200,4 @@ function updateTotal(){ try{ saveInputs(); let c=0; Object.values(inputCache).fo
         td.style.setProperty('background', '#f2f2f2', 'important');
         td.style.setProperty('background-color', '#f2f2f2', 'important');
       } else if(td.classList.contains('td-name')){
-        td.style.setProperty('background', '#ffffff', 'important');
-        td.style.setProperty('background-color', '#ffffff', 'important');
-      } else if(td.classL
+        td.style.setProperty('background', '#ffffff', 'import
