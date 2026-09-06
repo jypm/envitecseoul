@@ -555,6 +555,9 @@ window.goBackFromInput=function(){
     closeKeypad();
     return;
   }
+  window.editingOriginalDocIds=null;
+  window.editingOriginalDate=null;
+  window.editingOriginalCar=null;
   showScreen('mainScreen');
 };
 window.closeModal=function(id){ document.getElementById(id).classList.remove('show'); };
@@ -929,7 +932,7 @@ async function sendDataCore(){
   let date=document.getElementById('inputDate').value||today();
   const isEditMode=window.editingOriginalDocIds&&window.editingOriginalDocIds.length>0;
   let carNumber='';
-  if(isEditMode){ date=window.editingOriginalDate; carNumber=window.editingOriginalCar||currentUser.cars?.[0]||''; document.getElementById('inputDate').value=date; }else{ carNumber=document.getElementById('inputCar')?.value||currentUser.cars?.[0]||''; }
+  if(isEditMode){ date=document.getElementById('inputDate').value||window.editingOriginalDate; carNumber=window.editingOriginalCar||currentUser.cars?.[0]||''; }else{ carNumber=document.getElementById('inputCar')?.value||currentUser.cars?.[0]||''; }
   let count=0; const sent=[]; const base=Date.now();
   if(isEditMode){ try{ for(const docId of window.editingOriginalDocIds){ try{ await deleteDoc(doc(db,'일지db',docId)); }catch(e){} } }catch(e){} }
   for(let idx=0; idx<inputClients.length; idx++){
@@ -1116,6 +1119,9 @@ window.recoverTemp=async function(docId){
 function initInputScreenBase(){
   document.getElementById('inputDate').value=today();
   document.getElementById('inputTitle').textContent='수거 입력';
+  window.editingOriginalDocIds=null;
+  window.editingOriginalDate=null;
+  window.editingOriginalCar=null;
   inputClients=[]; inputCache={}; memoCache={}; tmpKey=null;
   // 차량 드롭다운 초기화
   const carEl=document.getElementById('inputCar');
@@ -1193,7 +1199,4 @@ function updateTotal(){ try{ saveInputs(); let c=0; Object.values(inputCache).fo
       } else if(td.classList.contains('td-name')){
         td.style.setProperty('background', '#ffffff', 'important');
         td.style.setProperty('background-color', '#ffffff', 'important');
-      } else if(td.classList.contains('cb') || td.classList.contains('cr')){
-        td.style.setProperty('background', '#f5f0db', 'important');
-        td.style.setProperty('background-color', '#f5f0db', 'important');
-      } else 
+      } else if(td.classL
