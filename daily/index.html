@@ -620,7 +620,7 @@ window.loadCourse=async function(id){
   inputClients=[...c.clients]; inputCache={}; memoCache={};
   const date=document.getElementById('inputDate').value||today();
   tmpKey=currentUser.userId+'_'+date+'_'+id;
-  try{ const snap=await getDoc(doc(db,'dailyTemp3',tmpKey)); if(snap.exists() && snap.data().clients?.length){ inputClients=snap.data().clients; inputCache=snap.data().cache||{}; toast('임시저장 불러왔어요!'); } }catch(e){ console.warn('loadCourse temp load fail', e); }
+  try{ const snap=await getDoc(doc(db,'dailyTemp3',tmpKey)); if(snap.exists() && snap.data().clients?.length){ inputClients=snap.data().clients; const rawCache=snap.data().cache||{}; inputCache={}; Object.keys(rawCache).forEach(k=>{ inputCache[parseInt(k)]=rawCache[k]; }); toast('임시저장 불러왔어요!'); } }catch(e){ console.warn('loadCourse temp load fail', e); }
   document.getElementById('inputTitle').textContent=c.name;
   renderSubHeader(); renderInputTable();
   await loadMemoCache();
@@ -1098,6 +1098,9 @@ window.recoverTemp=async function(docId){
       return;
     }
     const data=snap.data();
+    window.editingOriginalDocIds=null;
+    window.editingOriginalDate=null;
+    window.editingOriginalCar=null;
     inputClients=data.clients||[];
     const rawCache=data.cache||{};
     inputCache={};
@@ -1197,7 +1200,4 @@ function updateTotal(){ try{ saveInputs(); let c=0; Object.values(inputCache).fo
     var tds = table.querySelectorAll('td');
     tds.forEach(function(td){
       if(td.classList.contains('td-seq')){
-        td.style.setProperty('background', '#f2f2f2', 'important');
-        td.style.setProperty('background-color', '#f2f2f2', 'important');
-      } else if(td.classList.contains('td-name')){
-        td.style.setProperty('background', '#ffffff', 'import
+        td.style.setProperty('background', '#f2
