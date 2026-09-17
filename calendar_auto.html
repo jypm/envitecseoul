@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>연간 표지 포함 고정 6주 달력</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #555;
+            color: #333;
+        }
+        .controls-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #222;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .controls-bar input {
+            font-size: 16px;
+            padding: 5px 10px;
+            width: 80px;
+            text-align: center;
+        }
+        .controls-bar button {
+            font-size: 16px;
+            padding: 5px 15px;
+            background: #4F81BD;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .controls-bar button:hover {
+            background: #385D8A;
+        }
+        .container {
+            padding-top: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        /* 페이지 공통 스타일 (A4 세로) */
+        .page {
+            width: 210mm;
+            height: 297mm;
+            padding: 12mm 12mm;
+            box-sizing: border-box;
+            background: white;
+            margin-bottom: 20px;
+            page-break-after: always;
+            break-after: page;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        /* 연간 표지 스타일 */
+        .cover-header {
+            text-align: center;
+            border-bottom: 3px solid #4F81BD;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+        .cover-title {
+            font-size: 34px;
+            font-weight: bold;
+            color: #1F497D;
+        }
+        .annual-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 8px;
+            flex-grow: 1;
+        }
+        .mini-month {
+            border: 1px solid #D3D3D3;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            background: #FAFAFA;
+            box-sizing: border-box;
+        }
+        .mini-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #1F497D;
+            text-align: center;
+            margin-bottom: 3px;
+            border-bottom: 1px solid #B0C4DE;
+            padding-bottom: 2px;
+        }
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            flex-grow: 1;
+        }
+        .mini-table th {
+            font-size: 10px;
+            color: #555;
+            padding: 2px 0;
+            background: #EAEAEA;
+        }
+        .mini-table th:first-child { color: #C00000; }
+        .mini-table th:last-child { color: #0070C0; }
+        .mini-table td {
+            font-size: 10px;
+            text-align: center;
+            padding: 2px 0;
+            vertical-align: middle;
+        }
+        .mini-sun { color: #C00000; font-weight: bold; }
+        .mini-sat { color: #0070C0; font-weight: bold; }
+        .mini-other { color: #CCC; font-weight: normal; }
+
+        /* 월별 상세 페이지 스타일 */
+        .header-banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 3px solid #4F81BD;
+            padding-bottom: 5px;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+        .month-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1F497D;
+        }
+        .calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+            flex-grow: 1;
+            table-layout: fixed;
+        }
+        .calendar-table th {
+            background-color: #F2F4F7;
+            color: #333333;
+            font-size: 13px;
+            font-weight: bold;
+            padding: 6px 0;
+            border: 1px solid #B0C4DE;
+            width: 14.28%;
+        }
+        .calendar-table th:first-child {
+            background-color: #FFECEC;
+            color: #C00000;
+        }
+        .calendar-table th:last-child {
+            background-color: #E8F0FE;
+            color: #0070C0;
+        }
+        .calendar-table td {
+            border: 1px solid #D3D3D3;
+            vertical-align: top;
+            padding: 4px 5px;
+            height: calc((297mm - 24mm - 45mm - 30mm) / 6);
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+        .date-number {
+            font-size: 18px;
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sun { color: #C00000; font-weight: bold; }
+        .sat { color: #0070C0; font-weight: bold; }
+        .normal { color: #222222; font-weight: bold; }
+        .other-month { color: #CCCCCC; font-weight: normal; }
+        .holiday-name {
+            font-size: 10px;
+            color: #C00000;
+            font-weight: bold;
+            background: #FFF0F0;
+            padding: 1px 3px;
+            border-radius: 3px;
+        }
+        .memo-area {
+            font-size: 11px;
+            color: #333;
+            margin-top: 2px;
+            height: calc(100% - 24px);
+            outline: none;
+            white-space: pre-wrap;
+            word-break: break-all;
+            background-color: #FCFCFC;
+            border: 1px dashed #D0D0D0;
+            border-radius: 3px;
+            padding: 3px;
+            box-sizing: border-box;
+        }
+        .memo-area:focus {
+            background-color: #FFFFFF;
+            border-color: #4F81BD;
+        }
+        @media print {
+            body {
+                background: none;
+            }
+            .controls-bar {
+                display: none !important;
+            }
+            .container {
+                padding-top: 0 !important;
+            }
+            .page {
+                margin: 0;
+                box-shadow: none;
+                page-break-after: always;
+                break-after: page;
+                width: 210mm;
+                height: 297mm;
+                padding: 12mm 12mm;
+            }
+            .memo-area[contenteditable="true"] {
+                border: none !important;
+                background: transparent !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls-bar">
+    <label for="yearInput"><b>기준 연도:</b></label>
+    <input type="number" id="yearInput" value="2026" min="2000" max="2100" onchange="generateCalendar()">
+    <button onclick="window.print()">프린트 / PDF 저장</button>
+</div>
+
+<div class="container" id="calendarContainer"></div>
+
+<script>
+function getHolidays(year) {
+    let holidays = {
+        [`${year}-01-01`]: "신정",
+        [`${year}-03-01`]: "삼일절",
+        [`${year}-05-05`]: "어린이날",
+        [`${year}-06-06`]: "현충일",
+        [`${year}-08-15`]: "광복절",
+        [`${year}-10-03`]: "개천절",
+        [`${year}-10-09`]: "한글날",
+        [`${year}-12-25`]: "크리스마스"
+    };
+    
+    if (year === 2026) {
+        holidays["2026-02-16"] = "설날 연휴";
+        holidays["2026-02-17"] = "설날";
+        holidays["2026-02-18"] = "설날 연휴";
+        holidays["2026-05-24"] = "부처님오신날";
+        holidays["2026-05-25"] = "대체공휴일";
+        holidays["2026-09-24"] = "추석 연휴";
+        holidays["2026-09-25"] = "추석";
+        holidays["2026-09-26"] = "추석 연휴";
+        holidays["2026-03-02"] = "대체공휴일";
+    } else if (year === 2027) {
+        holidays["2027-02-06"] = "설날 연휴";
+        holidays["2027-02-07"] = "설날";
+        holidays["2027-02-08"] = "설날 연휴";
+        holidays["2027-05-13"] = "부처님오신날";
+        holidays["2027-09-14"] = "추석 연휴";
+        holidays["2027-09-15"] = "추석";
+        holidays["2027-09-16"] = "추석 연휴";
+    }
+    return holidays;
+}
+
+function generateCalendar() {
+    const year = parseInt(document.getElementById("yearInput").value);
+    const container = document.getElementById("calendarContainer");
+    container.innerHTML = "";
+    
+    const holidays = getHolidays(year);
+    const weekdays = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+    const miniWeekdays = ["일", "월", "화", "수", "목", "금", "토"];
+
+    // 1. 첫 번째 페이지: 연간 표지 생성
+    const coverPage = document.createElement("div");
+    coverPage.className = "page";
+    
+    let coverHeader = `<div class="cover-header"><div class="cover-title">${year}년 연간 캘린더</div></div>`;
+    let annualGrid = `<div class="annual-grid">`;
+    
+    for (let m = 1; m <= 12; m++) {
+        annualGrid += `<div class="mini-month">`;
+        annualGrid += `<div class="mini-title">${m}월</div>`;
+        annualGrid += `<table class="mini-table"><thead><tr>`;
+        miniWeekdays.forEach(dw => { annualGrid += `<th>${dw}</th>`; });
+        annualGrid += `</tr></thead><tbody>`;
+        
+        const firstDay = new Date(year, m - 1, 1);
+        const lastDay = new Date(year, m, 0);
+        const startDayOfWeek = firstDay.getDay();
+        const totalDays = lastDay.getDate();
+        const prevLastDay = new Date(year, m - 1, 0).getDate();
+        
+        let currDate = 1;
+        let nextDate = 1;
+        
+        for (let r = 0; r < 6; r++) {
+            let rowHtml = "<tr>";
+            for (let c = 0; c < 7; c++) {
+                let dNum = 0;
+                let cls = "";
+                if (r === 0 && c < startDayOfWeek) {
+                    dNum = prevLastDay - startDayOfWeek + c + 1;
+                    cls = "mini-other";
+                } else if (currDate > totalDays) {
+                    dNum = nextDate++;
+                    cls = "mini-other";
+                } else {
+                    dNum = currDate++;
+                    if (c === 0) cls = "mini-sun";
+                    else if (c === 6) cls = "mini-sat";
+                }
+                rowHtml += `<td class="${cls}">${dNum}</td>`;
+            }
+            rowHtml += "</tr>";
+            annualGrid += rowHtml;
+            if (currDate > totalDays && r >= 4) break;
+        }
+        annualGrid += `</tbody></table></div>`;
+    }
+    annualGrid += `</div>`;
+    
+    coverPage.innerHTML = coverHeader + annualGrid;
+    container.appendChild(coverPage);
+
+    // 2. 2페이지부터 13페이지까지: 월별 상세 6주 고정 달력 생성
+    for (let month = 1; month <= 12; month++) {
+        const pageDiv = document.createElement("div");
+        pageDiv.className = "page";
+        
+        const headerDiv = document.createElement("div");
+        headerDiv.className = "header-banner";
+        headerDiv.innerHTML = `<div class="month-title">${month}월 ${year}</div>`;
+        pageDiv.appendChild(headerDiv);
+        
+        const table = document.createElement("table");
+        table.className = "calendar-table";
+        
+        let thead = "<thead><tr>";
+        weekdays.forEach((day) => {
+            thead += `<th>${day}</th>`;
+        });
+        thead += "</tr></thead>";
+        
+        let tbody = "<tbody>";
+        
+        const firstDay = new Date(year, month - 1, 1);
+        const lastDay = new Date(year, month, 0);
+        
+        const startDayOfWeek = firstDay.getDay();
+        const totalDays = lastDay.getDate();
+        const prevLastDay = new Date(year, month - 1, 0).getDate();
+        
+        let currentDate = 1;
+        let nextMonthDate = 1;
+        
+        for (let i = 0; i < 6; i++) {
+            tbody += "<tr>";
+            for (let j = 0; j < 7; j++) {
+                let cellClass = "normal";
+                let holidayHtml = "";
+                let isOther = false;
+                
+                let cellYear = year;
+                let cellMonth = month;
+                let cellDayNum = 0;
+                
+                if (i === 0 && j < startDayOfWeek) {
+                    cellDayNum = prevLastDay - startDayOfWeek + j + 1;
+                    cellClass = "other-month";
+                    isOther = true;
+                    cellMonth = month - 1;
+                    if (cellMonth === 0) { cellMonth = 12; cellYear--; }
+                } else if (currentDate > totalDays) {
+                    cellDayNum = nextMonthDate++;
+                    cellClass = "other-month";
+                    isOther = true;
+                    cellMonth = month + 1;
+                    if (cellMonth === 13) { cellMonth = 1; cellYear++; }
+                } else {
+                    cellDayNum = currentDate++;
+                    if (j === 0) cellClass = "sun";
+                    else if (j === 6) cellClass = "sat";
+                    else cellClass = "normal";
+                }
+                
+                const mStr = String(cellMonth).padStart(2, '0');
+                const dStr = String(cellDayNum).padStart(2, '0');
+                const dateKey = `${cellYear}-${mStr}-${dStr}`;
+                
+                if (!isOther && holidays[dateKey]) {
+                    holidayHtml = `<span class="holiday-name">${holidays[dateKey]}</span>`;
+                    if (j === 0 || holidays[dateKey].includes("대체") || holidays[dateKey].includes("설날") || holidays[dateKey].includes("추석") || holidays[dateKey].includes("신정") || holidays[dateKey].includes("삼일절") || holidays[dateKey].includes("어린이날") || holidays[dateKey].includes("현충일") || holidays[dateKey].includes("광복절") || holidays[dateKey].includes("개천절") || holidays[dateKey].includes("한글날") || holidays[dateKey].includes("크리스마스") || holidays[dateKey].includes("부처님오신날")) {
+                        cellClass = "sun";
+                    }
+                }
+                
+                tbody += `<td>
+                    <div class="date-number">
+                        <span class="${cellClass}">${cellDayNum}</span>
+                        ${holidayHtml}
+                    </div>
+                    <div class="memo-area" contenteditable="true"></div>
+                </td>`;
+            }
+            tbody += "</tr>";
+        }
+        
+        tbody += "</tbody>";
+        table.innerHTML = thead + tbody;
+        pageDiv.appendChild(table);
+        container.appendChild(pageDiv);
+    }
+}
+
+window.onload = generateCalendar;
+</script>
+
+</body>
+</html>
