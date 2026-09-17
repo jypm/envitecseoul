@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>연간 표지 포함 고정 6주 달력</title>
+    <title>연간달력인쇄용</title>
     <style>
         @page {
             size: A4 portrait;
@@ -182,19 +182,31 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
+            padding: 2px;
+            border-radius: 3px;
+        }
+        .date-number:hover {
+            background-color: #F0F4F8;
         }
         .sun { color: #C00000; font-weight: bold; }
         .sat { color: #0070C0; font-weight: bold; }
         .normal { color: #222222; font-weight: bold; }
         .other-month { color: #CCCCCC; font-weight: normal; }
+        
         .holiday-name {
             font-size: 10px;
             color: #C00000;
             font-weight: bold;
             background: #FFF0F0;
-            padding: 1px 3px;
+            padding: 1px 4px;
             border-radius: 3px;
+            border: 1px solid #FFD0D0;
         }
+        .holiday-name:empty {
+            display: none;
+        }
+
         .memo-area {
             font-size: 11px;
             color: #333;
@@ -213,11 +225,80 @@
             background-color: #FFFFFF;
             border-color: #4F81BD;
         }
+
+        /* 커스텀 팝업(모달) 스타일 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-box {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 8px;
+            width: 320px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+        }
+        .modal-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1F497D;
+            margin-bottom: 12px;
+        }
+        .modal-input {
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        .modal-btn {
+            padding: 6px 14px;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .modal-btn.cancel {
+            background: #E0E0E0;
+            color: #333;
+        }
+        .modal-btn.save {
+            background: #4F81BD;
+            color: white;
+        }
+        .modal-btn.save:hover {
+            background: #385D8A;
+        }
+
         @media print {
+            /* 인쇄 시 요일 셀 및 공휴일 배경색 유지 설정 */
+            body, .calendar-table th, .holiday-name {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
             body {
                 background: none;
             }
             .controls-bar {
+                display: none !important;
+            }
+            .modal-overlay {
                 display: none !important;
             }
             .container {
@@ -236,6 +317,13 @@
                 border: none !important;
                 background: transparent !important;
             }
+            .holiday-name {
+                border: none !important;
+            }
+            .date-number {
+                background: transparent !important;
+                cursor: default !important;
+            }
         }
     </style>
 </head>
@@ -249,8 +337,29 @@
 
 <div class="container" id="calendarContainer"></div>
 
+<!-- 커스텀 팝업 모달창 -->
+<div class="modal-overlay" id="holidayModal" onclick="if(event.target === this) closeHolidayModal()">
+    <div class="modal-box">
+        <div class="modal-title" id="modalTitleText">공휴일/기념일 설정</div>
+        <input type="text" id="modalInput" class="modal-input" placeholder="이름을 입력하세요 (비우면 삭제)" onkeydown="if(event.key==='Enter') saveModalHoliday()">
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" onclick="closeHolidayModal()">취소</button>
+            <button class="modal-btn save" onclick="saveModalHoliday()">저장</button>
+        </div>
+    </div>
+</div>
+
 <script>
-function getHolidays(year) {
+let userEdits = {};
+let currentEditingKey = "";
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeHolidayModal();
+    }
+});
+
+function getBaseHolidays(year) {
     let holidays = {
         [`${year}-01-01`]: "신정",
         [`${year}-03-01`]: "삼일절",
@@ -277,11 +386,68 @@ function getHolidays(year) {
         holidays["2027-02-07"] = "설날";
         holidays["2027-02-08"] = "설날 연휴";
         holidays["2027-05-13"] = "부처님오신날";
+        holidays["2027-08-16"] = "대체공휴일";
         holidays["2027-09-14"] = "추석 연휴";
         holidays["2027-09-15"] = "추석";
         holidays["2027-09-16"] = "추석 연휴";
+        holidays["2027-10-04"] = "대체공휴일";
+    }
+
+    const solarTargets = ["03-01", "05-05", "08-15", "10-03", "10-09"];
+    solarTargets.forEach(md => {
+        const d = new Date(`${year}-${md}`);
+        if (d.getDay() === 0) {
+            const nextDay = new Date(d);
+            nextDay.setDate(d.getDate() + 1);
+            const mStr = String(nextDay.getMonth() + 1).padStart(2, '0');
+            const dStr = String(nextDay.getDate()).padStart(2, '0');
+            const altKey = `${year}-${mStr}-${dStr}`;
+            if (!holidays[altKey]) {
+                holidays[altKey] = "대체공휴일";
+            }
+        }
+    });
+
+    return holidays;
+}
+
+function getHolidays(year) {
+    let holidays = getBaseHolidays(year);
+    
+    for (let dateKey in userEdits) {
+        if (dateKey.startsWith(year)) {
+            if (userEdits[dateKey] === "") {
+                delete holidays[dateKey];
+            } else {
+                holidays[dateKey] = userEdits[dateKey];
+            }
+        }
     }
     return holidays;
+}
+
+function openHolidayModal(year, month, day, currentText) {
+    const mStr = String(month).padStart(2, '0');
+    const dStr = String(day).padStart(2, '0');
+    currentEditingKey = `${year}-${mStr}-${dStr}`;
+    
+    document.getElementById("modalTitleText").innerText = `${year}년 ${month}월 ${day}일 공휴일/기념일 설정`;
+    document.getElementById("modalInput").value = currentText;
+    
+    const modal = document.getElementById("holidayModal");
+    modal.style.display = "flex";
+    document.getElementById("modalInput").focus();
+}
+
+function closeHolidayModal() {
+    document.getElementById("holidayModal").style.display = "none";
+}
+
+function saveModalHoliday() {
+    const val = document.getElementById("modalInput").value.trim();
+    userEdits[currentEditingKey] = val;
+    closeHolidayModal();
+    generateCalendar();
 }
 
 function generateCalendar() {
@@ -380,7 +546,6 @@ function generateCalendar() {
             tbody += "<tr>";
             for (let j = 0; j < 7; j++) {
                 let cellClass = "normal";
-                let holidayHtml = "";
                 let isOther = false;
                 
                 let cellYear = year;
@@ -410,17 +575,19 @@ function generateCalendar() {
                 const dStr = String(cellDayNum).padStart(2, '0');
                 const dateKey = `${cellYear}-${mStr}-${dStr}`;
                 
+                let holidayText = "";
                 if (!isOther && holidays[dateKey]) {
-                    holidayHtml = `<span class="holiday-name">${holidays[dateKey]}</span>`;
-                    if (j === 0 || holidays[dateKey].includes("대체") || holidays[dateKey].includes("설날") || holidays[dateKey].includes("추석") || holidays[dateKey].includes("신정") || holidays[dateKey].includes("삼일절") || holidays[dateKey].includes("어린이날") || holidays[dateKey].includes("현충일") || holidays[dateKey].includes("광복절") || holidays[dateKey].includes("개천절") || holidays[dateKey].includes("한글날") || holidays[dateKey].includes("크리스마스") || holidays[dateKey].includes("부처님오신날")) {
-                        cellClass = "sun";
-                    }
+                    holidayText = holidays[dateKey];
+                    cellClass = "sun";
                 }
                 
+                let clickAttr = isOther ? "" : `onclick="openHolidayModal(${cellYear}, ${cellMonth}, ${cellDayNum}, '${holidayText}')"`;
+                let hoverClass = isOther ? "" : "date-number";
+
                 tbody += `<td>
-                    <div class="date-number">
+                    <div class="${hoverClass}" ${clickAttr}>
                         <span class="${cellClass}">${cellDayNum}</span>
-                        ${holidayHtml}
+                        <span class="holiday-name">${holidayText}</span>
                     </div>
                     <div class="memo-area" contenteditable="true"></div>
                 </td>`;
